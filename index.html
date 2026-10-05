@@ -84,7 +84,7 @@ main{padding:0 var(--gut) 90px;max-width:1280px;margin-inline:auto}
   <div class="eyebrow">Web Dev Collection</div>
   <h1>網站開發<em>合輯</em></h1>
   <p>這裡收錄所有做過的特效展示與行業範例網站。點任何一張卡片，就能在視窗裡預覽，並切換手機與桌機寬度。</p>
-  <div class="stats"><span><b>6</b>個頁面</span><span><b>3</b>組特效圖鑑</span><span><b>3</b>個行業範例</span></div>
+  <div class="stats"><span><b>6</b>個頁面</span><span><b>3</b>組特效圖鑑</span><span><b>3</b>個行業範例</span><span id="ver" title="每次更新請修改程式裡的 VERSION" style="color:var(--acc);border:1px solid var(--line);padding:2px 12px;border-radius:99px"></span></div>
 </header>
 
 <main>
@@ -111,6 +111,9 @@ main{padding:0 var(--gut) 90px;max-width:1280px;margin-inline:auto}
 
 <script>
 const $=s=>document.querySelector(s);
+/* 版本號：每次更新並推送前，只改這一處（頁首會顯示，預覽網址也會帶上，避免讀到舊快取） */
+const VERSION={v:'1.1.0',date:'2026-10-05',note:'加入滑鼠拖曳橫向捲動'};
+$('#ver').textContent=`v${VERSION.v} · ${VERSION.date}`;$('#ver').title=VERSION.note;
 const PAGES=[
  {grp:1,no:'01',art:'a1',file:'awwwards-effects.html',t:'特效圖鑑 I',d:'八款得獎網站常見互動：自訂游標、磁性按鈕、文字亂碼、跑馬燈、3D 傾斜、浮動預覽、粒子與捲動展開。',tags:['游標','Canvas','捲動'],dev:['桌機']},
  {grp:1,no:'02',art:'a2',file:'awwwards-effects-2.html',t:'特效圖鑑 II',d:'進階版：WebGL 液態流體、圖片漣漪色散、3D 神經網路球體、橫向釘住捲動與 AI 對話串流。',tags:['WebGL','Shader','3D'],dev:['桌機']},
@@ -129,7 +132,7 @@ PAGES.forEach(p=>{
 
 const ov=$('#ov'),fr=$('#fr'),ifr=$('#if'),ld=$('#ld');let cur=null;
 function setDev(phone){fr.classList.toggle('phone',phone);$('#bp').setAttribute('aria-pressed',phone);$('#bd').setAttribute('aria-pressed',!phone)}
-function openP(p){cur=p;const url='pages/'+p.file;$('#ot').textContent=p.t;$('#oa').href=url;
+function openP(p){cur=p;const url='pages/'+p.file+'?v='+VERSION.v;$('#ot').textContent=p.t;$('#oa').href=url;
   setDev(p.dev[0]==='手機');ld.classList.remove('off');ifr.onload=()=>ld.classList.add('off');ifr.src=url;
   ov.classList.add('on');ov.setAttribute('aria-hidden','false');document.body.style.overflow='hidden';try{history.replaceState(null,'','#'+p.no)}catch(e){}}
 function closeP(){ov.classList.remove('on');ov.setAttribute('aria-hidden','true');document.body.style.overflow='';setTimeout(()=>{if(!ov.classList.contains('on'))ifr.src='about:blank'},350);try{history.replaceState(null,'',location.pathname)}catch(e){}}
