@@ -63,7 +63,7 @@ main{padding:0 var(--gut) 90px;max-width:1280px;margin-inline:auto}
 
 .a8{background:radial-gradient(30% 40% at 50% 38%,#ffcf3f,transparent 70%),linear-gradient(90deg,transparent 30%,#17b8a6 30% 70%,transparent 70%),radial-gradient(80% 60% at 50% 100%,#2a2f6b,transparent 70%),#0a0f24}
 
-.a9{background:linear-gradient(90deg,transparent 0 10%,rgba(255,255,255,.9) 10% 90%,transparent 90%),repeating-linear-gradient(180deg,#dfe5ee 0 18px,#fff 18px 20px),linear-gradient(135deg,#2563eb,#14213d);background-blend-mode:normal}
+.a9{background:linear-gradient(90deg,transparent 0 10%,rgba(110,160,255,.18) 10% 90%,transparent 90%),repeating-linear-gradient(180deg,rgba(255,255,255,.07) 0 18px,transparent 18px 20px),linear-gradient(135deg,#1d3a8a,#0d1017)}
 
 /* 預覽視窗 */
 .ov{position:fixed;inset:0;z-index:100;display:flex;flex-direction:column;background:rgba(5,6,8,.92);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);opacity:0;pointer-events:none;transition:opacity .35s}
@@ -165,6 +165,7 @@ const $=s=>document.querySelector(s);
 /* 更新歷史：每次更新並推送前，只在「最上面」新增一筆即可。
    頁首版本標籤、預覽網址的版本參數、下方更新歷史都從這份清單產生。 */
 const CHANGELOG=[
+ {v:'1.5.1',date:'2026-10-05',items:['課程推廣工具改為暗色系，與整個合輯的風格一致（卡片、輸入框、分數環、標籤與按鈕全部重新配色）']},
  {v:'1.5.0',date:'2026-10-05',items:['新增課程工具：課程推廣工具（頻道篩選表＋合作信產生器）','頻道篩選表：依規模、互動、觀看比等自動評分，排除賣類似課程的競爭者，追蹤寄信狀態並可備份','合作信：三種頻道類型、首封信／私訊短版／追蹤信，附分潤條件與試算']},
  {v:'1.4.0',date:'2026-10-05',items:['新增創意作品：小麥自動販賣機（個人介紹網站）。拖曳硬幣投幣、選商品、機器會卡住要搖一搖、收集全部商品解鎖隱藏限定款','入口頁新增「創意作品」分類']},
  {v:'1.3.0',date:'2026-10-05',items:['新增行業範例：髮廊形象網站（髮絲簾幕、髮色實驗室、髮質診斷、設計師選擇、前後對照、預約訊息）','髮廊頁面的強調色會隨選到的髮色改變']},
@@ -186,8 +187,8 @@ const PAGES=[
  {grp:3,no:'08',art:'a8',file:'vending-me-site.html',t:'小麥自動販賣機',d:'有趣的個人介紹：投幣、選商品、掉出來，機器還會卡住要搖一搖。每個商品打開都是一張關於我的卡片。可改成自己的資料。',tags:['互動','遊戲化','個人介紹'],dev:['手機','桌機']},
  {grp:4,no:'09',art:'a9',file:'promo-tools.html',t:'課程推廣工具',d:'給 YouTuber 合作用的頻道篩選表（自動評分、追蹤狀態、備份）與三種合作信產生器（首封信、私訊短版、追蹤信，含分潤試算）。資料只存在你的瀏覽器。',tags:['課程','篩選表','合作信'],dev:['手機','桌機']}
 ];
-const G={a1:'#d6ff3f',a2:'#6d28ff',a3:'#ff7ad9',a4:'#c1123a',a5:'#f4b4c4',a6:'#ffb938',a7:'#ff9a4d',a8:'#ffcf3f',a9:'#2563eb'};
-const BG={a1:'#0c0c0e',a2:'#0d0e12',a3:'#17102e',a4:'#f1ebea',a5:'#12261b',a6:'#161008',a7:'#f3f2ef',a8:'#0a0f24',a9:'#14213d'};
+const G={a1:'#d6ff3f',a2:'#6d28ff',a3:'#ff7ad9',a4:'#c1123a',a5:'#f4b4c4',a6:'#ffb938',a7:'#ff9a4d',a8:'#ffcf3f',a9:'#6ea0ff'};
+const BG={a1:'#0c0c0e',a2:'#0d0e12',a3:'#17102e',a4:'#f1ebea',a5:'#12261b',a6:'#161008',a7:'#f3f2ef',a8:'#0a0f24',a9:'#0d1017'};
 PAGES.forEach(p=>{
   const b=document.createElement('button');b.className='card';b.type='button';b.style.setProperty('--g1',G[p.art]+'66');
   b.innerHTML=`<div class="thumb" style="--bgt:${BG[p.art]}"><div class="art ${p.art}"></div><span class="no">${p.no}</span><span class="dev">${p.dev.map(d=>`<i>${d}</i>`).join('')}</span></div>
