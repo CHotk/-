@@ -76,6 +76,39 @@ main{padding:0 var(--gut) 90px;max-width:1280px;margin-inline:auto}
 .load{position:absolute;inset:0;display:grid;place-items:center;font:500 12px var(--mono);color:var(--mute);letter-spacing:.14em;pointer-events:none;transition:opacity .4s}
 .load.off{opacity:0}
 :focus-visible{outline:2px solid var(--acc);outline-offset:3px}
+
+/* 版本標籤與更新歷史 */
+.ver{color:var(--acc);border:1px solid rgba(255,122,69,.45);padding:3px 14px;border-radius:99px;font:500 12px var(--mono);transition:background .3s,color .3s}
+.ver:hover{background:var(--acc);color:#160a04}
+.hist{margin-top:56px;scroll-margin-top:24px}
+.hl{border-left:1px solid var(--line);margin-left:6px;display:grid;gap:10px}
+.hl details{position:relative;margin-left:22px;background:var(--panel);border:1px solid var(--line);border-radius:16px}
+.hl details::before{content:"";position:absolute;left:-29px;top:20px;width:11px;height:11px;border-radius:50%;background:var(--bg);border:2px solid #4a4f60}
+.hl details:first-child::before{background:var(--acc);border-color:var(--acc);box-shadow:0 0 0 5px rgba(255,122,69,.18)}
+.hl summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:14px 18px;min-height:52px}
+.hl summary::-webkit-details-marker{display:none}
+.hl summary b{font:700 15px var(--mono);letter-spacing:-.01em}
+.hl summary time{font:400 12px var(--mono);color:var(--mute)}
+.hl summary .new{font:700 10px var(--mono);letter-spacing:.1em;padding:2px 8px;border-radius:99px;background:var(--acc);color:#160a04}
+.hl summary::after{content:"+";margin-left:auto;font:400 20px/1 var(--mono);color:var(--mute);transition:transform .3s}
+.hl details[open] summary::after{transform:rotate(45deg)}
+.hl ul{list-style:none;padding:0 18px 16px;display:grid;gap:8px;font-size:14px;color:#c4c9d6}
+.hl li{display:flex;gap:10px}.hl li::before{content:"";flex:none;width:6px;height:6px;border-radius:50%;background:var(--acc);margin-top:.7em}
+.desk{display:inline}
+@media(hover:none){.card:hover{transform:none;box-shadow:none}.card:hover .thumb .art{transform:none}.desk{display:none}}
+@media(max-width:700px){
+  header{padding-top:calc(env(safe-area-inset-top,0px) + 44px);padding-bottom:20px}
+  .stats{gap:10px 16px}
+  main{padding-bottom:calc(env(safe-area-inset-bottom,0px) + 56px)}
+  .grp{margin-top:34px}.grid{gap:14px}
+  .ov{inset:0 0 auto 0;height:100vh;height:100dvh}
+  .bar{padding:calc(env(safe-area-inset-top,0px) + 8px) 12px 8px;gap:8px}
+  .bar .t{font-size:14px}
+  .seg{display:none}
+  #oa{padding:0 12px}
+  .stage{padding:0 0 env(safe-area-inset-bottom,0px)}
+  .frame,.frame.phone{width:100%;max-width:100%;border:0;border-radius:0}
+}
 @media(prefers-reduced-motion:reduce){*{transition-duration:.01ms!important}}
 </style>
 </head>
@@ -84,7 +117,7 @@ main{padding:0 var(--gut) 90px;max-width:1280px;margin-inline:auto}
   <div class="eyebrow">Web Dev Collection</div>
   <h1>網站開發<em>合輯</em></h1>
   <p>這裡收錄所有做過的特效展示與行業範例網站。點任何一張卡片，就能在視窗裡預覽，並切換手機與桌機寬度。</p>
-  <div class="stats"><span><b>6</b>個頁面</span><span><b>3</b>組特效圖鑑</span><span><b>3</b>個行業範例</span><span id="ver" title="每次更新請修改程式裡的 VERSION" style="color:var(--acc);border:1px solid var(--line);padding:2px 12px;border-radius:99px"></span></div>
+  <div class="stats"><span><b>6</b>個頁面</span><span><b>3</b>組特效圖鑑</span><span><b>3</b>個行業範例</span><a id="ver" href="#history" class="ver"></a></div>
 </header>
 
 <main>
@@ -96,7 +129,11 @@ main{padding:0 var(--gut) 90px;max-width:1280px;margin-inline:auto}
     <h2>行業範例 · Industry Demos</h2>
     <div class="grid" id="g2"></div>
   </section>
-  <div class="hint"><b>在電腦上體驗手機版：</b>按 F12，再按 Ctrl+Shift+M 開啟裝置模式，就能用滑鼠模擬手指滑動；預覽視窗裡也可以用滑鼠按住左右拖曳橫向捲動的區塊。<br><b>使用說明：</b>所有範例的店名、價格、評價、商品與聯絡資料都是虛構示意，上線前請換成真實內容。頁面會從網路載入字型，需要連線才會顯示正確字體。若直接用滑鼠雙擊 index.html 打開，預覽視窗仍可運作；若某些瀏覽器擋住內嵌預覽，請改按「新分頁開啟」。</div>
+  <section class="hist" id="history">
+    <div class="grp" style="margin-top:0"><h2>更新歷史 · Changelog</h2></div>
+    <div class="hl" id="hl"></div>
+  </section>
+  <div class="hint"><span class="desk"><b>在電腦上體驗手機版：</b>預覽視窗選「手機」後，可以用滑鼠按住上下拖曳捲動頁面，像手指滑動一樣；橫向的輪播也能按住左右拖曳。更完整的模擬可按 F12，再按 Ctrl+Shift+M 開啟瀏覽器的裝置模式。<br></span><b>使用說明：</b>所有範例的店名、價格、評價、商品與聯絡資料都是虛構示意，上線前請換成真實內容。頁面會從網路載入字型，需要連線才會顯示正確字體。若直接用滑鼠雙擊 index.html 打開，預覽視窗仍可運作；若某些瀏覽器擋住內嵌預覽，請改按「新分頁開啟」。</div>
 </main>
 
 <div class="ov" id="ov" role="dialog" aria-modal="true" aria-label="頁面預覽" aria-hidden="true">
@@ -111,9 +148,16 @@ main{padding:0 var(--gut) 90px;max-width:1280px;margin-inline:auto}
 
 <script>
 const $=s=>document.querySelector(s);
-/* 版本號：每次更新並推送前，只改這一處（頁首會顯示，預覽網址也會帶上，避免讀到舊快取） */
-const VERSION={v:'1.1.0',date:'2026-10-05',note:'加入滑鼠拖曳橫向捲動'};
-$('#ver').textContent=`v${VERSION.v} · ${VERSION.date}`;$('#ver').title=VERSION.note;
+/* 更新歷史：每次更新並推送前，只在「最上面」新增一筆即可。
+   頁首版本標籤、預覽網址的版本參數、下方更新歷史都從這份清單產生。 */
+const CHANGELOG=[
+ {v:'1.2.0',date:'2026-10-05',items:['手機模式預覽：滑鼠可按住上下拖曳捲動頁面，放開後有慣性滑行','所有頁面左上角新增「首頁」按鈕，可回到合輯入口','入口頁新增更新歷史','入口頁針對手機調整：預覽視窗在手機上改為全螢幕']},
+ {v:'1.1.0',date:'2026-10-05',items:['滑鼠可按住左右拖曳橫向捲動區塊（輪播、篩選列、評價）','入口頁顯示版本號，預覽網址帶版本參數以避開舊快取','加入在電腦上體驗手機版的說明']},
+ {v:'1.0.0',date:'2026-10-05',items:['首次上線：入口頁與六個頁面（特效圖鑑 I、II、III，美甲師、花藝工作室、遊戲商人）']}
+];
+const VERSION=CHANGELOG[0];
+$('#ver').textContent=`v${VERSION.v} · ${VERSION.date}`;$('#ver').title='查看更新歷史';
+$('#hl').innerHTML=CHANGELOG.map((c,i)=>`<details${i===0?' open':''}><summary><b>v${c.v}</b><time>${c.date}</time>${i===0?'<span class="new">最新</span>':''}</summary><ul>${c.items.map(t=>`<li>${t}</li>`).join('')}</ul></details>`).join('');
 const PAGES=[
  {grp:1,no:'01',art:'a1',file:'awwwards-effects.html',t:'特效圖鑑 I',d:'八款得獎網站常見互動：自訂游標、磁性按鈕、文字亂碼、跑馬燈、3D 傾斜、浮動預覽、粒子與捲動展開。',tags:['游標','Canvas','捲動'],dev:['桌機']},
  {grp:1,no:'02',art:'a2',file:'awwwards-effects-2.html',t:'特效圖鑑 II',d:'進階版：WebGL 液態流體、圖片漣漪色散、3D 神經網路球體、橫向釘住捲動與 AI 對話串流。',tags:['WebGL','Shader','3D'],dev:['桌機']},
@@ -131,9 +175,10 @@ PAGES.forEach(p=>{
   b.onclick=()=>openP(p);$('#g'+p.grp).appendChild(b)});
 
 const ov=$('#ov'),fr=$('#fr'),ifr=$('#if'),ld=$('#ld');let cur=null;
-function setDev(phone){fr.classList.toggle('phone',phone);$('#bp').setAttribute('aria-pressed',phone);$('#bd').setAttribute('aria-pressed',!phone)}
+function sim(){try{ifr.contentWindow&&ifr.contentWindow.postMessage({type:'touchSim',on:fr.classList.contains('phone')},'*')}catch(e){}}
+function setDev(phone){fr.classList.toggle('phone',phone);$('#bp').setAttribute('aria-pressed',phone);$('#bd').setAttribute('aria-pressed',!phone);sim()}
 function openP(p){cur=p;const url='pages/'+p.file+'?v='+VERSION.v;$('#ot').textContent=p.t;$('#oa').href=url;
-  setDev(p.dev[0]==='手機');ld.classList.remove('off');ifr.onload=()=>ld.classList.add('off');ifr.src=url;
+  setDev(p.dev[0]==='手機');ld.classList.remove('off');ifr.onload=()=>{ld.classList.add('off');sim()};ifr.src=url;
   ov.classList.add('on');ov.setAttribute('aria-hidden','false');document.body.style.overflow='hidden';try{history.replaceState(null,'','#'+p.no)}catch(e){}}
 function closeP(){ov.classList.remove('on');ov.setAttribute('aria-hidden','true');document.body.style.overflow='';setTimeout(()=>{if(!ov.classList.contains('on'))ifr.src='about:blank'},350);try{history.replaceState(null,'',location.pathname)}catch(e){}}
 $('#oc').onclick=closeP;$('#bp').onclick=()=>setDev(true);$('#bd').onclick=()=>setDev(false);

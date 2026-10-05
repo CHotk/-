@@ -380,5 +380,6 @@ const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.targ
 $$('.rv').forEach(el=>{const r=el.getBoundingClientRect();
   if(r.top>innerHeight){io.observe(el)}else{el.classList.remove('pre')}});
 </script>
+<script src="common.js"></script>
 </body>
 </html>
