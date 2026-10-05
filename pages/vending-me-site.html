@@ -1,0 +1,420 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0a0f24">
+<title>小麥自動販賣機</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=DotGothic16&family=Noto+Sans+TC:wght@400;500;700;900&display=swap">
+<style>
+/* 版面：深夜巷口，一台發光的自動販賣機就是整個個人介紹。投幣、選商品、掉出來、搖一搖，每個商品打開都是一張「關於我」的卡。貓會在機器上看著你 */
+:root{
+  --n1:#080c1f; --n2:#1a1f48; --teal:#17b8a6; --teal2:#0c7d73; --coral:#ff6b4a; --cream:#fff6df; --gold:#ffcf3f; --ink:#10122a; --led:#7dffb2;
+  --disp:'Dela Gothic One','Noto Sans TC',sans-serif; --pix:'DotGothic16','Noto Sans TC',monospace; --body:'Noto Sans TC',system-ui,sans-serif;
+  --gut:clamp(16px,5vw,48px);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{color-scheme:dark}
+body{background:var(--n1);color:#eef0ff;font:400 15px/1.7 var(--body);overflow-x:hidden;min-height:100svh;-webkit-text-size-adjust:100%}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer;touch-action:manipulation}
+.scene{position:relative;min-height:100svh;padding-bottom:calc(env(safe-area-inset-bottom,0px) + 40px);background:
+  radial-gradient(60% 40% at 50% 62%,rgba(255,200,120,.22),transparent 70%),linear-gradient(180deg,var(--n1) 0,#141a3d 55%,#1b1642 100%);overflow:hidden}
+.stars{position:absolute;inset:0;pointer-events:none;opacity:.9;
+  background:radial-gradient(1.4px 1.4px at 12% 18%,#fff,transparent),radial-gradient(1px 1px at 28% 8%,#fff,transparent),radial-gradient(1.6px 1.6px at 44% 22%,#cfe0ff,transparent),
+  radial-gradient(1px 1px at 63% 12%,#fff,transparent),radial-gradient(1.4px 1.4px at 78% 26%,#fff,transparent),radial-gradient(1px 1px at 90% 10%,#ffe9b0,transparent),
+  radial-gradient(1px 1px at 8% 40%,#fff,transparent),radial-gradient(1.2px 1.2px at 94% 44%,#fff,transparent);animation:tw 4s ease-in-out infinite alternate}
+@keyframes tw{from{opacity:.5}to{opacity:1}}
+canvas#fx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:40}
+.top{position:relative;z-index:30;display:flex;justify-content:space-between;align-items:center;padding:calc(env(safe-area-inset-top,0px) + 14px) var(--gut) 8px}
+.brand{font:400 15px var(--disp);letter-spacing:.02em}.brand small{font:400 11px var(--pix);color:#9aa2d6;margin-left:8px}
+.snd{min-height:42px;padding:0 16px;border-radius:99px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.06);font:400 12px var(--pix);letter-spacing:.06em}
+.snd[aria-pressed=true]{background:var(--teal);color:#032a26;border-color:var(--teal)}
+.layout{position:relative;z-index:10;max-width:1040px;margin-inline:auto;padding:12px var(--gut) 0;display:grid;grid-template-columns:1fr;gap:26px;justify-items:center}
+@media(min-width:960px){.layout{grid-template-columns:1fr auto;gap:60px;align-items:center;justify-items:stretch;padding-top:30px}}
+.intro{text-align:center;max-width:460px}
+@media(min-width:960px){.intro{text-align:left;justify-self:end}}
+.intro h1{font:400 clamp(2.2rem,9vw,4.2rem)/1.1 var(--disp);letter-spacing:-.02em}
+.intro h1 em{font-style:normal;color:var(--gold)}
+.intro p{color:#b7bde6;margin-top:12px}
+.how{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:18px;font:400 12px var(--pix);color:#9aa2d6}
+@media(min-width:960px){.how{justify-content:flex-start}}
+.how span{border:1px dashed rgba(255,255,255,.22);border-radius:99px;padding:5px 12px}
+
+/* ===== 機器 ===== */
+.machine{position:relative;width:min(92vw,410px);margin-top:78px}
+@media(min-width:960px){.machine{margin-top:84px}}
+.machine.shake{animation:shk .45s}
+@keyframes shk{0%,100%{transform:none}15%{transform:translateX(-7px) rotate(-.8deg)}35%{transform:translateX(7px) rotate(.8deg)}55%{transform:translateX(-5px)}75%{transform:translateX(4px)}}
+.machine.thump{animation:thump .4s}
+@keyframes thump{30%{transform:translateY(5px)}60%{transform:translateY(-2px)}}
+.cat{position:absolute;right:6%;top:-70px;width:96px;z-index:3;cursor:pointer}
+.cat svg{width:100%;display:block;overflow:visible}
+.cat .tail{transform-origin:84px 78px;animation:tail 2.6s ease-in-out infinite}
+@keyframes tail{50%{transform:rotate(18deg)}}
+.cat .say{position:absolute;right:62%;top:-12px;white-space:nowrap;background:#fff;color:var(--ink);font:500 12px var(--body);padding:5px 12px;border-radius:14px 14px 2px 14px;opacity:0;transform:translateY(6px);transition:.35s;pointer-events:none}
+.cat .say.on{opacity:1;transform:none}
+.sign{position:relative;margin:0 auto;width:78%;text-align:center;padding:10px 12px;border-radius:14px 14px 0 0;background:linear-gradient(180deg,#ff8a6b,var(--coral));color:#fff;font:400 20px/1.2 var(--disp);letter-spacing:.04em;text-shadow:0 0 14px rgba(255,255,255,.7);box-shadow:0 -6px 40px rgba(255,107,74,.55);animation:fl 5s infinite}
+.sign small{display:block;font:400 10px var(--pix);letter-spacing:.3em;opacity:.9;margin-top:2px}
+@keyframes fl{0%,92%,96%,100%{opacity:1}93%{opacity:.55}94%{opacity:1}95%{opacity:.7}}
+.cab{position:relative;padding:14px 14px 16px;border-radius:22px 22px 14px 14px;background:linear-gradient(160deg,var(--teal),var(--teal2));box-shadow:0 30px 60px -10px rgba(0,0,0,.65),inset 0 2px 0 rgba(255,255,255,.35),inset 0 -8px 16px rgba(0,0,0,.25),0 0 80px rgba(255,200,120,.25)}
+.win{position:relative;border-radius:14px;padding:8px;background:linear-gradient(180deg,#fffbe9,#ffe7b8);box-shadow:inset 0 0 0 4px #0a4a44,inset 0 10px 30px rgba(255,255,255,.7);display:grid;gap:6px}
+.win::after{content:"";position:absolute;inset:4px;border-radius:10px;background:linear-gradient(115deg,rgba(255,255,255,.35) 0,transparent 30%,transparent 70%,rgba(255,255,255,.15) 100%);pointer-events:none}
+.row{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding-bottom:6px;border-bottom:4px solid #c9a56c;position:relative}
+.row:last-child{border-bottom:0;padding-bottom:0}
+.slot{position:relative;aspect-ratio:.92;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:0 2px 3px;transition:transform .2s,background .2s;text-align:center;color:#2a2012}
+.slot:active{transform:scale(.95)}
+.slot[aria-pressed=true]{background:rgba(255,107,74,.2);box-shadow:inset 0 0 0 2px var(--coral)}
+.slot .pv{flex:1;width:100%;display:grid;place-items:center;min-height:0;padding-top:4px}
+.slot .code{position:absolute;left:5px;top:3px;font:400 10px var(--pix);color:#8a6a2e}
+.slot .price{font:400 10px var(--pix);background:#2a2012;color:var(--gold);border-radius:4px;padding:0 6px;line-height:15px;margin-top:2px}
+.slot.sold::after{content:"SOLD OUT";position:absolute;inset:auto 0 22px 0;background:#d92b2b;color:#fff;font:400 9px/15px var(--pix);transform:rotate(-8deg)}
+.slot.sold .prod{filter:grayscale(1) brightness(.6)}
+.slot.locked .prod{filter:brightness(.25)}
+.slot.locked::after{content:"LOCK";position:absolute;inset:auto 0 22px 0;background:#2a2012;color:var(--gold);font:400 9px/15px var(--pix)}
+.slot.gold .prod{animation:glint 1.6s infinite}
+@keyframes glint{50%{filter:brightness(1.35) drop-shadow(0 0 6px #ffcf3f)}}
+.slot.spin{animation:spin .8s}
+@keyframes spin{25%{transform:translateX(-3px)}50%{transform:translateX(3px)}75%{transform:translateX(-2px)}}
+/* 商品外型 */
+.prod{position:relative;display:block;width:var(--pw,46%);height:var(--ph,74%);min-height:30px}
+.prod i{position:absolute;inset:0;display:grid;place-items:center;font:700 8px/1 var(--pix);writing-mode:vertical-rl;letter-spacing:.1em;color:rgba(0,0,0,.6);text-shadow:0 0 3px rgba(255,255,255,.5);font-style:normal}
+.can{border-radius:7px/5px;background:linear-gradient(90deg,var(--c2),var(--c1) 28%,rgba(255,255,255,.75) 46%,var(--c1) 60%,var(--c2));box-shadow:inset 0 -6px 8px rgba(0,0,0,.25),0 3px 4px rgba(0,0,0,.25)}
+.can::before,.can::after{content:"";position:absolute;left:3%;right:3%;height:9%;background:linear-gradient(90deg,#9aa,#fff,#9aa);border-radius:50%}
+.can::before{top:-3%}.can::after{bottom:-3%}
+.bottle{--pw:38%;--ph:84%;border-radius:10px 10px 8px 8px/16px 16px 8px 8px;margin-top:12%;height:70%;background:linear-gradient(90deg,var(--c2),var(--c1) 30%,rgba(255,255,255,.7) 46%,var(--c1) 62%,var(--c2));box-shadow:inset 0 -6px 8px rgba(0,0,0,.2),0 3px 4px rgba(0,0,0,.25)}
+.bottle::before{content:"";position:absolute;left:30%;right:30%;top:-16%;height:18%;background:linear-gradient(90deg,var(--c2),var(--c1),var(--c2));border-radius:4px 4px 0 0}
+.bottle::after{content:"";position:absolute;left:24%;right:24%;top:-22%;height:9%;background:#222;border-radius:3px}
+.box{--pw:58%;--ph:62%;border-radius:5px;background:linear-gradient(145deg,var(--c1),var(--c2));box-shadow:inset 0 -5px 6px rgba(0,0,0,.25),0 3px 4px rgba(0,0,0,.25)}
+.box::before{content:"";position:absolute;left:10%;right:10%;top:12%;height:22%;border-radius:3px;background:rgba(255,255,255,.55)}
+.box i{writing-mode:horizontal-tb;top:auto;bottom:6%;height:auto;inset:auto 0 6% 0}
+.cup{--pw:52%;--ph:66%;background:linear-gradient(90deg,var(--c2),var(--c1) 40%,rgba(255,255,255,.65) 55%,var(--c2));clip-path:polygon(6% 0,94% 0,80% 100%,20% 100%);filter:drop-shadow(0 3px 3px rgba(0,0,0,.3))}
+.cup::before{content:"";position:absolute;left:0;right:0;top:0;height:14%;background:#fff;opacity:.85}
+.cup i{writing-mode:horizontal-tb;inset:20% 0 0 0}
+.goldp{background:linear-gradient(135deg,#fff3b0,#ffcf3f 45%,#c98a00)}
+/* 控制列 */
+.ctl{display:grid;grid-template-columns:62px 1fr 62px;gap:10px;margin-top:12px;align-items:stretch}
+.coinslot{position:relative;border-radius:12px;background:#0a4a44;display:grid;place-items:center;padding:8px 0;box-shadow:inset 0 3px 8px rgba(0,0,0,.5);transition:box-shadow .3s}
+.coinslot::before{content:"";width:8px;height:34px;border-radius:5px;background:#030f0e;box-shadow:0 0 0 3px #1a7a71}
+.coinslot small{position:absolute;bottom:3px;font:400 9px var(--pix);color:#8de9dc}
+.coinslot.want{animation:want 1s infinite}
+@keyframes want{50%{box-shadow:inset 0 3px 8px rgba(0,0,0,.5),0 0 0 3px var(--gold),0 0 18px var(--gold)}}
+.led{border-radius:10px;background:#04120c;color:var(--led);padding:7px 10px;font:400 14px/1.35 var(--pix);box-shadow:inset 0 0 0 2px #1a3a2c,inset 0 0 20px rgba(125,255,178,.12);text-shadow:0 0 8px rgba(125,255,178,.7);min-height:62px;display:flex;flex-direction:column;justify-content:center;overflow:hidden}
+.led b{font-weight:400;color:#ffd96e;text-shadow:0 0 8px rgba(255,217,110,.6)}
+.retslot{border-radius:12px;background:#0a4a44;display:grid;place-items:center;box-shadow:inset 0 3px 8px rgba(0,0,0,.5);font:400 9px var(--pix);color:#8de9dc;text-align:center;line-height:1.3;transition:transform .2s}
+.retslot:active{transform:scale(.94)}
+.retslot span{display:block;width:30px;height:12px;margin:0 auto 3px;border-radius:3px;background:#030f0e;box-shadow:0 0 0 2px #1a7a71}
+.tray{position:relative;margin-top:12px;border-radius:12px;background:#031412;height:74px;box-shadow:inset 0 6px 14px rgba(0,0,0,.8),0 0 0 3px #0a4a44;display:grid;place-items:center;overflow:hidden;cursor:pointer}
+.tray .prod{--ph:68%;height:60px;width:var(--pw,46%);opacity:0;transform:translateY(10px)}
+.tray.has .prod{opacity:1;transform:none}
+.tray::after{content:"取物口 ▼";position:absolute;bottom:3px;font:400 10px var(--pix);color:#3d7f77;pointer-events:none}
+.tray.has{animation:glowtray 1.2s infinite}
+.tray.has::after{content:"點我取出";color:var(--gold)}
+@keyframes glowtray{50%{box-shadow:inset 0 6px 14px rgba(0,0,0,.8),0 0 0 3px var(--gold),0 0 22px rgba(255,207,63,.7)}}
+.legs{display:flex;justify-content:space-between;padding:0 14%;margin-top:-2px}.legs i{width:34px;height:12px;background:#06403a;border-radius:0 0 6px 6px}
+.ground{position:absolute;left:-10%;right:-10%;bottom:-26px;height:46px;background:radial-gradient(50% 100% at 50% 0%,rgba(255,200,120,.45),transparent 70%);filter:blur(6px);pointer-events:none}
+
+/* 口袋與收藏 */
+.under{position:relative;z-index:10;width:min(92vw,410px);margin:26px auto 0;display:grid;gap:14px}
+.wallet{display:flex;align-items:center;gap:14px;padding:12px 16px;border-radius:18px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14)}
+.coin{width:56px;height:56px;flex:none;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff3b0,#ffcf3f 50%,#b87a00);display:grid;place-items:center;font:400 22px var(--disp);color:#8a5a00;box-shadow:inset 0 0 0 4px rgba(184,122,0,.5),0 6px 14px rgba(0,0,0,.4);touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none;transition:transform .2s}
+.coin:active{cursor:grabbing;transform:scale(1.08)}
+.coin[hidden]{display:none}
+.coin.fly{position:fixed;left:0;top:0;z-index:700;margin:0;pointer-events:none;transition:none}
+.wallet p{font:400 13px/1.5 var(--body);color:#b7bde6}.wallet p b{color:var(--gold);font:400 20px var(--pix)}
+.shelf h3{font:400 12px var(--pix);color:#9aa2d6;letter-spacing:.1em;display:flex;justify-content:space-between;margin-bottom:8px}
+.dex{display:grid;grid-template-columns:repeat(8,1fr);gap:6px}
+.dex div{aspect-ratio:1;border-radius:10px;background:rgba(255,255,255,.05);border:1px dashed rgba(255,255,255,.2);display:grid;place-items:center;position:relative;overflow:hidden}
+.dex div.got{border-style:solid;border-color:rgba(255,255,255,.35);background:rgba(255,255,255,.1)}
+.dex div .prod{--pw:44%;--ph:62%;height:62%;opacity:.25;filter:brightness(0)}
+.dex div.got .prod{opacity:1;filter:none}
+.dex div::after{content:attr(data-c);position:absolute;left:3px;top:1px;font:400 8px var(--pix);color:#6b73a8}
+.tip{font:400 12px/1.7 var(--pix);color:#8d95cc;text-align:center}
+
+/* 卡片 */
+.ov{position:fixed;inset:0;z-index:300;display:flex;align-items:flex-end;justify-content:center;background:rgba(3,5,18,.72);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);opacity:0;pointer-events:none;transition:opacity .35s}
+.ov.on{opacity:1;pointer-events:auto}
+.card{position:relative;width:min(100%,520px);max-height:90svh;overflow-y:auto;overscroll-behavior:contain;background:var(--cream);color:var(--ink);border-radius:26px 26px 0 0;padding:0 0 calc(env(safe-area-inset-bottom,0px) + 22px);transform:translateY(100%);transition:transform .55s cubic-bezier(.2,.9,.1,1)}
+@media(min-width:700px){.ov{align-items:center}.card{border-radius:26px;transform:translateY(40px) scale(.96);opacity:0;transition:transform .5s cubic-bezier(.2,.9,.1,1),opacity .3s}}
+.ov.on .card{transform:none;opacity:1}
+.card .band{padding:18px 22px 16px;background:linear-gradient(120deg,var(--c1),var(--c2));color:#1a1204;display:flex;justify-content:space-between;align-items:flex-end;gap:12px}
+.card .band small{font:400 11px var(--pix);letter-spacing:.14em;opacity:.8}
+.card .band h2{font:400 28px/1.15 var(--disp);letter-spacing:-.01em}
+.card .x{width:44px;height:44px;border-radius:50%;background:rgba(0,0,0,.15);font-size:18px;flex:none}
+.card .cb{padding:20px 22px;display:grid;gap:14px}
+.card p{font-size:15px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}.chips span{font:500 12px var(--body);padding:4px 12px;border-radius:99px;background:#fff;border:1.5px solid var(--ink)}
+.nf{border:3px solid var(--ink);border-radius:6px;padding:10px 12px;background:#fff}
+.nf h4{font:900 26px/1 var(--body);letter-spacing:-.02em;border-bottom:8px solid var(--ink);padding-bottom:4px;margin-bottom:4px}
+.nf small{font:400 11px var(--body);display:block;border-bottom:1px solid var(--ink);padding-bottom:4px;margin-bottom:6px}
+.nf .r{display:grid;grid-template-columns:1fr auto;gap:10px;padding:5px 0;border-bottom:1px solid #ccc;font-size:14px;font-weight:700}
+.nf .r span:last-child{font-variant-numeric:tabular-nums}
+.nf .bar{grid-column:1/-1;height:8px;background:#e5e0d0;border-radius:4px;overflow:hidden}.nf .bar i{display:block;height:100%;background:var(--ink);width:0;transition:width 1s cubic-bezier(.2,.8,.1,1)}
+.nf .fn{font-size:11px;font-weight:400;border:0;padding-top:6px;color:#444}
+.pj{padding:12px 14px;border-radius:14px;background:#fff;border:2px solid var(--ink)}
+.pj b{font:900 16px var(--body)}.pj p{font-size:13.5px;color:#444}
+.tl{border-left:3px dashed var(--ink);margin-left:6px;display:grid;gap:12px}
+.tl div{position:relative;padding-left:16px}.tl div::before{content:"";position:absolute;left:-9px;top:6px;width:13px;height:13px;border-radius:50%;background:var(--c1);border:3px solid var(--ink)}
+.tl small{font:400 11px var(--pix);color:#555;display:block}.tl b{font:900 15px var(--body)}
+.sbtn{min-height:48px;border-radius:14px;background:var(--ink);color:var(--cream);font:700 14px var(--body);padding:0 18px}
+.sbtn:active{transform:scale(.97)}
+.ct{display:grid;gap:8px}.ct div{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 14px;border:2px solid var(--ink);border-radius:14px;background:#fff;font-size:14px}
+.ct b{font:400 11px var(--pix);color:#555;flex:none}.ct span{word-break:break-all;text-align:right;font-weight:500}
+.ct button{flex:none;font:700 12px var(--body);border:1.5px solid var(--ink);border-radius:99px;padding:6px 12px;min-height:34px}
+.big{font:400 22px/1.4 var(--disp);letter-spacing:-.01em}
+.toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 24px);transform:translate(-50%,30px);background:#fff;color:var(--ink);padding:12px 20px;border-radius:99px;font:500 13px var(--body);opacity:0;pointer-events:none;transition:.45s cubic-bezier(.2,.8,.1,1);z-index:900;white-space:nowrap}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+@media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+</style>
+</head>
+<body>
+<canvas id="fx" aria-hidden="true"></canvas>
+<div class="scene">
+<div class="stars"></div>
+<header class="top"><div class="brand">MAI VENDING<small>24H 營業中</small></div><button class="snd" id="snd" aria-pressed="false">聲音 OFF</button></header>
+
+<div class="layout">
+  <div class="intro">
+    <h1>投個幣，<br>認識<em>我</em>。</h1>
+    <p id="intro-p"></p>
+    <div class="how"><span>① 點商品</span><span>② 把硬幣拖進投幣口</span><span>③ 取出商品</span></div>
+  </div>
+
+  <div>
+    <div class="machine" id="machine">
+      <div class="cat" id="cat" role="button" aria-label="摸摸貓">
+        <div class="say" id="say">喵</div>
+        <svg viewBox="0 0 120 100" aria-hidden="true">
+          <g class="tail"><path d="M84 78 C112 78 118 52 104 40 C98 35 94 42 100 48 C108 58 100 68 84 68Z" fill="#05071a"/></g>
+          <ellipse cx="56" cy="76" rx="34" ry="22" fill="#05071a"/>
+          <circle cx="40" cy="44" r="22" fill="#05071a"/>
+          <path d="M22 34 L20 12 L36 24Z M58 34 L60 12 L44 24Z" fill="#05071a"/>
+          <g id="eyes"><ellipse cx="32" cy="44" rx="6" ry="7" fill="#ffd86b"/><ellipse cx="50" cy="44" rx="6" ry="7" fill="#ffd86b"/>
+          <ellipse class="pu" cx="32" cy="44" rx="2.2" ry="5.5" fill="#05071a"/><ellipse class="pu" cx="50" cy="44" rx="2.2" ry="5.5" fill="#05071a"/></g>
+          <path d="M39 54 L41 57 L43 54Z" fill="#ff9aa8"/>
+        </svg>
+      </div>
+      <div class="sign" id="sign"><span id="signName">小麥</span> 自販機<small>VENDING · OPEN 24H</small></div>
+      <div class="cab" id="cab">
+        <div class="win" id="win"></div>
+        <div class="ctl">
+          <div class="coinslot" id="slotC"><small>COIN</small></div>
+          <div class="led" id="led"></div>
+          <button class="retslot" id="ret" aria-label="退幣口"><div><span></span>退幣口</div></button>
+        </div>
+        <div class="tray" id="tray" role="button" tabindex="0" aria-label="取物口"><i class="prod" id="trayP"></i></div>
+      </div>
+      <div class="legs"><i></i><i></i></div><div class="ground"></div>
+    </div>
+  </div>
+</div>
+
+<div class="under">
+  <div class="wallet"><div class="coin" id="coin" data-nodrag role="button" aria-label="硬幣，拖到投幣口或點一下投幣" tabindex="0">¥</div><p><b id="coinN">3</b> 枚在口袋<br><span id="walletHint">把硬幣拖到機器的投幣口</span></p></div>
+  <div class="shelf"><h3><span>收藏冊</span><span id="dexN">0 / 7</span></h3><div class="dex" id="dex"></div></div>
+  <p class="tip">收集全部 7 款商品，就會解鎖第 9 格的限定商品。<br>機器偶爾會卡住，記得搖一搖。</p>
+</div>
+</div>
+
+<div class="ov" id="ov" aria-hidden="true"><div class="card" id="card" role="dialog" aria-modal="true"></div></div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+/* =====================================================
+   ★ 想改成自己的介紹，只要修改這一區 ★
+   ===================================================== */
+const PROFILE={
+  name:'小麥',
+  intro:'白天把設計變成網頁，晚上把網頁變成笑話。這台機器裡放的，都是關於我的東西。',
+  catLines:['喵','別看我，去買東西','我只收小魚乾','你今天喝水了嗎','喵？'],
+  coinJokes:['空的。','只有一張舊發票。','摸到一點口香糖，別問。','沒有硬幣，但有一點希望。','這裡只有灰塵。'],
+  ledIdle:['請選擇商品','把硬幣拖進投幣口','24H 營業中','歡迎光臨'],
+  contact:[['LINE','@your-line-id'],['Instagram','@your.handle'],['Email','hello@example.com']],
+  hello:'你好，我看完了你的自動販賣機，想跟你聊聊合作。'
+};
+/* 商品順序即擺放順序（3 列 × 3 格）。type 決定卡片長相。 */
+const ITEMS=[
+ {k:'about',code:'A1',name:'關於我',lb:'ABOUT',shape:'can',c:['#ff8a6b','#c9412a'],type:'bio',
+  text:'嗨，我是小麥。做介面設計，也寫前端。相信好的介面像好的玩笑，不需要解釋。',tags:['好奇心','咖啡','一點固執','貓毛']},
+ {k:'skills',code:'A2',name:'技能',lb:'SKILL',shape:'bottle',c:['#8fdcff','#2a8fc4'],type:'skills',
+  rows:[['介面設計',85],['前端開發',80],['動畫與互動',90],['溝通協調',70],['咖啡因耐受',100]],note:'* 咖啡因耐受已超過每日建議攝取量。'},
+ {k:'works',code:'A3',name:'作品',lb:'WORKS',shape:'box',c:['#ffd75a','#d98d00'],type:'works',
+  list:[['月光動物園','隨夜色變化的線上導覽','Canvas・互動'],['小店訂位工具','三步完成預約，店家用手機就能管理','表單・手機'],['一人公司儀表板','把收入與時間畫成一張圖','資料視覺化']]},
+ {k:'exp',code:'B1',name:'經歷',lb:'EXP',shape:'can',c:['#c4a3ff','#6b3fc9'],type:'timeline',
+  list:[['2024 至今','自由接案','獨立設計與開發'],['2021 – 2024','某某科技（示意）','前端工程師'],['2019 – 2021','某某工作室（示意）','設計助理']]},
+ {k:'hobby',code:'B2',name:'興趣',lb:'FUN',shape:'cup',c:['#86e8ae','#2f9f66'],type:'hobby',
+  list:['爬山','手沖咖啡','桌遊','拍街貓','深夜寫小程式','收集奇怪的橡皮擦']},
+ {k:'fact',code:'B3',name:'冷知識',lb:'FACT',shape:'bottle',c:['#ff9cc3','#c43f77'],type:'fact',
+  list:['我一天最多喝過 6 杯咖啡，然後在半夜整理了書櫃。','我的第一個網站是 12 歲做的，現在還留著，不准看。','我寫程式時一定要聽雨聲。','我的鍵盤上，空白鍵是磨損最嚴重的。','我曾經為了一個 1px 的對齊，花掉整個下午。']},
+ {k:'contact',code:'C1',name:'聯絡',lb:'CALL',shape:'box',c:['#ffffff','#bcc8d8'],type:'contact'},
+ {k:'sleep',code:'C2',name:'睡眠',lb:'SLEEP',shape:'can',c:['#666','#222'],type:'sold'},
+ {k:'gold',code:'C3',name:'限定',lb:'★',shape:'can',c:['#fff3b0','#ffcf3f'],type:'gold',gold:true}
+];
+const NEED=7;  /* 收集幾款才解鎖限定商品 */
+/* ===================================================== */
+
+const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
+const lerp=(a,b,t)=>a+(b-a)*t,clamp=(v,a=0,b=1)=>Math.max(a,Math.min(b,v)),sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const buzz=n=>{try{navigator.vibrate&&navigator.vibrate(n)}catch(e){}};
+let tt;function toast(t){const e=$('#toast');e.textContent=t;e.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>e.classList.remove('on'),2000)}
+
+/* ---------- 狀態 ---------- */
+const S={sel:null,credit:0,coins:3,busy:false,pending:null,col:new Set(),vends:0,unlocked:false,catTaps:0,shakeWant:0,shakeCnt:0,shakeRes:null};
+try{const d=JSON.parse(localStorage.getItem('vm-save')||'null');if(d){S.col=new Set(d.col||[]);S.coins=d.coins??3;S.unlocked=!!d.unlocked}}catch(e){}
+const save=()=>{try{localStorage.setItem('vm-save',JSON.stringify({col:[...S.col],coins:S.coins,unlocked:S.unlocked}))}catch(e){}};
+const BY=Object.fromEntries(ITEMS.map(i=>[i.k,i]));
+const REAL=ITEMS.filter(i=>!['sold','gold'].includes(i.type));
+
+/* ---------- 聲音 ---------- */
+let AC=null,sound=false;
+function tone(f,d,type='sine',v=.12,delay=0,slide){if(!sound)return;try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();const t=AC.currentTime+delay,o=AC.createOscillator(),g=AC.createGain();
+  o.type=type;o.frequency.setValueAtTime(f,t);if(slide)o.frequency.exponentialRampToValueAtTime(slide,t+d);g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.connect(g).connect(AC.destination);o.start(t);o.stop(t+d)}catch(e){}}
+const sfx={coin:()=>{tone(1400,.12,'square',.07);tone(2100,.2,'square',.07,.08)},thunk:()=>{tone(110,.25,'sine',.35,0,45)},err:()=>{tone(160,.25,'sawtooth',.1)},win:()=>[523,659,784,1047].forEach((f,i)=>tone(f,.25,'triangle',.12,i*.09)),click:()=>tone(900,.05,'square',.05),shake:()=>tone(200,.15,'sawtooth',.06,0,120)};
+$('#snd').onclick=()=>{sound=!sound;$('#snd').setAttribute('aria-pressed',sound);$('#snd').textContent='聲音 '+(sound?'ON':'OFF');sfx.click()};
+
+/* ---------- 建立商品 ---------- */
+$('#signName').textContent=PROFILE.name;$('#intro-p').textContent=PROFILE.intro;document.title=PROFILE.name+'自動販賣機';
+const prodHTML=(it,cls='')=>`<i class="prod ${it.shape} ${it.gold?'goldp':''} ${cls}" style="--c1:${it.c[0]};--c2:${it.c[1]}"><i>${it.lb}</i></i>`;
+const win=$('#win');
+for(let r=0;r<3;r++){const row=document.createElement('div');row.className='row';
+  ITEMS.slice(r*3,r*3+3).forEach(it=>{const b=document.createElement('button');b.className='slot';b.dataset.k=it.k;b.setAttribute('aria-label',`${it.code} ${it.name}`);
+    b.innerHTML=`<span class="code">${it.code}</span><span class="pv">${prodHTML(it)}</span><span class="price">${it.gold?'FREE':'1 枚'}</span>`;
+    b.onclick=()=>pickItem(it);row.appendChild(b)});win.appendChild(row)}
+const slotEl=it=>$(`.slot[data-k="${it.k}"]`);
+/* 收藏冊 */
+const dex=$('#dex');REAL.concat([BY.gold]).forEach((it,i)=>{const d=document.createElement('div');d.dataset.k=it.k;d.dataset.c=it.code;d.innerHTML=prodHTML(it);dex.appendChild(d)});
+
+/* ---------- LED ---------- */
+const led=$('#led');let ledTimer;
+function say(a,b=''){led.innerHTML=`<div>${a}</div>${b?`<div>${b}</div>`:''}`}
+function idle(){if(S.busy||S.pending)return;say(S.sel?`<b>${S.sel.code}</b> ${S.sel.name}`:pick(PROFILE.ledIdle),S.sel?(S.credit>=1?'讀取中…':'請投 1 枚'):`投幣 <b>${S.credit}</b>`)}
+setInterval(()=>{if(!S.sel&&!S.busy&&!S.pending)idle()},3200);
+function ui(){
+  $('#coinN').textContent=S.coins;$('#coin').hidden=S.coins<=0;
+  $('#walletHint').textContent=S.coins>0?'把硬幣拖到機器的投幣口，或點一下硬幣':'沒硬幣了。試試摸摸退幣口或貓咪';
+  $('#slotC').classList.toggle('want',!!S.sel&&S.credit<(S.sel.gold?0:1)&&!S.busy);
+  const n=REAL.filter(i=>S.col.has(i.k)).length;$('#dexN').textContent=`${n} / ${NEED}`;
+  $$('#dex div').forEach(d=>d.classList.toggle('got',S.col.has(d.dataset.k)));
+  const g=slotEl(BY.gold);g.classList.toggle('locked',!S.unlocked);g.classList.toggle('gold',S.unlocked);
+  $$('.slot').forEach(s=>{const it=BY[s.dataset.k];s.classList.toggle('sold',it.type==='sold');s.setAttribute('aria-pressed',S.sel===it)});
+  save()}
+
+/* ---------- 選商品與投幣 ---------- */
+function pickItem(it){
+  if(S.busy||S.pending){if(S.pending)toast('先把取物口的商品拿出來');return}
+  sfx.click();buzz(8);
+  if(it.type==='sold'){say('<b>SOLD OUT</b>','這個永遠缺貨');sfx.err();S.sel=null;ui();return}
+  if(it.gold&&!S.unlocked){say('<b>LOCK</b>',`收集 ${NEED} 款解鎖`);sfx.err();S.sel=null;ui();return}
+  S.sel=it;
+  if(it.gold||S.credit>=1){vend(it)}else{say(`<b>${it.code}</b> ${it.name}`,'請投 1 枚硬幣');ui()}}
+function insertCoin(){
+  if(S.coins<=0||S.busy)return false;
+  S.coins--;S.credit++;sfx.coin();buzz(10);ui();
+  if(S.sel&&!S.sel.gold&&S.credit>=1)vend(S.sel);else say(`投幣 <b>${S.credit}</b>`,S.sel?'':'請選擇商品');
+  return true}
+/* 拖曳硬幣 */
+const coin=$('#coin'),slotC=$('#slotC');
+function flyCoin(x0,y0,done){const g=coin.cloneNode(true);g.removeAttribute('id');g.classList.add('fly');g.hidden=false;document.body.appendChild(g);return g}
+coin.addEventListener('pointerdown',e=>{
+  if(S.coins<=0||S.busy)return;e.preventDefault();
+  const g=flyCoin();let moved=false,sx=e.clientX,sy=e.clientY;
+  const place=(x,y)=>g.style.transform=`translate(${x-28}px,${y-28}px) scale(1.15)`;place(e.clientX,e.clientY);coin.style.opacity=.35;
+  const mv=ev=>{if(Math.hypot(ev.clientX-sx,ev.clientY-sy)>6)moved=true;place(ev.clientX,ev.clientY)};
+  const up=ev=>{removeEventListener('pointermove',mv);removeEventListener('pointerup',up);removeEventListener('pointercancel',up);coin.style.opacity='';
+    const r=slotC.getBoundingClientRect(),near=ev.clientX>r.left-30&&ev.clientX<r.right+30&&ev.clientY>r.top-30&&ev.clientY<r.bottom+30;
+    if(near||!moved){const tx=r.left+r.width/2,ty=r.top+r.height/2;g.style.transition='transform .28s cubic-bezier(.5,0,.8,.4)';g.style.transform=`translate(${tx-28}px,${ty-28}px) scale(.3)`;
+      setTimeout(()=>{g.remove();insertCoin()},270)}
+    else{g.style.transition='transform .3s cubic-bezier(.2,.8,.2,1),opacity .3s';const w=coin.getBoundingClientRect();g.style.transform=`translate(${w.left}px,${w.top}px)`;g.style.opacity='0';setTimeout(()=>g.remove(),300)}};
+  addEventListener('pointermove',mv);addEventListener('pointerup',up);addEventListener('pointercancel',up)});
+coin.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();insertCoin()}});
+
+/* 退幣口與貓 */
+$('#ret').onclick=()=>{if(S.busy)return;sfx.click();
+  if(S.credit>0){S.coins+=S.credit;S.credit=0;S.sel=null;sfx.coin();say('<b>退幣</b>','硬幣退回口袋');ui();return}
+  if(S.coins<9&&Math.random()<.6){S.coins++;sfx.coin();buzz(12);say('<b>找到了！</b>','一枚被遺忘的硬幣');toast('退幣口裡有一枚硬幣');ui()}else{say('<b>…</b>',pick(PROFILE.coinJokes))}};
+const cat=$('#cat'),catSay=$('#say');let cst;
+cat.onclick=()=>{S.catTaps++;catSay.textContent=pick(PROFILE.catLines);catSay.classList.add('on');clearTimeout(cst);cst=setTimeout(()=>catSay.classList.remove('on'),1800);buzz(8);
+  if(S.catTaps%6===0&&S.coins<9){S.coins++;sfx.coin();catSay.textContent='喵（推出一枚硬幣）';ui();toast('貓咪給了你一枚硬幣')}};
+/* 貓眼睛追著游標 */
+addEventListener('pointermove',e=>{const r=cat.getBoundingClientRect(),cx=r.left+r.width*.4,cy=r.top+r.height*.45,dx=e.clientX-cx,dy=e.clientY-cy,d=Math.hypot(dx,dy)||1,k=Math.min(2.4,d/80);
+  $$('#eyes .pu').forEach(p=>p.setAttribute('transform',`translate(${dx/d*k},${dy/d*k})`))});
+
+/* ---------- 出貨 ---------- */
+function doShake(){const m=$('#machine');m.classList.remove('shake');void m.offsetWidth;m.classList.add('shake');sfx.shake();buzz(30);
+  if(S.shakeRes){S.shakeCnt++;if(S.shakeCnt>=S.shakeWant){const r=S.shakeRes;S.shakeRes=null;r()}else say('<b>搖！</b>',`還差 ${S.shakeWant-S.shakeCnt} 下`)}}
+$('#cab').addEventListener('click',e=>{if(e.target.closest('button,.tray'))return;doShake()});
+let lastShake=0;addEventListener('devicemotion',e=>{const a=e.accelerationIncludingGravity;if(!a)return;const m=Math.abs(a.x||0)+Math.abs(a.y||0)+Math.abs(a.z||0);if(m>32&&performance.now()-lastShake>600){lastShake=performance.now();doShake()}});
+async function vend(it){
+  if(S.busy)return;S.busy=true;if(!it.gold)S.credit=Math.max(0,S.credit-1);ui();
+  say('<b>出貨中</b>','請稍候…');const sl=slotEl(it);sl.classList.add('spin');sfx.click();await sleep(reduce?50:650);sl.classList.remove('spin');
+  const prod=$('.prod',sl),r=prod.getBoundingClientRect(),clone=prod.cloneNode(true);
+  Object.assign(clone.style,{position:'fixed',left:r.left+'px',top:r.top+'px',width:r.width+'px',height:r.height+'px',margin:0,zIndex:60,'--pw':'100%','--ph':'100%',transformOrigin:'50% 100%'});document.body.appendChild(clone);prod.style.visibility='hidden';
+  const tr=$('#trayP').getBoundingClientRect(),tray=$('#tray').getBoundingClientRect(),dx=tray.left+tray.width/2-(r.left+r.width/2),dy=tray.top+tray.height/2-(r.top+r.height/2)+6;
+  const stuck=S.vends>0&&!it.gold&&Math.random()<.35;S.vends++;
+  if(stuck){
+    await clone.animate([{transform:'none'},{transform:`translate(${dx*.1}px,${Math.min(dy*.28,64)}px) rotate(-16deg)`}],{duration:380,easing:'cubic-bezier(.2,.7,.3,1)',fill:'forwards'}).finished;
+    say('<b>卡住了！</b>','搖一搖機器（點機身）');sfx.err();toast('卡住了！點機身或搖手機');
+    S.shakeWant=3;S.shakeCnt=0;await new Promise(res=>S.shakeRes=res);
+    await clone.animate([{transform:`translate(${dx*.1}px,${Math.min(dy*.28,64)}px) rotate(-16deg)`},{transform:`translate(${dx}px,${dy}px) rotate(6deg)`}],{duration:520,easing:'cubic-bezier(.55,0,1,.6)',fill:'forwards'}).finished}
+  else await clone.animate([{transform:'none'},{transform:`translate(${dx}px,${dy}px) rotate(8deg)`}],{duration:reduce?60:640,easing:'cubic-bezier(.55,0,1,.6)',fill:'forwards'}).finished;
+  clone.remove();sfx.thunk();buzz([30,20,20]);const m=$('#machine');m.classList.remove('thump');void m.offsetWidth;m.classList.add('thump');
+  $('#tray').innerHTML=prodHTML(it);const tp=$('#tray .prod');tp.style.height='60px';$('#tray').classList.add('has');S.pending=it;S.busy=false;
+  say('<b>請取出商品</b>','點下方取物口');setTimeout(()=>{prod.style.visibility=''},900);ui()}
+const tray=$('#tray');tray.onclick=()=>{if(S.pending)openCard(S.pending)};tray.onkeydown=e=>{if((e.key==='Enter'||e.key===' ')&&S.pending){e.preventDefault();openCard(S.pending)}};
+
+/* ---------- 卡片 ---------- */
+const ov=$('#ov'),card=$('#card');
+function nf(it){return `<div class="nf"><h4>營養成分表</h4><small>Nutrition Facts ・ 每份人生</small>${it.rows.map(r=>`<div class="r"><span>${r[0]}</span><span>${r[1]}%</span><div class="bar"><i data-w="${Math.min(100,r[1])}"></i></div></div>`).join('')}<div class="r fn">${it.note||''}</div></div>`}
+const BODY={
+  bio:it=>`<p>${it.text}</p><div class="chips">${it.tags.map(t=>`<span>${t}</span>`).join('')}</div><p style="font-size:12px;color:#666">原料：${it.tags.join('、')}。可能含有大量冷笑話。</p>`,
+  skills:nf,
+  works:it=>it.list.map(w=>`<div class="pj"><b>${w[0]}</b><p>${w[1]}</p><div class="chips" style="margin-top:6px"><span>${w[2]}</span></div></div>`).join('')+'<p style="font-size:12px;color:#666">作品為示意，請換成你的真實專案。</p>',
+  timeline:it=>`<div class="tl" style="--c1:${it.c[0]}">${it.list.map(e=>`<div><small>保存期限 ${e[0]}</small><b>${e[1]}</b><p style="font-size:13.5px">${e[2]}</p></div>`).join('')}</div>`,
+  hobby:it=>`<div class="chips">${it.list.map(t=>`<span>${t}</span>`).join('')}</div><button class="sbtn" id="rnd" type="button">抽今日口味</button><p class="big" id="rndO" style="min-height:2.8em"></p>`,
+  fact:it=>`<p class="big" id="rndO">${pick(it.list)}</p><button class="sbtn" id="rnd" type="button">再抽一個</button>`,
+  contact:()=>`<div class="ct">${PROFILE.contact.map(c=>`<div><b>${c[0]}</b><span>${c[1]}</span><button type="button" data-copy="${c[1]}">複製</button></div>`).join('')}</div><p style="font-size:12px;color:#666">聯絡資料為示意。通常 24 小時內回覆。</p>`,
+  gold:()=>`<p class="big">謝謝你把我全部看完。</p><p>這台機器裡的東西你都拿過了，那我們就聊聊吧。</p><div class="ct"><div><b>訊息</b><span style="text-align:left;font-size:13px">${PROFILE.hello}</span><button type="button" data-copy="${PROFILE.hello}">複製</button></div>${PROFILE.contact.map(c=>`<div><b>${c[0]}</b><span>${c[1]}</span><button type="button" data-copy="${c[1]}">複製</button></div>`).join('')}</div>`
+};
+function openCard(it){
+  const first=!S.col.has(it.k);
+  if(!it.gold){S.col.add(it.k)}
+  card.style.setProperty('--c1',it.c[0]);card.style.setProperty('--c2',it.c[1]);
+  card.innerHTML=`<div class="band"><div><small>${it.code} ・ ${first&&!it.gold?'NEW':'已收藏'}</small><h2>${it.name}</h2></div><button class="x" id="cx" aria-label="關閉">✕</button></div><div class="cb">${BODY[it.type](it)}</div>`;
+  ov.classList.add('on');ov.setAttribute('aria-hidden','false');document.body.style.overflow='hidden';buzz(15);sfx.win();
+  requestAnimationFrame(()=>requestAnimationFrame(()=>$$('.bar i',card).forEach(b=>b.style.width=b.dataset.w+'%')));
+  const rnd=$('#rnd',card);if(rnd){const lst=it.list;rnd.onclick=()=>{$('#rndO',card).textContent=pick(lst);sfx.click()};if(it.type==='hobby')rnd.click()}
+  $$('[data-copy]',card).forEach(b=>b.onclick=async()=>{try{await navigator.clipboard.writeText(b.dataset.copy);toast('已複製')}catch(e){toast('請長按文字手動複製')}});
+  $('#cx').onclick=closeCard;
+  if(it.gold)burst();
+  S.pending=null;tray.classList.remove('has');$('#tray').innerHTML='<i class="prod" id="trayP"></i>';S.sel=null;
+  const n=REAL.filter(i=>S.col.has(i.k)).length;
+  if(!S.unlocked&&n>=NEED){S.unlocked=true;setTimeout(()=>{toast('★ 限定商品已解鎖，在第 9 格');say('<b>UNLOCK</b>','限定商品 C3 開放')},900)}
+  ui()}
+function closeCard(){ov.classList.remove('on');ov.setAttribute('aria-hidden','true');document.body.style.overflow='';idle()}
+ov.addEventListener('click',e=>{if(e.target===ov)closeCard()});addEventListener('keydown',e=>{if(e.key==='Escape')closeCard()});
+
+/* ---------- 特效：飛蛾與彩帶 ---------- */
+const fx=$('#fx'),g=fx.getContext('2d');let FW=0,FH=0,dpr=1;
+function fit(){dpr=Math.min(devicePixelRatio||1,2);FW=innerWidth;FH=innerHeight;fx.width=FW*dpr;fx.height=FH*dpr;g.setTransform(dpr,0,0,dpr,0,0)}fit();addEventListener('resize',fit);
+const moths=Array.from({length:7},(_,i)=>({a:Math.random()*6.28,rx:30+Math.random()*70,ry:20+Math.random()*50,sp:.6+Math.random()*.9,fl:Math.random()*6,s:3+Math.random()*2.2}));
+let conf=[];
+function burst(){const c=['#ffcf3f','#ff6b4a','#17b8a6','#8fdcff','#ff9cc3','#c4a3ff'];conf=Array.from({length:110},()=>({x:FW/2,y:FH*.45,vx:(Math.random()-.5)*14,vy:-Math.random()*14-4,r:Math.random()*6.28,vr:(Math.random()-.5)*.4,w:5+Math.random()*6,c:pick(c),l:1}))}
+function loop(now){
+  const t=now/1000;g.clearRect(0,0,FW,FH);
+  if(!reduce){const sr=$('#sign').getBoundingClientRect(),cx=sr.left+sr.width/2,cy=sr.top+sr.height*.5;
+    for(const m of moths){m.a+=.012*m.sp;const x=cx+Math.cos(m.a)*m.rx+Math.sin(t*1.7+m.fl)*8,y=cy+Math.sin(m.a*1.3)*m.ry-sr.height*.4,w=Math.sin(t*28+m.fl);
+      g.save();g.translate(x,y);g.rotate(Math.cos(m.a)*.5);g.fillStyle='rgba(255,236,190,.92)';
+      g.beginPath();g.ellipse(-m.s*.7,0,m.s*(1.1+w*.5),m.s*.7,-.4,0,6.3);g.fill();g.beginPath();g.ellipse(m.s*.7,0,m.s*(1.1+w*.5),m.s*.7,.4,0,6.3);g.fill();
+      g.fillStyle='#5a4a2a';g.fillRect(-.6,-m.s*.6,1.2,m.s*1.2);g.restore()}}
+  conf=conf.filter(p=>p.l>0&&p.y<FH+20);for(const p of conf){p.vy+=.35;p.x+=p.vx;p.y+=p.vy;p.vx*=.99;p.r+=p.vr;p.l-=.004;g.save();g.translate(p.x,p.y);g.rotate(p.r);g.fillStyle=p.c;g.globalAlpha=clamp(p.l*2);g.fillRect(-p.w/2,-p.w/4,p.w,p.w/2);g.restore()}
+  requestAnimationFrame(loop)}
+requestAnimationFrame(loop);
+
+ui();idle();
+if(S.col.size===0)setTimeout(()=>{if(!S.sel&&!S.busy)say('<b>歡迎光臨</b>','點一個商品試試')},400);
+</script>
+<script src="common.js"></script>
+</body>
+</html>
