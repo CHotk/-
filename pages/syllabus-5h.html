@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b0d12">
+<title>5 小時課綱</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+TC:wght@300;400;500;700;900&display=swap">
+<style>
+/* 版面：備課用的課綱頁。上方一條依類型分色的時間比例，下方是可展開的時間軸，每段含目標、講解重點、學員動作、交付物與講師提醒。深色底、手機單欄 */
+:root{
+  --bg:#0b0d12; --card:#141822; --card2:#1a1f2c; --ink:#eaeef6; --mute:#8d96ab; --line:rgba(255,255,255,.1);
+  --warm:#ffcf5a; --concept:#a78bfa; --hands:#5eead4; --wrap:#7cc4ff; --rest:#5b6479;
+  --display:'Bricolage Grotesque','Noto Sans TC',sans-serif; --sans:'Noto Sans TC',system-ui,sans-serif; --mono:'JetBrains Mono',ui-monospace,monospace;
+  --gut:clamp(16px,5vw,48px);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{color-scheme:dark;scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font:400 15px/1.8 var(--sans);overflow-x:hidden;-webkit-text-size-adjust:100%;padding-bottom:calc(env(safe-area-inset-bottom,0px) + 40px)}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer;touch-action:manipulation}
+header{padding:calc(env(safe-area-inset-top,0px) + 30px) var(--gut) 8px;max-width:920px;margin-inline:auto}
+.eyebrow{font:500 11.5px var(--mono);letter-spacing:.18em;text-transform:uppercase;color:var(--hands);margin-bottom:12px}
+h1{font:800 clamp(2rem,8vw,3.6rem)/1.1 var(--display);letter-spacing:-.04em}
+h1 em{font-style:normal;color:var(--hands)}
+header p{color:var(--mute);margin-top:12px;max-width:52ch}
+main{max-width:920px;margin-inline:auto;padding:14px var(--gut) 0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:18px}
+h2{font:800 20px var(--display);letter-spacing:-.02em;margin-bottom:12px}
+/* 比例條 */
+.prop .bar{display:flex;height:16px;border-radius:99px;overflow:hidden;gap:2px;background:#0a0c10}
+.prop .bar i{display:block;transition:flex .6s}
+.leg{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px 14px;margin-top:14px}
+.leg div{display:flex;gap:10px;align-items:center;font-size:13.5px}.leg i{width:12px;height:12px;border-radius:4px;flex:none}
+.leg b{font:500 13px var(--mono);margin-left:auto;color:var(--mute)}
+.leg small{display:block;color:var(--mute);font-size:11.5px;line-height:1.4}
+.note{font-size:12.5px;color:var(--mute);margin-top:12px}
+/* 工具列 */
+.tools{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0 12px}
+.chip{min-height:42px;padding:0 16px;border-radius:99px;border:1px solid var(--line);background:var(--card);font:500 13.5px var(--sans);transition:.2s}
+.chip[aria-pressed=true]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+/* 時間軸 */
+.tl{display:grid;gap:10px}
+.blk{--c:var(--hands);border:1px solid var(--line);border-left:4px solid var(--c);border-radius:16px;background:var(--card)}
+.blk[hidden]{display:none}
+.blk.warm{--c:var(--warm)}.blk.concept{--c:var(--concept)}.blk.hands{--c:var(--hands)}.blk.wrap{--c:var(--wrap)}.blk.rest{--c:var(--rest);background:transparent;border-style:dashed}
+.blk summary{list-style:none;cursor:pointer;display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;padding:14px 16px;min-height:62px}
+.blk summary::-webkit-details-marker{display:none}
+.tm{font:500 13px var(--mono);color:var(--c);text-align:center;line-height:1.3}.tm small{display:block;color:var(--mute);font-size:11px}
+.blk h3{font:700 16.5px/1.35 var(--sans)}.blk .tg{font:500 11px var(--mono);letter-spacing:.08em;color:var(--c);text-transform:uppercase}
+.blk summary::after{content:"+";font:400 22px/1 var(--mono);color:var(--mute);transition:transform .3s}.blk[open] summary::after{transform:rotate(45deg)}
+.bd{padding:0 16px 16px;display:grid;gap:14px;border-top:1px dashed var(--line);padding-top:14px;margin:0 16px 0;padding-inline:0}
+.bd h4{font:500 11px var(--mono);letter-spacing:.14em;color:var(--mute);text-transform:uppercase;margin-bottom:6px}
+.bd ul{list-style:none;display:grid;gap:7px;font-size:14.5px}.bd li{display:flex;gap:10px}.bd li::before{content:"";flex:none;width:6px;height:6px;border-radius:50%;background:var(--c);margin-top:.75em}
+.bd p{font-size:14.5px}
+.tipb{padding:12px 14px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid var(--line);font-size:13.5px;color:#cfd6e6}
+.tipb b{color:var(--c)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}@media(max-width:560px){.two{grid-template-columns:1fr}}
+.hist{display:grid;gap:8px;margin-top:2px}.hist div{display:grid;grid-template-columns:auto 1fr;gap:12px;font-size:14px;padding:8px 12px;background:rgba(255,255,255,.04);border-radius:10px}.hist b{font:500 13px var(--mono);color:var(--warm)}
+/* 其他卡片 */
+.sec{margin-top:18px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}@media(max-width:700px){.grid2{grid-template-columns:1fr}}
+.card ul{list-style:none;display:grid;gap:8px;font-size:14.5px}.card li{display:flex;gap:10px}.card li::before{content:"✓";color:var(--hands);font-weight:700}
+.card.no li::before{content:"！";color:var(--warm)}
+.toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 24px);transform:translate(-50%,30px);background:var(--ink);color:var(--bg);padding:12px 20px;border-radius:99px;font:500 13px var(--sans);opacity:0;pointer-events:none;transition:.4s;z-index:900}.toast.on{opacity:1;transform:translate(-50%,0)}
+.btn{min-height:46px;padding:0 18px;border-radius:12px;background:var(--hands);color:#04211c;font:700 14px var(--sans)}
+:focus-visible{outline:2px solid var(--hands);outline-offset:2px}
+</style>
+</head>
+<body>
+<header>
+  <div class="eyebrow">Syllabus · 備課用</div>
+  <h1>5 小時課綱：<em>用 AI 做出你的第一個店家官網</em></h1>
+  <p>總長 300 分鐘，含兩次休息。開頭保留「輕鬆暖身」，但每一段都有實際用途，不是純拖時間。點每個時段可展開講解重點、學員動作與講師提醒。</p>
+</header>
+<main>
+  <section class="card prop sec" style="margin-top:6px">
+    <h2>時間分配</h2>
+    <div class="bar" id="bar" role="img" aria-label="時間比例條"></div>
+    <div class="leg" id="leg"></div>
+    <p class="note">實作與練習約佔一半；輕鬆暖身控制在 15% 左右，既能讓人進入狀態，也不會稀釋課程價值。</p>
+  </section>
+
+  <div class="tools"><button class="chip" id="all" aria-pressed="false">全部展開</button><button class="chip" id="onlyHands" aria-pressed="false">只看實作</button></div>
+  <div class="tl" id="tl"></div>
+
+  <section class="sec grid2">
+    <div class="card"><h2>怎麼把「輕鬆暖身」做得有價值</h2><ul>
+      <li>把它當成<b>進場緩衝</b>：讓遲到的人上線，同時檢查電腦、網路與帳號。</li>
+      <li>用<b>故事和互動</b>代替年代表：每個歷史轉折一句話加一個生活例子，最後用搶答收尾。</li>
+      <li>每段都連到後面的內容：講 AI 小史是為了後面理解「為什麼它會亂說」。</li>
+      <li><b>上限 45 分鐘</b>：超過就會稀釋課程，學員也會覺得被拖時間。</li></ul></div>
+    <div class="card no"><h2>備課清單</h2><ul>
+      <li>示範成品頁（開場展示用）</li><li>個人指令範本與一頁講義</li><li>環境確認清單（電腦、瀏覽器、帳號）</li>
+      <li>「常見卡點」速查表（不會存檔、打不開、內容被截斷）</li><li>上線步驟的圖文教學，並預先自己跑過一次</li>
+      <li>展示用的順序表、問卷（含「最卡的地方」）</li><li>完整彩排並計時，抓出哪段會超時</li></ul></div>
+  </section>
+
+  <section class="card sec"><h2>如果想拆成兩場</h2>
+    <p>5 小時一次上完對學員體力負擔大。建議在「實作一」前拆開：</p>
+    <div class="two" style="margin-top:12px"><div class="tipb"><b>第一場（約 2 小時 5 分）</b><br>開場暖身 → AI 小史 → AI 怎麼運作 → 休息 → 好指令的寫法。回家作業：用指令範本準備自己的網站題材。</div>
+    <div class="tipb"><b>第二場（約 2 小時 55 分）</b><br>實作一 → 休息 → 實作二 → 上線 → 展示與下一步。</div></div></section>
+
+  <section class="card sec"><h2>歷史節點的查證提醒</h2><p>課綱裡提到的年份與事件（圖靈 1950、達特茅斯會議 1956、深度學習突破 2012、Transformer 2017、ChatGPT 2022）是常被引用的節點，講課前請再自行查證確認，並依你的敘述方式調整措辭。</p></section>
+  <p class="note" style="text-align:center;margin-top:20px">這份課綱是通用版本，請依你實際使用的工具與流程調整。</p>
+</main>
+<div class="toast" id="toast" role="status"></div>
+<script>
+const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
+const TYPES={warm:['輕鬆暖身','進場、破冰、歷史故事'],concept:['觀念講解','只講用得到的'],hands:['實作','學員動手做'],wrap:['收尾','展示與下一步'],rest:['休息','']};
+const B=[
+ {s:0,m:20,k:'warm',t:'開場暖身',goal:'讓大家進入狀態，知道今天會帶走什麼。',pts:['進場緩衝：前 5 分鐘讓遲到的人上線，同時請大家確認電腦、網路與帳號','自我介紹與破冰：每人一句「我想做什麼網站」，這也是之後實作的題材','先看成品：用 3 分鐘示範「一句指令長出一個網頁」','說明規則：全程動手、隨時提問、休息時間'],act:'在聊天室打出自己想做的網站題材。',out:'每位學員的題材清單。',tip:'這段看起來輕鬆，但同時完成了環境檢查與選題，不是拖時間。'},
+ {s:20,m:25,k:'warm',t:'AI 小史：它是怎麼走到今天',goal:'用故事建立背景，為後面「為什麼 AI 會亂說」鋪路。',hist:[['1950','圖靈提出「機器能思考嗎」的問題，後來稱為圖靈測驗'],['1956','達特茅斯會議，「人工智慧」一詞開始被使用'],['2012','深度學習在影像辨識上大幅突破'],['2017','Transformer 架構出現，是現在大型語言模型的基礎'],['2022','ChatGPT 讓一般人第一次能直接和 AI 對話']],pts:['每個轉折一句話，加一個生活例子','重點不是背年代，而是「它一路從規則走到學習」','結尾用 5 題「AI 做得到嗎？」搶答收尾，帶出能力邊界'],act:'參與搶答，說出自己覺得 AI 做得到或做不到的事。',out:'對 AI 能力邊界的初步感覺。',tip:'控制在 25 分鐘內，講故事不講年代表。年份請上課前再查證。'},
+ {s:45,m:30,k:'concept',t:'AI 怎麼運作（夠用就好）',goal:'理解它的限制，之後才知道怎麼用得安全。',pts:['它在做的事：預測下一個字，不是「查資料庫」','為什麼會一本正經說錯：幻覺','它的「記憶」：對話有長度限制，太長會忘','同一個問題，每次答案可能不同'],act:'同一個指令連問三次比較差異；問一個冷門事實，觀察它是否亂編。',out:'「哪些事不能直接相信 AI」清單，至少 3 條。',tip:'實驗比講解有效。讓學員自己抓到幻覺，印象最深。'},
+ {s:75,m:10,k:'rest',t:'休息 10 分鐘'},
+ {s:85,m:40,k:'concept',t:'好指令的寫法',goal:'整堂課最值錢的一段，之後所有實作都靠它。',pts:['公式：角色、對象、目標、限制、格式、範例','對照示範：爛指令 vs 好指令（用髮廊官網）','迭代：不滿意就追問，不要整個重來','請 AI 反問你：讓它先問問題再動手'],act:'把 3 個爛指令改寫成好指令，與鄰座交換看結果。',out:'個人指令範本 v1，之後可以重複使用。',tip:'寧可壓縮開場，也不要壓縮這一段。'},
+ {s:125,m:60,k:'hands',t:'實作一：做出第一版網站',goal:'每個人做出自己的第一版頁面。',pts:['請 AI 先「訪談」你：店名、客人、服務、風格','產出網站架構與文案，確認後再生成','生成第一版頁面（單一 HTML 檔）','用瀏覽器打開，再用手機看一次'],act:'每人用自己的題材做出第一版。',out:'一個能打開的網頁檔。',tip:'巡場時預備好 3 個常見卡點的標準解法：不會存檔、打不開、內容太長被截斷。'},
+ {s:185,m:10,k:'rest',t:'休息 10 分鐘'},
+ {s:195,m:50,k:'hands',t:'實作二：修改與微調',goal:'把第一版修到接近可以上線。',pts:['改顏色、字體與版面','檢查手機版，修正跑版','加上預約區塊與聯絡資訊','出錯時：把錯誤訊息貼給 AI 請它修'],act:'依清單逐項微調並存檔。',out:'接近可上線的第二版。',tip:'準備「修改指令速查表」，學員卡住時可以直接套用。'},
+ {s:245,m:30,k:'hands',t:'上線：拿到可分享的網址',goal:'每個人都有一個公開的網址。',pts:['免費放到網路上的做法（例如 GitHub Pages、Netlify 等）','拿到網址，用手機打開確認','基本檢查：連結、文字、聯絡方式是否正確'],act:'每人完成上線並把網址傳到聊天室。',out:'一個公開的網址。',tip:'上線最容易卡在帳號與設定。先準備圖文步驟，並預留機動時間。'},
+ {s:275,m:25,k:'wrap',t:'展示、注意事項與下一步',goal:'收成果、提醒風險、接到下一步。',pts:['輪流展示，每人 1 分鐘','常見的坑：圖片與文字的版權、個人資料、不實宣傳、AI 輸出必須人工審核','如何把作品放進作品集、拿去談客人','下一步課程預告與問卷'],act:'展示作品、填問卷。',out:'問卷與意願表。',tip:'問卷一定要問「最卡的地方」，這是改課程最直接的依據。'}
+];
+const f=m=>`${Math.floor(m/60)}:${String(m%60).padStart(2,'0')}`;
+const tot={};B.forEach(b=>tot[b.k]=(tot[b.k]||0)+b.m);
+$('#bar').innerHTML=Object.keys(TYPES).map(k=>`<i style="flex:${tot[k]||0};background:var(--${k})"></i>`).join('');
+$('#leg').innerHTML=Object.entries(TYPES).map(([k,[n,d]])=>`<div><i style="background:var(--${k})"></i><span>${n}${d?`<small>${d}</small>`:''}</span><b>${tot[k]||0} 分・${Math.round((tot[k]||0)/3)}%</b></div>`).join('');
+$('#tl').innerHTML=B.map((b,i)=>{
+  if(b.k==='rest')return `<details class="blk rest" data-k="rest"><summary style="cursor:default;pointer-events:none"><div class="tm">${f(b.s)}<small>${b.m} 分</small></div><div><div class="tg">休息</div><h3>${b.t}</h3></div><span></span></summary></details>`;
+  return `<details class="blk ${b.k}" data-k="${b.k}"><summary><div class="tm">${f(b.s)}<small>${b.m} 分</small></div><div><div class="tg">${TYPES[b.k][0]}</div><h3>${b.t}</h3></div></summary>
+  <div class="bd"><div><h4>目標</h4><p>${b.goal}</p></div>${b.hist?`<div><h4>歷史節點</h4><div class="hist">${b.hist.map(h=>`<div><b>${h[0]}</b><span>${h[1]}</span></div>`).join('')}</div></div>`:''}
+  <div><h4>講解重點</h4><ul>${b.pts.map(p=>`<li>${p}</li>`).join('')}</ul></div>
+  <div class="two"><div><h4>學員動作</h4><p>${b.act}</p></div><div><h4>交付物</h4><p>${b.out}</p></div></div>
+  <div class="tipb"><b>講師提醒　</b>${b.tip}</div></div></details>`}).join('');
+$('#all').onclick=e=>{const on=e.currentTarget.getAttribute('aria-pressed')!=='true';e.currentTarget.setAttribute('aria-pressed',on);e.currentTarget.textContent=on?'全部收合':'全部展開';$$('.blk:not(.rest)').forEach(d=>d.open=on)};
+$('#onlyHands').onclick=e=>{const on=e.currentTarget.getAttribute('aria-pressed')!=='true';e.currentTarget.setAttribute('aria-pressed',on);$$('.blk').forEach(d=>d.hidden=on&&d.dataset.k!=='hands')};
+</script>
+</body>
+</html>

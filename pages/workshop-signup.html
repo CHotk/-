@@ -1,0 +1,355 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b0d12">
+<title>AI 官網工作坊報名</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+TC:wght@300;400;500;700;900&display=swap">
+<style>
+/* 版面：手機優先的單欄報名頁。首屏用「輸入指令，網頁長出來」的小動畫示範課程成果，往下依序是帶走什麼、好壞指令對照、兩小時流程、適合對象、講師、報名表、常見問題。深色底搭薄荷綠 */
+:root{
+  --bg:#0b0d12; --card:#141822; --card2:#1a1f2c; --ink:#eaeef6; --mute:#8d96ab; --line:rgba(255,255,255,.1);
+  --mint:#5eead4; --mint2:#2bc4ae; --vio:#a78bfa; --warn:#ffcf5a; --bad:#ff7b72;
+  --display:'Bricolage Grotesque','Noto Sans TC',sans-serif; --sans:'Noto Sans TC',system-ui,sans-serif; --mono:'JetBrains Mono',ui-monospace,monospace;
+  --gut:clamp(18px,5vw,56px);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{color-scheme:dark;scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font:400 15.5px/1.8 var(--sans);overflow-x:hidden;-webkit-text-size-adjust:100%;padding-bottom:calc(env(safe-area-inset-bottom,0px) + 86px)}
+button,input,select,textarea{font:inherit;color:inherit}button{border:0;background:none;cursor:pointer;touch-action:manipulation}
+section{padding:clamp(56px,10vh,110px) var(--gut)}
+.in{max-width:1040px;margin-inline:auto}
+.eyebrow{font:500 11.5px var(--mono);letter-spacing:.18em;text-transform:uppercase;color:var(--mint);display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.eyebrow::before{content:"";width:22px;height:2px;background:currentColor}
+h2{font:800 clamp(1.8rem,6.4vw,3.2rem)/1.14 var(--display);letter-spacing:-.03em;text-wrap:balance}
+h2 em{font-style:normal;color:var(--mint)}
+.lead{color:var(--mute);max-width:46ch;margin-top:12px}
+.btn{position:relative;display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:54px;padding:0 28px;border-radius:14px;background:var(--mint);color:#04211c;font:700 16px var(--sans);transition:transform .2s,filter .2s;overflow:hidden}
+.btn:hover{filter:brightness(1.08)}.btn:active{transform:scale(.97)}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.ink{position:absolute;border-radius:50%;background:rgba(255,255,255,.45);transform:scale(0);animation:ink .6s ease-out forwards;pointer-events:none}@keyframes ink{to{transform:scale(1);opacity:0}}
+
+/* 範本提醒（上線前請修改，改完會自動消失） */
+.todo{position:sticky;top:0;z-index:300;background:#2a2410;color:#ffe9a8;font:500 12.5px/1.6 var(--sans);padding:8px var(--gut);display:flex;gap:10px;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,207,90,.4)}
+.todo button{flex:none;min-height:34px;padding:0 12px;border:1px solid rgba(255,207,90,.5);border-radius:99px;color:#ffe9a8}
+
+/* Hero */
+.hero{position:relative;padding-top:clamp(36px,7vh,80px);overflow:hidden}
+.hero::before{content:"";position:absolute;left:50%;top:-10%;width:min(120vw,900px);aspect-ratio:1;transform:translateX(-50%);background:radial-gradient(circle,rgba(94,234,212,.18),transparent 62%);pointer-events:none}
+.hero-g{position:relative;display:grid;grid-template-columns:1.05fr .95fr;gap:clamp(28px,5vw,64px);align-items:center}
+@media(max-width:860px){.hero-g{grid-template-columns:1fr}}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+.chips span{font:500 12px var(--mono);padding:5px 12px;border-radius:99px;border:1px solid var(--line);background:rgba(255,255,255,.04);color:#c3cbdd}
+.hero h1{font:800 clamp(2.5rem,10.5vw,4.9rem)/1.04 var(--display);letter-spacing:-.045em}
+.hero h1 em{font-style:normal;background:linear-gradient(100deg,var(--mint),var(--vio));-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero p.sub{color:#b9c2d6;margin-top:16px;max-width:36ch;font-size:16.5px}
+.cta{display:flex;gap:10px;flex-wrap:wrap;margin-top:24px}
+.fact{display:flex;gap:18px;flex-wrap:wrap;margin-top:24px;font:400 13px var(--mono);color:var(--mute)}.fact b{color:var(--ink);font-weight:500}
+.ref{display:none;margin-bottom:14px;font:500 12.5px var(--sans);color:var(--mint);background:rgba(94,234,212,.1);border:1px solid rgba(94,234,212,.3);border-radius:10px;padding:7px 12px;width:fit-content}.ref.on{display:block}
+/* 動畫示範 */
+.mock{border-radius:18px;background:var(--card);border:1px solid var(--line);box-shadow:0 30px 70px -30px rgba(94,234,212,.35);overflow:hidden}
+.mock .bar{display:flex;align-items:center;gap:6px;padding:10px 14px;border-bottom:1px solid var(--line);background:var(--card2)}
+.mock .bar i{width:9px;height:9px;border-radius:50%;background:#394055}.mock .bar span{margin-left:8px;font:400 11px var(--mono);color:var(--mute)}
+.mock .scr{padding:14px;display:grid;gap:12px;min-height:380px}
+.prm{font:400 13px/1.7 var(--mono);color:#cfe;background:#0d1119;border:1px solid var(--line);border-radius:10px;padding:10px 12px;min-height:76px}
+.prm::after{content:"▍";color:var(--mint);animation:bl 1s steps(2) infinite}@keyframes bl{50%{opacity:0}}
+.site{border-radius:12px;overflow:hidden;background:#fff;color:#1d1d1f;display:grid;gap:0;min-height:230px}
+.site>*{opacity:0;transform:translateY(12px);transition:opacity .6s,transform .6s cubic-bezier(.2,.8,.1,1)}
+.site>.on{opacity:1;transform:none}
+.s-nav{display:flex;justify-content:space-between;align-items:center;padding:9px 14px;font:700 12px var(--sans)}.s-nav i{width:34px;height:8px;border-radius:9px;background:#ddd;display:inline-block;margin-left:6px}
+.s-hero{padding:22px 14px;background:linear-gradient(120deg,#ffb4a2,#b8c0ff);font:800 18px/1.25 var(--display);letter-spacing:-.02em}.s-hero small{display:block;font:500 11px var(--sans);margin-top:4px;opacity:.75}
+.s-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:12px 14px}.s-row div{height:46px;border-radius:8px;background:#f0f0f4}
+.s-btn{margin:2px 14px 14px;height:34px;border-radius:99px;background:#1d1d1f;color:#fff;display:grid;place-items:center;font:700 12px var(--sans)}
+
+/* 帶走什麼 */
+.take{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:30px}
+@media(max-width:760px){.take{grid-template-columns:1fr}}
+.take>div{padding:22px;border-radius:20px;background:var(--card);border:1px solid var(--line);display:grid;gap:8px;align-content:start}
+.take .ic{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;background:rgba(94,234,212,.12);color:var(--mint);font:500 18px var(--mono)}
+.take h3{font:700 18px var(--sans)}.take p{color:var(--mute);font-size:14.5px}
+
+/* 好壞指令 */
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:26px;align-items:start}
+@media(max-width:760px){.cmp{grid-template-columns:1fr}}
+.seg{display:flex;padding:3px;border-radius:14px;background:var(--card2);border:1px solid var(--line);margin-top:22px;width:fit-content;max-width:100%}
+.seg button{min-height:44px;padding:0 20px;border-radius:11px;font:700 14px var(--sans);color:var(--mute);transition:.2s}
+.seg button[aria-pressed=true]{background:#2b3550;color:var(--ink)}
+.box{padding:16px;border-radius:16px;background:var(--card);border:1px solid var(--line);display:grid;gap:10px}
+.box h4{font:500 11px var(--mono);letter-spacing:.14em;color:var(--mute);text-transform:uppercase}
+.box .t{font:400 14px/1.8 var(--mono);color:#d7e6e1;min-height:96px}
+.box .res{border-radius:12px;overflow:hidden;background:#fff;color:#1d1d1f;min-height:200px}
+.res.bad{padding:16px;font:400 13px/1.6 'Times New Roman',serif}.res.bad h5{font-size:20px;font-weight:700;margin-bottom:8px}.res.bad p{margin-bottom:8px}.res.bad a{color:#00e;text-decoration:underline}
+.verdict{display:flex;gap:8px;align-items:center;font:500 13px var(--sans)}.verdict b{font-weight:700}
+.verdict.bad b{color:var(--bad)}.verdict.good b{color:var(--mint)}
+
+/* 流程 */
+.tl{margin-top:28px;display:grid;gap:0;border-left:2px solid var(--line);margin-left:6px}
+.tl>div{position:relative;padding:0 0 26px 22px}
+.tl>div::before{content:"";position:absolute;left:-8px;top:6px;width:14px;height:14px;border-radius:50%;background:var(--bg);border:3px solid var(--mint)}
+.tl time{font:500 12px var(--mono);color:var(--mint)}.tl h3{font:700 17px var(--sans)}.tl p{color:var(--mute);font-size:14.5px}
+/* 對象 */
+.who{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:26px}
+@media(max-width:700px){.who{grid-template-columns:1fr}}
+.who>div{padding:20px;border-radius:18px;background:var(--card);border:1px solid var(--line)}
+.who h3{font:700 16px var(--sans);margin-bottom:10px}.who ul{list-style:none;display:grid;gap:8px;font-size:14.5px;color:#c3cbdd}
+.who li{display:flex;gap:10px}.who li::before{content:"✓";color:var(--mint);font-weight:700}.who .no li::before{content:"✕";color:var(--bad)}
+/* 講師 */
+.ins{display:flex;gap:18px;align-items:center;margin-top:24px;padding:20px;border-radius:20px;background:var(--card);border:1px solid var(--line);flex-wrap:wrap}
+.ins .av{width:76px;height:76px;border-radius:50%;background:linear-gradient(140deg,var(--mint),var(--vio));display:grid;place-items:center;font:800 28px var(--display);color:#06201b;flex:none}
+.ins h3{font:700 18px var(--sans)}.ins p{color:var(--mute);font-size:14.5px;max-width:52ch}
+
+/* 報名 */
+.sign{display:grid;grid-template-columns:1fr 1fr;gap:clamp(16px,4vw,48px);margin-top:28px;align-items:start}
+@media(max-width:860px){.sign{grid-template-columns:1fr}}
+.price{padding:24px;border-radius:22px;background:linear-gradient(160deg,#16322e,#141822);border:1px solid rgba(94,234,212,.35);display:grid;gap:10px;position:sticky;top:20px}
+@media(max-width:860px){.price{position:static}}
+.price .p{font:800 clamp(2.4rem,9vw,3.4rem)/1 var(--display);letter-spacing:-.05em}.price .p small{font:500 13px var(--mono);color:var(--mute);letter-spacing:0;margin-left:6px}
+.price ul{list-style:none;display:grid;gap:8px;font-size:14.5px}.price li{display:flex;gap:10px}.price li::before{content:"✓";color:var(--mint);font-weight:700}
+.cd{font:500 14px var(--mono);color:var(--warn)}.cd[hidden]{display:none}
+form{display:grid;gap:16px}
+.f{display:grid;gap:6px}.f>label,.f>span.l{font:500 13px var(--sans);color:#c3cbdd}
+input[type=text],textarea{width:100%;min-height:50px;padding:11px 14px;border:1px solid var(--line);border-radius:12px;background:var(--card2);font-size:16px;outline:0}
+textarea{min-height:90px;resize:vertical;line-height:1.7}
+input:focus,textarea:focus{border-color:var(--mint);box-shadow:0 0 0 3px rgba(94,234,212,.18)}
+.opts{display:flex;gap:8px;flex-wrap:wrap}.opts button{min-height:46px;padding:0 16px;border-radius:12px;border:1px solid var(--line);background:var(--card2);font:500 14px var(--sans);transition:.2s}
+.opts button[aria-pressed=true]{border-color:var(--mint);background:rgba(94,234,212,.14);color:var(--mint)}
+.agree{display:flex;gap:12px;align-items:flex-start;font-size:13.5px;color:#c3cbdd;min-height:44px}.agree input{width:22px;height:22px;accent-color:var(--mint);flex:none;margin-top:2px}
+.err{color:var(--bad);font-size:13px;min-height:1.4em}
+.done{padding:20px;border-radius:18px;background:var(--card);border:1px solid rgba(94,234,212,.4);display:grid;gap:12px}.done[hidden]{display:none}
+.done h3{font:800 20px var(--display)}.done textarea{min-height:170px;font-size:14px}
+/* FAQ */
+.faq{margin-top:24px;display:grid;gap:8px}
+.faq details{border:1px solid var(--line);border-radius:14px;background:var(--card)}
+.faq summary{list-style:none;cursor:pointer;padding:15px 18px;min-height:52px;display:flex;justify-content:space-between;align-items:center;gap:12px;font:700 15px var(--sans)}
+.faq summary::-webkit-details-marker{display:none}.faq summary::after{content:"+";font:400 22px/1 var(--mono);color:var(--mute);transition:transform .3s}.faq details[open] summary::after{transform:rotate(45deg)}
+.faq p{padding:0 18px 16px;color:#b9c2d6;font-size:14.5px}
+footer{padding:30px var(--gut) 10px;color:var(--mute);font:400 12px/1.8 var(--sans);text-align:center;border-top:1px solid var(--line)}
+/* 底部報名列 */
+.bar2{position:fixed;z-index:200;left:0;right:0;bottom:0;padding:10px var(--gut) calc(env(safe-area-inset-bottom,0px) + 10px);background:rgba(11,13,18,.88);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:12px;transform:translateY(110%);transition:transform .5s cubic-bezier(.2,.8,.1,1)}
+.bar2.on{transform:none}.bar2 div{font:500 12px/1.4 var(--mono);color:var(--mute)}.bar2 b{display:block;font:800 18px var(--display);color:var(--ink);letter-spacing:-.03em}
+.bar2 .btn{min-height:48px;padding:0 24px}
+.toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 96px);transform:translate(-50%,30px);background:var(--ink);color:var(--bg);padding:12px 20px;border-radius:99px;font:500 13px var(--sans);opacity:0;pointer-events:none;transition:.4s cubic-bezier(.2,.8,.1,1);z-index:900;white-space:nowrap}.toast.on{opacity:1;transform:translate(-50%,0)}
+.rv{opacity:1;transform:none}.js .rv.pre{opacity:0;transform:translateY(34px);transition:opacity .9s,transform .9s cubic-bezier(.2,.8,.1,1)}.js .rv.pre.in{opacity:1;transform:none}
+:focus-visible{outline:2px solid var(--mint);outline-offset:3px}
+@media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+</style>
+</head>
+<body>
+<div class="todo" id="todo" hidden><span id="todoTxt"></span><button id="todoX" type="button">知道了</button></div>
+
+<section class="hero" id="top">
+  <div class="in hero-g">
+    <div>
+      <div class="ref" id="ref"></div>
+      <div class="chips"><span id="cMode"></span><span id="cLen"></span><span id="cSeats"></span></div>
+      <h1>五小時，用 AI 做出<em>你店的第一個官網</em></h1>
+      <p class="sub">不用會寫程式。跟著做，結束時你會有一個能在手機上打開、能分享的網站。</p>
+      <div class="cta"><a class="btn" href="#signup" data-ink>我要報名</a><a class="btn ghost" href="#flow">看課程流程</a></div>
+      <div class="fact"><span><b id="fDate"></b></span><span id="fPrice"></span></div>
+    </div>
+    <div class="mock" aria-label="示範：輸入一句指令，網頁自動長出來">
+      <div class="bar"><i></i><i></i><i></i><span>你的店.com</span></div>
+      <div class="scr"><div class="prm" id="prm"></div>
+        <div class="site" id="site">
+          <div class="s-nav"><span>● 小店名稱</span><span><i></i><i></i><i></i></span></div>
+          <div class="s-hero">剪出適合你的樣子<small>預約制髮廊 · 台北</small></div>
+          <div class="s-row"><div></div><div></div><div></div></div>
+          <div class="s-btn">立即預約</div>
+        </div></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="in">
+    <div class="eyebrow rv pre">你會帶走</div>
+    <h2 class="rv pre">結束時，<em>手上有東西</em></h2>
+    <div class="take">
+      <div class="rv pre"><div class="ic">01</div><h3>一個自己的網站</h3><p>以你的店或你的想法為題，從零做出第一版，手機和電腦都能看。</p></div>
+      <div class="rv pre"><div class="ic">02</div><h3>一份指令範本</h3><p>我平常對 AI 下指令的寫法，整理成可以複製、改一改就能用的範本。</p></div>
+      <div class="rv pre"><div class="ic">03</div><h3>一個可分享的網址</h3><p>當場上線，拿到連結，可以直接傳給朋友或客人看。</p></div>
+    </div>
+  </div>
+</section>
+
+<section style="padding-top:0">
+  <div class="in">
+    <div class="eyebrow rv pre">為什麼指令很重要</div>
+    <h2 class="rv pre">同一個 AI，<em>差在你怎麼說</em></h2>
+    <p class="lead rv pre">切換看看。這就是課程第二段會教你的事。</p>
+    <div class="seg" id="seg" role="group" aria-label="指令對照"><button data-k="bad" aria-pressed="true">爛指令</button><button data-k="good" aria-pressed="false">好指令</button></div>
+    <div class="cmp">
+      <div class="box"><h4>你輸入的</h4><div class="t" id="cmpT"></div><div class="verdict" id="cmpV"></div></div>
+      <div class="box"><h4>AI 做出來的</h4><div class="res" id="cmpR"></div></div>
+    </div>
+  </div>
+</section>
+
+<section id="flow" style="padding-top:0">
+  <div class="in">
+    <div class="eyebrow rv pre">課程流程 ・ 含兩次休息</div>
+    <h2 class="rv pre">五小時，<em>一步步做出來</em></h2>
+    <div class="tl">
+      <div class="rv pre"><time>0:00 – 0:20</time><h3>開場暖身</h3><p>上線、破冰、先看成品，同時確認你的環境都沒問題。</p></div>
+      <div class="rv pre"><time>0:20 – 0:45</time><h3>AI 小史</h3><p>用故事了解 AI 怎麼走到今天，以及它的能力邊界。</p></div>
+      <div class="rv pre"><time>0:45 – 1:15</time><h3>AI 怎麼運作</h3><p>只講用得到的，並親手測出它會亂說的地方。</p></div>
+      <div class="rv pre"><time>1:25 – 2:05</time><h3>好指令的寫法</h3><p>整堂課最重要的一段，做出你的個人指令範本。</p></div>
+      <div class="rv pre"><time>2:05 – 3:05</time><h3>實作一：做出第一版</h3><p>描述你的店，請 AI 產出第一版頁面。每個人做自己的。</p></div>
+      <div class="rv pre"><time>3:15 – 4:05</time><h3>實作二：修改與微調</h3><p>改顏色、文案、確認手機版，加上預約區塊。</p></div>
+      <div class="rv pre"><time>4:05 – 4:35</time><h3>上線，拿到網址</h3><p>放到網路上，用手機打開，傳給朋友看。</p></div>
+      <div class="rv pre"><time>4:35 – 5:00</time><h3>展示與下一步</h3><p>輪流展示作品，提醒常見的坑，並回答問題。</p></div>
+    </div>
+  </div>
+</section>
+
+<section style="padding-top:0">
+  <div class="in">
+    <div class="eyebrow rv pre">適合誰</div>
+    <h2 class="rv pre">先確認<em>這堂課適不適合你</em></h2>
+    <div class="who">
+      <div class="rv pre"><h3>適合</h3><ul><li>想幫自己的店或服務做官網，但不會寫程式</li><li>用過 ChatGPT 之類的工具，但不知道怎麼做出成品</li><li>想學一套之後能重複使用的做法</li></ul></div>
+      <div class="no rv pre"><h3>不適合</h3><ul><li>想要「學完就保證賺錢」的人，本課程不做這種承諾</li><li>想學深入的程式設計與框架</li><li>完全不打算動手、只想看人示範</li></ul></div>
+    </div>
+  </div>
+</section>
+
+<section style="padding-top:0">
+  <div class="in">
+    <div class="eyebrow rv pre">講師</div>
+    <div class="ins rv pre"><div class="av" id="insAv"></div><div><h3 id="insName"></h3><p id="insBio"></p></div></div>
+  </div>
+</section>
+
+<section id="signup" style="padding-top:0">
+  <div class="in">
+    <div class="eyebrow rv pre">報名</div>
+    <h2 class="rv pre">留下資料，<em>保留你的名額</em></h2>
+    <div class="sign">
+      <div class="price rv pre"><div class="cd" id="cd" hidden></div><div class="p" id="pPrice"></div>
+        <ul><li id="pLen"></li><li>完整指令範本與講義</li><li>當場上線，拿到可分享的網址</li><li id="pRefund"></li></ul></div>
+      <div class="rv pre">
+        <form id="form" onsubmit="return false" novalidate>
+          <div class="f"><label for="nm">稱呼</label><input type="text" id="nm" autocomplete="name" placeholder="怎麼稱呼你"></div>
+          <div class="f"><label for="ct">聯絡方式（LINE ID 或信箱）</label><input type="text" id="ct" autocomplete="email" placeholder="方便我們聯絡你"></div>
+          <div class="f"><span class="l">你目前的 AI 使用程度</span><div class="opts" id="lv"></div></div>
+          <div class="f"><label for="idea">想做什麼網站？（選填）</label><textarea id="idea" placeholder="例如：我開一間美甲工作室，想做一個可以預約的官網"></textarea></div>
+          <label class="agree"><input type="checkbox" id="ag"><span id="agTxt"></span></label>
+          <div class="err" id="err" role="alert"></div>
+          <button class="btn" id="go" type="button" data-ink>送出報名</button>
+        </form>
+        <div class="done" id="done" hidden><h3>差一步就完成了</h3><p id="doneP"></p><textarea id="msg" readonly aria-label="報名訊息"></textarea>
+          <button class="btn" id="copy" type="button" data-ink>複製報名訊息</button><a class="btn ghost" id="fu" target="_blank" rel="noopener" hidden>前往報名表單</a></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section style="padding-top:0">
+  <div class="in">
+    <div class="eyebrow rv pre">常見問題</div>
+    <h2 class="rv pre">還有疑問？</h2>
+    <div class="faq rv pre">
+      <details><summary>完全不會寫程式也可以嗎？</summary><p>可以。這堂課用 AI 幫你產出網頁，你要做的是把想法描述清楚，以及判斷結果好不好。</p></details>
+      <details><summary>需要準備什麼？</summary><p>一台可以上網的電腦（手機也能參與但電腦較方便），以及想做的網站題材。報名後會寄給你準備清單。</p></details>
+      <details><summary>會有錄影嗎？</summary><p id="faqRec"></p></details>
+      <details><summary>可以退費嗎？</summary><p id="faqRef"></p></details>
+      <details><summary>學完會賺錢嗎？</summary><p>課程教的是做出網站的方法，不保證任何收入。能不能轉換成生意，取決於你的投入、服務與客人，我們不會做這種承諾。</p></details>
+    </div>
+  </div>
+</section>
+
+<footer>本課程內容與成果依個人投入而異，不保證任何收入或成效。<br>© <span id="ft"></span></footer>
+
+<div class="bar2" id="bar2"><div>限額報名<b id="bPrice"></b></div><a class="btn" href="#signup" data-ink>我要報名</a></div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+/* =====================================================
+   ★ 上線前，只要修改這一區 ★
+   填完之後，頁面頂端的「範本提醒」會自動消失
+   ===================================================== */
+const COURSE={
+  name:'用 AI 做出你的第一個店家官網',
+  brand:'你的名字或品牌',
+  dateText:'',            /* 例如：10/26（日）晚上 8:00 */
+  dateISO:'',             /* 例如：2026-10-26T20:00:00+08:00，填了會顯示倒數 */
+  length:'5 小時',
+  mode:'線上直播',
+  seats:10,
+  price:1200,             /* 單位：新台幣 */
+  priceIsPlaceholder:true,/* 確定價格後改成 false */
+  contact:'LINE @your-line-id',
+  contactIsPlaceholder:true, /* 填好聯絡方式後改成 false */
+  formUrl:'',             /* 若有 Google 表單，填網址；沒有就維持空白，會改為複製報名訊息 */
+  refund:'開課前 48 小時可全額退費',
+  refundIsPlaceholder:true,  /* 確認退費規則後改成 false */
+  recording:'會提供回放，報名者可在開課後 7 天內觀看（請依實際情況修改）。',
+  instructor:{name:'',bio:''}  /* 填入你的名字與簡介 */
+};
+/* ===================================================== */
+
+const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));const reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
+document.documentElement.classList.add('js');
+let tt;function toast(t){const e=$('#toast');e.textContent=t;e.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>e.classList.remove('on'),2200)}
+document.addEventListener('pointerdown',e=>{const b=e.target.closest('[data-ink]');if(!b)return;const r=b.getBoundingClientRect(),s=Math.max(r.width,r.height)*2.2,i=document.createElement('span');i.className='ink';i.style.cssText=`width:${s}px;height:${s}px;left:${e.clientX-r.left-s/2}px;top:${e.clientY-r.top-s/2}px`;b.appendChild(i);setTimeout(()=>i.remove(),650)});
+
+/* ---------- 帶入設定 ---------- */
+const C=COURSE,price='NT$'+C.price.toLocaleString();
+const dateLabel=C.dateText||'日期待公布';
+document.title=C.name+'報名';
+$('#cMode').textContent=C.mode;$('#cLen').textContent=C.length;$('#cSeats').textContent=`限 ${C.seats} 位`;
+$('#fDate').textContent=dateLabel;$('#fPrice').textContent=price+(C.priceIsPlaceholder?'（暫定）':'');
+$('#pPrice').innerHTML=`${price}<small>${C.priceIsPlaceholder?'暫定':'每人'}</small>`;$('#bPrice').textContent=price;
+$('#pLen').textContent=`${C.mode}，共 ${C.length}`;$('#pRefund').textContent=C.refund;$('#faqRef').textContent=C.refund+'。';$('#faqRec').textContent=C.recording;
+$('#agTxt').textContent=`我已閱讀課程說明與退費規則（${C.refund}）。`;
+$('#insName').textContent=C.instructor.name||'你的名字（請填入）';$('#insBio').textContent=C.instructor.bio||'在這裡寫下你的背景、做過的作品，以及為什麼想教這堂課。越具體越有說服力。';
+$('#insAv').textContent=(C.instructor.name||'你')[0];$('#ft').textContent=C.brand;
+/* 推薦來源 */
+const refRaw=new URLSearchParams(location.search).get('ref');const REF=refRaw?refRaw.slice(0,30):'';
+if(REF){$('#ref').textContent='來自「'+REF+'」的推薦';$('#ref').classList.add('on')}
+/* 範本提醒 */
+const miss=[];if(!C.dateText)miss.push('日期');if(C.priceIsPlaceholder)miss.push('價格');if(C.contactIsPlaceholder)miss.push('聯絡方式');if(C.refundIsPlaceholder)miss.push('退費規則');if(!C.instructor.name)miss.push('講師資料');
+if(miss.length){$('#todoTxt').textContent='範本頁：上線前請在程式最上方填入「'+miss.join('、')+'」。填完這則提醒會消失。';$('#todo').hidden=false}
+$('#todoX').onclick=()=>$('#todo').hidden=true;
+/* 倒數 */
+if(C.dateISO){const t=Date.parse(C.dateISO);if(!isNaN(t)){const cd=$('#cd');cd.hidden=false;const tick=()=>{let d=t-Date.now();if(d<=0){cd.textContent='已開課';return}const D=Math.floor(d/864e5),H=Math.floor(d%864e5/36e5),M=Math.floor(d%36e5/6e4),S=Math.floor(d%6e4/1e3);cd.textContent=`距離開課 ${D} 天 ${String(H).padStart(2,'0')}:${String(M).padStart(2,'0')}:${String(S).padStart(2,'0')}`};tick();setInterval(tick,1000)}}
+
+/* ---------- 首屏動畫 ---------- */
+(function(){const P='幫我的髮廊做一個官網，要有預約按鈕，手機也要好看。',prm=$('#prm'),blocks=$$('#site>*');
+  if(reduce){prm.textContent=P;blocks.forEach(b=>b.classList.add('on'));return}
+  let i=0;const sl=ms=>new Promise(r=>setTimeout(r,ms));
+  (async function loop(){while(true){prm.textContent='';blocks.forEach(b=>b.classList.remove('on'));await sl(500);
+    for(i=0;i<=P.length;i++){prm.textContent=P.slice(0,i);await sl(55)}await sl(500);
+    for(const b of blocks){b.classList.add('on');await sl(520)}await sl(3600)}})()})();
+
+/* ---------- 好壞指令 ---------- */
+const BAD={t:'做一個網站。',v:'<b>太籠統。</b>AI 不知道你是誰、要給誰看、要什麼風格，只能亂猜。',r:'<h5>歡迎來到我的網站</h5><p>這是一個網站。</p><p>這裡有一些內容。</p><p><a href="#" onclick="return false">點這裡</a></p>'};
+const GOOD={t:'幫我的髮廊做一個手機優先的官網。\n風格：簡約、柔和的粉色。\n內容：大標題、三項服務、預約按鈕。\n語氣：親切，不要太商業。',v:'<b>具體。</b>有對象、風格、內容與語氣，AI 就能一次做對八成。',r:'<div class="site" style="min-height:0"><div class="s-nav on"><span>● 月沐髮廊</span><span><i></i><i></i><i></i></span></div><div class="s-hero on">剪出適合你的樣子<small>預約制髮廊 · 台北</small></div><div class="s-row on"><div></div><div></div><div></div></div><div class="s-btn on">立即預約</div></div>'};
+function setCmp(k){const d=k==='bad'?BAD:GOOD;$('#cmpT').textContent=d.t;$('#cmpV').className='verdict '+k;$('#cmpV').innerHTML=d.v;const r=$('#cmpR');r.className='res'+(k==='bad'?' bad':'');r.innerHTML=d.r;
+  $$('#seg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.k===k))}
+$$('#seg button').forEach(b=>b.onclick=()=>setCmp(b.dataset.k));setCmp('bad');
+
+/* ---------- 報名 ---------- */
+const LV=['完全沒用過','用過 ChatGPT 之類','已經常常使用'];let lv=null;
+LV.forEach(l=>{const b=document.createElement('button');b.type='button';b.textContent=l;b.onclick=()=>{lv=lv===l?null:l;$$('#lv button').forEach(x=>x.setAttribute('aria-pressed',x.textContent===lv))};$('#lv').appendChild(b)});
+$('#go').onclick=()=>{
+  const nm=$('#nm').value.trim(),ct=$('#ct').value.trim(),err=$('#err');err.textContent='';
+  if(!nm){err.textContent='請填寫稱呼';$('#nm').focus();return}
+  if(!ct){err.textContent='請留下 LINE ID 或信箱，才能聯絡你';$('#ct').focus();return}
+  if(!$('#ag').checked){err.textContent='請先勾選已閱讀課程說明與退費規則';return}
+  const m=`你好，我想報名「${C.name}」（${dateLabel}）。\n稱呼：${nm}\n聯絡方式：${ct}\nAI 使用程度：${lv||'未填'}\n想做的網站：${$('#idea').value.trim()||'未填'}\n推薦來源：${REF||'無'}\n謝謝！`;
+  $('#msg').value=m;$('#form').hidden=true;$('#done').hidden=false;
+  $('#doneP').textContent=C.formUrl?'請先複製下面的訊息，再前往報名表單完成報名。':`請複製下面的訊息，傳給我（${C.contact}），確認收款後即完成報名。`;
+  if(C.formUrl){const a=$('#fu');a.href=C.formUrl;a.hidden=false}
+  $('#done').scrollIntoView({behavior:'smooth',block:'center'})};
+$('#copy').onclick=async()=>{const t=$('#msg');try{await navigator.clipboard.writeText(t.value);toast('已複製')}catch(e){t.removeAttribute('readonly');t.select();let ok=false;try{ok=document.execCommand('copy')}catch(x){}t.setAttribute('readonly','');toast(ok?'已複製':'請長按文字手動複製')}};
+
+/* ---------- 底部列與揭露 ---------- */
+const bar2=$('#bar2');addEventListener('scroll',()=>{const sg=$('#signup').getBoundingClientRect();bar2.classList.toggle('on',scrollY>innerHeight*.6&&sg.top>innerHeight*.5)},{passive:true});
+const rio=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');rio.unobserve(e.target)}}),{threshold:.1});
+$$('.rv').forEach(el=>{if(el.getBoundingClientRect().top>innerHeight)rio.observe(el);else el.classList.remove('pre')});
+</script>
+</body>
+</html>

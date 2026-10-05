@@ -65,6 +65,9 @@ main{padding:0 var(--gut) 90px;max-width:1280px;margin-inline:auto}
 
 .a9{background:linear-gradient(90deg,transparent 0 10%,rgba(110,160,255,.18) 10% 90%,transparent 90%),repeating-linear-gradient(180deg,rgba(255,255,255,.07) 0 18px,transparent 18px 20px),linear-gradient(135deg,#1d3a8a,#0d1017)}
 
+.a10{background:radial-gradient(60% 70% at 50% 45%,rgba(94,234,212,.5),transparent 70%),linear-gradient(180deg,transparent 0 62%,#5eead4 62% 70%,transparent 70%),linear-gradient(135deg,#16322e,#0b0d12)}
+.a11{background:linear-gradient(90deg,#ffcf5a 0 15%,#a78bfa 15% 38%,#5eead4 38% 85%,#7cc4ff 85%) bottom/100% 22% no-repeat,repeating-linear-gradient(180deg,rgba(255,255,255,.08) 0 2px,transparent 2px 26px),#0b0d12}
+
 /* 預覽視窗 */
 .ov{position:fixed;inset:0;z-index:100;display:flex;flex-direction:column;background:rgba(5,6,8,.92);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);opacity:0;pointer-events:none;transition:opacity .35s}
 .ov.on{opacity:1;pointer-events:auto}
@@ -123,7 +126,7 @@ main{padding:0 var(--gut) 90px;max-width:1280px;margin-inline:auto}
   <div class="eyebrow">Web Dev Collection</div>
   <h1>網站開發<em>合輯</em></h1>
   <p>這裡收錄所有做過的特效展示與行業範例網站。點任何一張卡片，就能在視窗裡預覽，並切換手機與桌機寬度。</p>
-  <div class="stats"><span><b>9</b>個頁面</span><span><b>3</b>組特效圖鑑</span><span><b>4</b>個行業範例</span><span><b>1</b>個創意作品</span><span><b>1</b>個課程工具</span><a id="ver" href="#history" class="ver"></a></div>
+  <div class="stats"><span><b>11</b>個頁面</span><span><b>3</b>組特效圖鑑</span><span><b>4</b>個行業範例</span><span><b>1</b>個創意作品</span><span><b>3</b>個課程工具</span><a id="ver" href="#history" class="ver"></a></div>
 </header>
 
 <main>
@@ -165,6 +168,7 @@ const $=s=>document.querySelector(s);
 /* 更新歷史：每次更新並推送前，只在「最上面」新增一筆即可。
    頁首版本標籤、預覽網址的版本參數、下方更新歷史都從這份清單產生。 */
 const CHANGELOG=[
+ {v:'1.6.0',date:'2026-10-05',items:['新增工作坊報名頁：首屏動畫、好壞指令對照、流程、倒數、推薦來源追蹤，上線前只需修改最上方設定','新增 5 小時課綱：含輕鬆暖身與 AI 小史、時間分配比例條、每段講解重點與講師提醒，並提供兩場拆分建議','報名頁流程同步改為 5 小時']},
  {v:'1.5.1',date:'2026-10-05',items:['課程推廣工具改為暗色系，與整個合輯的風格一致（卡片、輸入框、分數環、標籤與按鈕全部重新配色）']},
  {v:'1.5.0',date:'2026-10-05',items:['新增課程工具：課程推廣工具（頻道篩選表＋合作信產生器）','頻道篩選表：依規模、互動、觀看比等自動評分，排除賣類似課程的競爭者，追蹤寄信狀態並可備份','合作信：三種頻道類型、首封信／私訊短版／追蹤信，附分潤條件與試算']},
  {v:'1.4.0',date:'2026-10-05',items:['新增創意作品：小麥自動販賣機（個人介紹網站）。拖曳硬幣投幣、選商品、機器會卡住要搖一搖、收集全部商品解鎖隱藏限定款','入口頁新增「創意作品」分類']},
@@ -185,10 +189,12 @@ const PAGES=[
  {grp:2,no:'06',art:'a6',file:'game-trader-site.html',t:'遊戲商人商店',d:'App 式手機商店：稀有度篩選、商品詳情抽屜、收購估價、安全檢查表與底部分頁列。',tags:['手機優先','電商','收藏'],dev:['手機','桌機']},
  {grp:2,no:'07',art:'a7',file:'hair-salon-site.html',t:'髮廊形象網站',d:'Canvas 髮絲簾幕會隨手指流動；髮色實驗室即時換色、三題髮質診斷、設計師選擇與前後對照。',tags:['美業','Canvas','診斷'],dev:['手機','桌機']},
  {grp:3,no:'08',art:'a8',file:'vending-me-site.html',t:'小麥自動販賣機',d:'有趣的個人介紹：投幣、選商品、掉出來，機器還會卡住要搖一搖。每個商品打開都是一張關於我的卡片。可改成自己的資料。',tags:['互動','遊戲化','個人介紹'],dev:['手機','桌機']},
- {grp:4,no:'09',art:'a9',file:'promo-tools.html',t:'課程推廣工具',d:'給 YouTuber 合作用的頻道篩選表（自動評分、追蹤狀態、備份）與三種合作信產生器（首封信、私訊短版、追蹤信，含分潤試算）。資料只存在你的瀏覽器。',tags:['課程','篩選表','合作信'],dev:['手機','桌機']}
+ {grp:4,no:'09',art:'a9',file:'promo-tools.html',t:'課程推廣工具',d:'給 YouTuber 合作用的頻道篩選表（自動評分、追蹤狀態、備份）與三種合作信產生器（首封信、私訊短版、追蹤信，含分潤試算）。資料只存在你的瀏覽器。',tags:['課程','篩選表','合作信'],dev:['手機','桌機']},
+ {grp:4,no:'10',art:'a10',file:'workshop-signup.html',t:'工作坊報名頁',d:'給學員與 YouTuber 連結用的報名頁：首屏動畫、好壞指令對照、5 小時流程、倒數、推薦來源追蹤（?ref=）。上線前只要改最上方的設定。',tags:['報名頁','課程','手機優先'],dev:['手機','桌機']},
+ {grp:4,no:'11',art:'a11',file:'syllabus-5h.html',t:'5 小時課綱',d:'備課用的詳細課綱：時間分配比例條、每段的目標、講解重點、學員動作、交付物與講師提醒；含 AI 小史暖身與兩場拆分建議。',tags:['課綱','備課','5 小時'],dev:['手機','桌機']}
 ];
-const G={a1:'#d6ff3f',a2:'#6d28ff',a3:'#ff7ad9',a4:'#c1123a',a5:'#f4b4c4',a6:'#ffb938',a7:'#ff9a4d',a8:'#ffcf3f',a9:'#6ea0ff'};
-const BG={a1:'#0c0c0e',a2:'#0d0e12',a3:'#17102e',a4:'#f1ebea',a5:'#12261b',a6:'#161008',a7:'#f3f2ef',a8:'#0a0f24',a9:'#0d1017'};
+const G={a1:'#d6ff3f',a2:'#6d28ff',a3:'#ff7ad9',a4:'#c1123a',a5:'#f4b4c4',a6:'#ffb938',a7:'#ff9a4d',a8:'#ffcf3f',a9:'#6ea0ff',a10:'#5eead4',a11:'#a78bfa'};
+const BG={a1:'#0c0c0e',a2:'#0d0e12',a3:'#17102e',a4:'#f1ebea',a5:'#12261b',a6:'#161008',a7:'#f3f2ef',a8:'#0a0f24',a9:'#0d1017',a10:'#0b0d12',a11:'#0b0d12'};
 PAGES.forEach(p=>{
   const b=document.createElement('button');b.className='card';b.type='button';b.style.setProperty('--g1',G[p.art]+'66');
   b.innerHTML=`<div class="thumb" style="--bgt:${BG[p.art]}"><div class="art ${p.art}"></div><span class="no">${p.no}</span><span class="dev">${p.dev.map(d=>`<i>${d}</i>`).join('')}</span></div>
