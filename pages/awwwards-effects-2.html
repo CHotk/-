@@ -1,0 +1,475 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Awwwards 進階特效 II</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Syne:wght@500;700;800&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+TC:wght@300;500;900&display=swap">
+<style>
+/* 版面：AI 課程銷售頁的進階特效集，全部以 WebGL / Canvas / CSS 實作，深色單一主題 */
+:root{
+  --bg:#07060b; --fg:#f1f0ee; --mute:#8b8a96; --line:#1f1e29; --acc:#d6ff3f; --vio:#6d28ff; --cyan:#19e3ff; --hot:#ff3d81;
+  --display:'Syne','Noto Sans TC',sans-serif; --serif:'Instrument Serif','Noto Sans TC',serif;
+  --mono:'JetBrains Mono',ui-monospace,monospace; --body:'Noto Sans TC',system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font:300 15px/1.75 var(--body);overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+section{position:relative}
+.pad{padding:16vh 5vw}
+.tag{display:flex;gap:1rem;align-items:baseline;flex-wrap:wrap;font:500 12px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--mute);margin-bottom:2.5rem}
+.tag b{color:var(--acc);font-weight:500}
+.hint{font:400 12px var(--mono);color:var(--mute);margin-top:1.6rem}
+h2{font:900 clamp(2.2rem,6vw,5.5rem)/1.02 var(--display);letter-spacing:-.03em;text-wrap:balance}
+h2 em{font:italic 400 1.05em var(--serif);color:var(--acc);letter-spacing:-.01em}
+.lead{max-width:48ch;color:var(--mute);margin-top:1.4rem}
+
+/* 進度條與導覽 */
+.bar{position:fixed;left:0;top:0;height:3px;width:100%;transform-origin:0 50%;transform:scaleX(0);background:linear-gradient(90deg,var(--vio),var(--cyan),var(--acc));z-index:200}
+nav{position:fixed;top:0;left:0;right:0;z-index:150;display:flex;justify-content:space-between;align-items:center;padding:1.4rem 5vw;mix-blend-mode:difference;color:#fff;font:500 12px var(--mono);letter-spacing:.1em}
+nav b{font:800 18px var(--display);letter-spacing:-.02em}
+
+/* 游標 */
+@media (pointer:fine){
+  body,a,button{cursor:none}
+  .cur{position:fixed;left:0;top:0;width:14px;height:14px;margin:-7px 0 0 -7px;border-radius:50%;background:#fff;mix-blend-mode:difference;pointer-events:none;z-index:999;transition:width .3s,height .3s,margin .3s}
+  .cur.big{width:80px;height:80px;margin:-40px 0 0 -40px}
+}
+@media (pointer:coarse){.cur{display:none}}
+
+/* ===== 1. WebGL 液態英雄區 ===== */
+.hero{height:100vh;min-height:620px;overflow:hidden;display:flex;align-items:flex-end;padding:0 5vw 9vh}
+.hero canvas{position:absolute;inset:0;width:100%;height:100%;display:block;background:linear-gradient(120deg,#1a0b3d,#0a3a52)}
+.hero-in{position:relative;z-index:2;width:100%}
+.hero h1{font:900 clamp(2.8rem,10.5vw,10rem)/.95 var(--display);letter-spacing:-.05em;text-shadow:0 8px 60px rgba(0,0,0,.35)}
+.hero h1 .ln{display:block;overflow:hidden;padding-bottom:.1em}
+.hero h1 .ln>span{display:block;transform:translateY(115%);animation:up 1.2s cubic-bezier(.2,.8,.1,1) forwards}
+.hero h1 .ln:nth-child(2)>span{animation-delay:.12s}
+.hero h1 i{font:italic 400 1.02em var(--serif);color:var(--acc);letter-spacing:-.02em}
+@keyframes up{to{transform:none}}
+.hero-meta{display:flex;justify-content:space-between;gap:2rem;flex-wrap:wrap;margin-top:2.4rem;align-items:center}
+.hero-meta p{max-width:40ch;color:#d9d8e6}
+.cta{display:inline-flex;align-items:center;gap:.8rem;background:var(--acc);color:#07060b;font:700 14px var(--display);padding:1.1rem 1.8rem;border-radius:99px;transition:transform .3s,box-shadow .3s;box-shadow:0 0 0 0 rgba(214,255,63,.5)}
+.cta:hover{transform:translateY(-3px);box-shadow:0 0 0 12px rgba(214,255,63,.15)}
+
+/* ===== 2. WebGL 圖片扭曲 ===== */
+.dist-wrap{position:relative;aspect-ratio:16/9;max-height:80vh;width:100%;border-radius:20px;overflow:hidden;border:1px solid var(--line);background:#1a0b3d}
+.dist-wrap canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+
+/* ===== 3. 神經網路球體 ===== */
+.net{display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:2rem;min-height:100vh}
+.net canvas{width:100%;aspect-ratio:1;max-height:86vh;display:block}
+@media(max-width:800px){.net{grid-template-columns:1fr}}
+
+/* ===== 4. 捲動點亮文字 ===== */
+.words{height:320vh;border-top:1px solid var(--line)}
+.words-stick{position:sticky;top:0;height:100vh;display:flex;flex-direction:column;justify-content:center;padding:0 5vw}
+.words p{font:900 clamp(1.8rem,5vw,4.6rem)/1.28 var(--display);letter-spacing:-.02em;max-width:22ch}
+.words p span{color:#3a3948;transition:color .35s}
+.words p span.on{color:var(--fg)}
+.words p span.on.k{color:var(--acc)}
+
+/* ===== 5. 釘住橫向捲動 ===== */
+.hs{border-top:1px solid var(--line)}
+.hs-stick{position:sticky;top:0;height:100vh;overflow:hidden;display:flex;flex-direction:column;justify-content:center}
+.hs-head{padding:0 5vw 3vh}
+.hs-track{display:flex;gap:2.2vw;padding:0 5vw;width:max-content;will-change:transform}
+.card{position:relative;flex:none;width:min(62vw,560px);height:min(58vh,520px);border-radius:24px;overflow:hidden;padding:2rem;display:flex;flex-direction:column;justify-content:space-between;color:#fff}
+.card:nth-child(1){background:linear-gradient(145deg,#6d28ff,#1a0b3d)}
+.card:nth-child(2){background:linear-gradient(145deg,#0a8ea0,#07263b)}
+.card:nth-child(3){background:linear-gradient(145deg,#ff3d81,#3d0b2b)}
+.card:nth-child(4){background:linear-gradient(145deg,#d6ff3f,#1f5a1a);color:#07060b}
+.card:nth-child(5){background:linear-gradient(145deg,#f1f0ee,#8b8a96);color:#07060b}
+.card .big{position:absolute;right:-2rem;bottom:-4rem;font:800 clamp(10rem,22vw,20rem)/1 var(--display);letter-spacing:-.06em;opacity:.22;pointer-events:none;will-change:transform}
+.card h3{font:900 clamp(1.8rem,3.4vw,3rem)/1.1 var(--display);letter-spacing:-.03em;position:relative}
+.card p{position:relative;max-width:30ch;font-size:14px;opacity:.85}
+.card small{font:500 12px var(--mono);letter-spacing:.1em;position:relative}
+.hs-prog{margin:3vh 5vw 0;height:2px;background:var(--line);position:relative}
+.hs-prog i{position:absolute;inset:0;background:var(--acc);transform-origin:0 50%;transform:scaleX(0)}
+
+/* ===== 6. 旋轉光暈邊框 + AI 對話打字 ===== */
+@property --ang{syntax:'<angle>';inherits:false;initial-value:0deg}
+.glow{position:relative;border-radius:22px;padding:2px;background:conic-gradient(from var(--ang),transparent 0 55%,var(--cyan),var(--vio),var(--hot),var(--acc),transparent);animation:spin 5s linear infinite;max-width:760px}
+.glow::after{content:"";position:absolute;inset:-1px;border-radius:inherit;background:inherit;filter:blur(28px);opacity:.55;z-index:-1}
+@keyframes spin{to{--ang:360deg}}
+.term{background:#0c0b14;border-radius:20px;padding:1.6rem 1.8rem;font:400 14px/1.8 var(--mono);min-height:340px;color:#cfcfe0}
+.term .dots{display:flex;gap:.5rem;margin-bottom:1.2rem}
+.term .dots i{width:11px;height:11px;border-radius:50%;background:#2a2938}
+.term .u{color:var(--acc)}
+.term .a{color:#e9e8ff}
+.term .c{display:inline-block;width:9px;height:1.1em;background:var(--acc);vertical-align:-.18em;animation:blink 1s steps(2) infinite}
+@keyframes blink{50%{opacity:0}}
+
+/* ===== 7. 點陣扭曲 ===== */
+.dots{position:relative;height:80vh;min-height:460px;overflow:hidden;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.dots canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.dots-in{position:absolute;inset:0;display:grid;place-items:center;text-align:center;pointer-events:none;padding:0 5vw}
+.dots-in h2{mix-blend-mode:difference;color:#fff}
+
+/* ===== 8. 故障 RGB 分離 ===== */
+.gl{position:relative;display:inline-block;font:900 clamp(3rem,13vw,12rem)/1 var(--display);letter-spacing:-.05em}
+.gl::before,.gl::after{content:attr(data-t);position:absolute;inset:0;pointer-events:none;opacity:0;mix-blend-mode:screen}
+.gl::before{color:var(--hot);transform:translate(-4px,0)}
+.gl::after{color:var(--cyan);transform:translate(4px,0)}
+.gl:hover::before,.gl:hover::after{opacity:1;animation:gl 0.5s steps(1) infinite}
+.gl:hover::after{animation-delay:.1s}
+@keyframes gl{
+  0%{clip-path:inset(10% 0 70% 0);translate:-6px 0}
+  20%{clip-path:inset(60% 0 10% 0);translate:6px 0}
+  40%{clip-path:inset(30% 0 40% 0);translate:-3px 0}
+  60%{clip-path:inset(75% 0 5% 0);translate:8px 0}
+  80%{clip-path:inset(5% 0 80% 0);translate:-8px 0}
+  100%{clip-path:inset(45% 0 30% 0);translate:2px 0}
+}
+
+/* ===== 9. 手電筒揭露 ===== */
+.flash{position:relative;min-height:70vh;display:grid;place-items:center;text-align:center;overflow:hidden;border-top:1px solid var(--line);padding:10vh 5vw}
+.flash .l1,.flash .l2{font:900 clamp(2.4rem,8.5vw,8rem)/1.05 var(--display);letter-spacing:-.04em;max-width:14ch;text-wrap:balance}
+.flash .l1{color:#262535}
+.flash .l2{position:absolute;inset:0;display:grid;place-items:center;padding:10vh 5vw;color:#07060b;background:linear-gradient(120deg,var(--acc),var(--cyan));
+  -webkit-mask:radial-gradient(circle 190px at var(--x,50%) var(--y,50%),#000 98%,transparent 100%);mask:radial-gradient(circle 190px at var(--x,50%) var(--y,50%),#000 98%,transparent 100%)}
+.flash .l2 span{max-width:14ch;text-wrap:balance}
+
+/* ===== 10. 數字滾動 ===== */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));border-top:1px solid var(--line)}
+.stat{padding:8vh 5vw;border-right:1px solid var(--line)}
+.stat:last-child{border-right:0}
+.stat .n{font:800 clamp(3.4rem,8vw,7rem)/1 var(--display);letter-spacing:-.05em;font-variant-numeric:tabular-nums;background:linear-gradient(180deg,#fff,#7d7a99);-webkit-background-clip:text;background-clip:text;color:transparent}
+.stat .n sup{font-size:.4em;color:var(--acc);-webkit-text-fill-color:var(--acc);letter-spacing:0;vertical-align:top;margin-left:.1em}
+.stat p{color:var(--mute);font-size:14px;margin-top:.6rem}
+
+footer{padding:12vh 5vw 8vh;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:2rem}
+footer .mega{font:900 clamp(3rem,12vw,11rem)/.95 var(--display);letter-spacing:-.05em}
+footer .mega em{font:italic 400 1em var(--serif);color:var(--acc)}
+footer small{color:var(--mute);font:400 12px var(--mono)}
+.rv{opacity:1;transform:none}
+.js .rv.pre{opacity:0;transform:translateY(50px);transition:opacity 1s,transform 1s cubic-bezier(.2,.8,.1,1)}
+.js .rv.pre.in{opacity:1;transform:none}
+:focus-visible{outline:2px solid var(--acc);outline-offset:3px}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="cur" id="cur"></div>
+<nav><b>NEURA/</b><span>AI COURSE · 範例頁</span></nav>
+
+<!-- 1 -->
+<section class="hero" id="hero">
+  <canvas id="gl1" aria-hidden="true"></canvas>
+  <div class="hero-in">
+    <div class="tag" style="color:#cfcfe0"><b>01</b><span>WebGL Liquid Shader · 液態流體背景</span></div>
+    <h1><span class="ln"><span>把 AI 變成</span></span><span class="ln"><span>你的<i> unfair</i> 優勢</span></span></h1>
+    <div class="hero-meta">
+      <p>背景是即時運算的 GLSL 流體，會跟著游標被推開。這是高級感最快的一招，也是 Awwwards 首頁最常見的開場。</p>
+      <a class="cta" href="#enroll" data-big>立即報名 →</a>
+    </div>
+  </div>
+</section>
+
+<!-- 2 -->
+<section class="pad">
+  <div class="tag"><b>02</b><span>WebGL Image Distortion · 圖片漣漪與色散</span></div>
+  <h2 class="rv pre">圖片像 <em>水面</em> 一樣回應</h2>
+  <p class="lead rv pre" style="margin-bottom:3rem">游標劃過時產生漣漪位移，並把 R / G / B 三色分開取樣，形成色散。速度越快，扭曲越強。</p>
+  <div class="dist-wrap" id="dwrap"><canvas id="gl2"></canvas></div>
+  <p class="hint">在上面來回移動游標。這張圖是程式即時畫的，實務上換成課程封面或講師照片即可。</p>
+</section>
+
+<!-- 3 -->
+<section class="pad net">
+  <div>
+    <div class="tag"><b>03</b><span>3D Neural Sphere · 神經網路球體</span></div>
+    <h2 class="rv pre">看得見的 <em>思考</em></h2>
+    <p class="lead rv pre">以費波那契球面分布 220 個節點，連上最近的三個鄰居，再讓光點沿連線流動。可隨游標與捲動旋轉。對 AI 主題非常貼題。</p>
+    <p class="hint">移動游標轉動球體 · 向下捲動會加速</p>
+  </div>
+  <canvas id="net" aria-hidden="true"></canvas>
+</section>
+
+<!-- 4 -->
+<section class="words" id="words">
+  <div class="words-stick">
+    <div class="tag"><b>04</b><span>Scroll-scrubbed Text · 捲動逐字點亮</span></div>
+    <p id="wp" data-k="用 AI 的人,十倍,今天">AI 不會取代你，會用 AI 的人才會。每個人都有十倍的槓桿，差別只在你今天有沒有開始。</p>
+  </div>
+</section>
+
+<!-- 5 -->
+<section class="hs" id="hs">
+  <div class="hs-stick">
+    <div class="hs-head"><div class="tag"><b>05</b><span>Pinned Horizontal Scroll · 釘住橫向捲動</span></div><h2>五週，從零到 <em>能賺錢</em></h2></div>
+    <div class="hs-track" id="track">
+      <div class="card"><small>WEEK 01</small><h3>Prompt 工程<br>與思維框架</h3><p>學會跟模型對話，穩定產出可用結果。</p><div class="big">1</div></div>
+      <div class="card"><small>WEEK 02</small><h3>自動化工作流<br>Agent 實戰</h3><p>把重複工作交給 AI，一天省下三小時。</p><div class="big">2</div></div>
+      <div class="card"><small>WEEK 03</small><h3>RAG 與<br>私有知識庫</h3><p>讓 AI 讀懂你的文件、客戶與資料。</p><div class="big">3</div></div>
+      <div class="card"><small>WEEK 04</small><h3>做出第一個<br>AI 產品</h3><p>從點子到上線，整個流程親手走一遍。</p><div class="big">4</div></div>
+      <div class="card"><small>WEEK 05</small><h3>定價、行銷<br>與變現</h3><p>找到客戶，把作品變成收入。</p><div class="big">5</div></div>
+    </div>
+    <div class="hs-prog"><i id="hprog"></i></div>
+  </div>
+</section>
+
+<!-- 6 -->
+<section class="pad" style="border-top:1px solid var(--line)">
+  <div class="tag"><b>06</b><span>Conic Glow Border + Streaming Text · 光環邊框與 AI 串流打字</span></div>
+  <h2 class="rv pre" style="margin-bottom:3rem">讓產品 <em>活著</em></h2>
+  <div class="glow rv pre" data-big>
+    <div class="term" id="term"><div class="dots"><i></i><i></i><i></i></div><div id="tl"></div></div>
+  </div>
+  <p class="hint">邊框用 CSS @property 讓角度動起來，不需要任何 JS。內容則逐字串流輸出並循環。</p>
+</section>
+
+<!-- 7 -->
+<section class="dots" id="dots">
+  <canvas id="dg" aria-hidden="true"></canvas>
+  <div class="dots-in"><div><div class="tag" style="justify-content:center"><b>07</b><span>Dot Grid Warp · 點陣場</span></div><h2>空間會被 <em style="color:#fff">你擠壓</em></h2><p class="hint">移動游標，點擊會擴散一圈波紋</p></div></div>
+</section>
+
+<!-- 8 -->
+<section class="pad" style="text-align:center">
+  <div class="tag" style="justify-content:center"><b>08</b><span>RGB Glitch · 故障色散</span></div>
+  <a class="gl" data-t="FUTURE" href="#" data-big>FUTURE</a>
+  <p class="hint">Hover 看看。用兩層偽元素加 clip-path 切片動畫，零 JS。</p>
+</section>
+
+<!-- 9 -->
+<section class="flash" id="flash">
+  <div class="l1">別再只是 看 AI 新聞</div>
+  <div class="l2" aria-hidden="true"><span>現在就開始 動手做</span></div>
+  <div class="tag" style="position:absolute;left:5vw;top:5vh;margin:0"><b>09</b><span>Flashlight Reveal · 手電筒揭露</span></div>
+</section>
+
+<!-- 10 -->
+<section class="stats" id="stats">
+  <div class="stat"><div class="n"><span data-n="12800">0</span><sup>+</sup></div><p>學員人數（範例數字）</p></div>
+  <div class="stat"><div class="n"><span data-n="94">0</span><sup>%</sup></div><p>完課率（範例數字）</p></div>
+  <div class="stat"><div class="n"><span data-n="4.9" data-d="1">0</span><sup>/5</sup></div><p>平均評分（範例數字）</p></div>
+  <div class="stat"><div class="n"><span data-n="36">0</span><sup>hr</sup></div><p>實作影片時數（範例數字）</p></div>
+</section>
+
+<footer id="enroll">
+  <div class="mega rv pre">準備好了嗎？<br><em>現在</em>就開始。</div>
+  <div><a class="cta" href="#" data-big>搶先登記 →</a></div>
+  <small>範例頁：數字與課程內容為示意，請換成你自己的資料。 · 單檔 HTML，無外部套件</small>
+</footer>
+
+<script>
+document.documentElement.classList.add('js');
+const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
+const lerp=(a,b,t)=>a+(b-a)*t,clamp=(v,a=0,b=1)=>Math.max(a,Math.min(b,v));
+const reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
+let mx=innerWidth/2,my=innerHeight/2,pmx=mx,pmy=my,mv=0;
+addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY});
+addEventListener('touchmove',e=>{mx=e.touches[0].clientX;my=e.touches[0].clientY},{passive:true});
+
+/* 游標 */
+const cur=$('#cur');let cx=mx,cy=my;
+$$('[data-big]').forEach(el=>{el.addEventListener('mouseenter',()=>cur.classList.add('big'));el.addEventListener('mouseleave',()=>cur.classList.remove('big'))});
+
+/* 進度條 */
+const bar=$('#bar');
+function onScroll(){bar.style.transform=`scaleX(${scrollY/(document.documentElement.scrollHeight-innerHeight||1)})`}
+addEventListener('scroll',onScroll,{passive:true});
+
+/* ---------- WebGL 工具 ---------- */
+function makeGL(canvas,frag,opts={}){
+  const gl=canvas.getContext('webgl',{antialias:false,alpha:false});if(!gl)return null;
+  const mk=(t,s)=>{const sh=gl.createShader(t);gl.shaderSource(sh,s);gl.compileShader(sh);
+    if(!gl.getShaderParameter(sh,gl.COMPILE_STATUS)){console.error(gl.getShaderInfoLog(sh));return null}return sh};
+  const v=mk(gl.VERTEX_SHADER,'attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}');
+  const f=mk(gl.FRAGMENT_SHADER,frag);if(!v||!f)return null;
+  const pr=gl.createProgram();gl.attachShader(pr,v);gl.attachShader(pr,f);gl.linkProgram(pr);gl.useProgram(pr);
+  const b=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,b);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,3,-1,-1,3]),gl.STATIC_DRAW);
+  const loc=gl.getAttribLocation(pr,'p');gl.enableVertexAttribArray(loc);gl.vertexAttribPointer(loc,2,gl.FLOAT,false,0,0);
+  const cache={};const u=n=>cache[n]??(cache[n]=gl.getUniformLocation(pr,n));
+  const maxDpr=opts.dpr||1.5;
+  const size=()=>{const d=Math.min(devicePixelRatio||1,maxDpr);const w=Math.max(2,canvas.clientWidth*d|0),h=Math.max(2,canvas.clientHeight*d|0);
+    if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h}gl.viewport(0,0,w,h);gl.uniform2f(u('uRes'),w,h)};
+  return{gl,u,size,draw(){size();gl.drawArrays(gl.TRIANGLES,0,3)}};
+}
+const visible=new Map();
+const vio=new IntersectionObserver(es=>es.forEach(e=>visible.set(e.target,e.isIntersecting)),{threshold:0});
+const watch=el=>{visible.set(el,true);vio.observe(el)};
+const vis=el=>visible.get(el)!==false;
+
+/* ---------- 1. 液態背景 ---------- */
+const H1=`precision highp float;uniform vec2 uRes,uM;uniform float uT,uV;
+float h(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
+float n(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);
+  return mix(mix(h(i),h(i+vec2(1,0)),f.x),mix(h(i+vec2(0,1)),h(i+vec2(1,1)),f.x),f.y);}
+float fbm(vec2 p){float a=.5,s=0.;for(int i=0;i<5;i++){s+=a*n(p);p=p*2.02+vec2(1.7,9.2);a*=.5;}return s;}
+void main(){
+  vec2 uv=gl_FragCoord.xy/uRes;vec2 p=(gl_FragCoord.xy-.5*uRes)/uRes.y;
+  vec2 m=(uM*uRes-.5*uRes)/uRes.y;float d=length(p-m);
+  p+=(p-m)*exp(-d*3.2)*(.25+uV*2.2);
+  float t=uT*.1;
+  vec2 q=vec2(fbm(p*1.6+t),fbm(p*1.6+vec2(5.2,1.3)-t));
+  vec2 r=vec2(fbm(p*1.6+3.*q+vec2(1.7,9.2)+t*1.5),fbm(p*1.6+3.*q+vec2(8.3,2.8)-t));
+  float f=fbm(p*1.6+3.*r);
+  vec3 c=mix(vec3(.025,.015,.08),vec3(.38,.1,1.),smoothstep(.15,.65,f));
+  c=mix(c,vec3(.0,.8,.95),smoothstep(.5,.95,length(q))*.75);
+  c=mix(c,vec3(.84,1.,.25),smoothstep(.8,1.05,f*length(r)*1.6)*.9);
+  c*=1.-.9*dot(uv-.5,uv-.5);
+  c+=(h(gl_FragCoord.xy+uT)-.5)*.045;
+  gl_FragColor=vec4(c,1.);}`;
+const g1=makeGL($('#gl1'),H1,{dpr:1});watch($('#hero'));
+let hx=.5,hy=.5,hv=0;
+
+/* ---------- 2. 圖片扭曲 ---------- */
+const H2=`precision highp float;uniform vec2 uRes,uM;uniform float uT,uS;uniform sampler2D uTex;
+void main(){
+  vec2 uv=gl_FragCoord.xy/uRes;vec2 d=uv-uM;d.x*=uRes.x/uRes.y;float dist=length(d);
+  float w=exp(-dist*dist*14.)*uS;
+  vec2 dir=d/(dist+1e-4);
+  float rip=sin(dist*46.-uT*7.)*w*.022;
+  vec2 off=dir*(w*.07+rip);
+  float r=texture2D(uTex,uv-off*1.5).r;
+  float g=texture2D(uTex,uv-off).g;
+  float b=texture2D(uTex,uv-off*.5).b;
+  gl_FragColor=vec4(r,g,b,1.);}`;
+const g2=makeGL($('#gl2'),H2,{dpr:1.5});
+let tex2;
+function art(){
+  const c=document.createElement('canvas');c.width=1600;c.height=900;const x=c.getContext('2d');
+  let g=x.createLinearGradient(0,0,1600,900);g.addColorStop(0,'#14072e');g.addColorStop(.5,'#5a22ff');g.addColorStop(1,'#12c4e0');x.fillStyle=g;x.fillRect(0,0,1600,900);
+  g=x.createRadialGradient(1150,260,10,1150,260,520);g.addColorStop(0,'rgba(214,255,63,.95)');g.addColorStop(1,'rgba(214,255,63,0)');x.fillStyle=g;x.fillRect(0,0,1600,900);
+  x.strokeStyle='rgba(255,255,255,.14)';x.lineWidth=1;for(let i=0;i<=1600;i+=80){x.beginPath();x.moveTo(i,0);x.lineTo(i,900);x.stroke()}for(let j=0;j<=900;j+=80){x.beginPath();x.moveTo(0,j);x.lineTo(1600,j);x.stroke()}
+  x.textBaseline='alphabetic';x.font='800 440px Syne, sans-serif';x.fillStyle='#f1f0ee';x.fillText('NEURAL',60,560);
+  x.lineWidth=3;x.strokeStyle='#07060b';x.font='800 440px Syne, sans-serif';x.strokeText('NEURAL',72,572);
+  x.font='italic 400 150px "Instrument Serif", serif';x.fillStyle='#07060b';x.fillText('learning',80,740);
+  x.font='500 28px "JetBrains Mono", monospace';x.fillStyle='rgba(255,255,255,.9)';x.fillText('COHORT 2026 — 5 WEEKS — LIVE + RECORDED',80,830);
+  return c;
+}
+function uploadTex(){
+  if(!g2)return;const gl=g2.gl;tex2=tex2||gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,tex2);
+  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,true);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,art());
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
+  gl.uniform1i(g2.u('uTex'),0);
+}
+uploadTex();
+Promise.all(['800 40px Syne','italic 400 40px "Instrument Serif"','500 20px "JetBrains Mono"'].map(f=>document.fonts.load(f))).then(uploadTex).catch(()=>{});
+const dw=$('#dwrap');watch(dw);let dx=.5,dy=.5,ds=0,dxs=.5,dys=.5;
+dw.addEventListener('pointermove',e=>{const r=dw.getBoundingClientRect();dx=(e.clientX-r.left)/r.width;dy=1-(e.clientY-r.top)/r.height;ds=1});
+dw.addEventListener('pointerleave',()=>ds=0);
+
+/* ---------- 3. 神經球 ---------- */
+const nc=$('#net'),nctx=nc.getContext('2d');watch(nc);
+const N=220,pts=[],edges=[],pulses=[];
+for(let i=0;i<N;i++){const y=1-2*(i+.5)/N,r=Math.sqrt(1-y*y),a=i*2.399963;pts.push([Math.cos(a)*r,y,Math.sin(a)*r])}
+pts.forEach((p,i)=>{const ds=pts.map((q,j)=>[j,(p[0]-q[0])**2+(p[1]-q[1])**2+(p[2]-q[2])**2]).filter(o=>o[0]!==i).sort((a,b)=>a[1]-b[1]).slice(0,3);
+  ds.forEach(o=>{if(!edges.some(e=>(e[0]===o[0]&&e[1]===i)))edges.push([i,o[0]])})});
+for(let i=0;i<26;i++)pulses.push({e:Math.random()*edges.length|0,t:Math.random(),s:.004+Math.random()*.008});
+let rotY=0,rotX=.3,nsz=0;
+function drawNet(t){
+  const d=Math.min(devicePixelRatio||1,2),W=nc.clientWidth,H=nc.clientHeight;
+  if(nc.width!==W*d|0||nc.height!==H*d|0){nc.width=W*d;nc.height=H*d}
+  nctx.setTransform(d,0,0,d,0,0);nctx.clearRect(0,0,W,H);
+  const r=nc.getBoundingClientRect();
+  const tx=((mx-(r.left+W/2))/innerWidth),ty=((my-(r.top+H/2))/innerHeight);
+  rotY+=.004+Math.abs(scrollY-lastScroll)*.0006+tx*.01;rotX=lerp(rotX,.3+ty*.8,.05);
+  const cy=Math.cos(rotY),sy=Math.sin(rotY),cxr=Math.cos(rotX),sx=Math.sin(rotX),R=Math.min(W,H)*.38,F=3;
+  const P=pts.map(p=>{let x=p[0]*cy+p[2]*sy,z=-p[0]*sy+p[2]*cy,y=p[1]*cxr-z*sx;z=p[1]*sx+z*cxr;
+    const s=F/(F-z);return[W/2+x*R*s,H/2+y*R*s,z,s]});
+  nctx.lineWidth=1;
+  edges.forEach(e=>{const a=P[e[0]],b=P[e[1]],al=(a[2]+b[2]+2)/4;
+    nctx.strokeStyle=`rgba(120,140,255,${.04+al*.28})`;nctx.beginPath();nctx.moveTo(a[0],a[1]);nctx.lineTo(b[0],b[1]);nctx.stroke()});
+  pulses.forEach(p=>{p.t+=p.s;if(p.t>1){p.t=0;p.e=Math.random()*edges.length|0}
+    const e=edges[p.e],a=P[e[0]],b=P[e[1]],x=lerp(a[0],b[0],p.t),y=lerp(a[1],b[1],p.t),al=(lerp(a[2],b[2],p.t)+1)/2;
+    const g=nctx.createRadialGradient(x,y,0,x,y,12);g.addColorStop(0,`rgba(214,255,63,${.4+al*.6})`);g.addColorStop(1,'rgba(214,255,63,0)');
+    nctx.fillStyle=g;nctx.beginPath();nctx.arc(x,y,12,0,6.3);nctx.fill()});
+  P.forEach(p=>{const al=(p[2]+1)/2;nctx.fillStyle=`rgba(${120+al*100|0},${200+al*55|0},255,${.25+al*.75})`;nctx.beginPath();nctx.arc(p[0],p[1],1+p[3]*1.1,0,6.3);nctx.fill()});
+}
+
+/* ---------- 4. 逐字點亮 ---------- */
+const wp=$('#wp'),keys=(wp.dataset.k||'').split(',');
+const text=wp.textContent;wp.textContent='';const chars=[];
+let kmask=new Array(text.length).fill(false);
+keys.forEach(k=>{let i=text.indexOf(k);while(i>=0){for(let j=0;j<k.length;j++)kmask[i+j]=true;i=text.indexOf(k,i+k.length)}});
+[...text.matchAll(/[A-Za-z0-9]+|[\s\S]/g)].forEach(m=>{const s=document.createElement('span');s.textContent=m[0];if(kmask[m.index])s.className='k';wp.appendChild(s);chars.push(s)});
+const wsec=$('#words');
+function doWords(){const r=wsec.getBoundingClientRect(),t=clamp(-r.top/(r.height-innerHeight)),n=t*chars.length*1.08;
+  chars.forEach((c,i)=>c.classList.toggle('on',i<n))}
+
+/* ---------- 5. 橫向捲動 ---------- */
+const hs=$('#hs'),track=$('#track'),hprog=$('#hprog'),bigs=$$('.card .big');
+function hsSize(){hs.style.height=(track.scrollWidth-innerWidth+innerHeight)+'px'}
+function doHS(){const r=hs.getBoundingClientRect(),max=track.scrollWidth-innerWidth,t=clamp(-r.top/(hs.offsetHeight-innerHeight));
+  const x=-t*max;track.style.transform=`translate3d(${x}px,0,0)`;hprog.style.transform=`scaleX(${t})`;
+  bigs.forEach(b=>{const c=b.parentElement,mid=c.offsetLeft+x+c.offsetWidth/2-innerWidth/2;b.style.transform=`translateX(${-mid*.14}px)`})}
+hsSize();addEventListener('resize',hsSize);addEventListener('load',hsSize);
+
+/* ---------- 6. 串流打字 ---------- */
+const tl=$('#tl');
+const script=[['u','你  幫我規劃一個 30 天的 AI 副業計畫。'],['a','AI  好的。先確認三件事：你的專長、每天可投入的時間，以及目標收入。根據你的答案，我會拆成四個階段：'],
+  ['a','  第 1 週  選定一個有人願意付費的小問題'],['a','  第 2 週  用 AI 做出可展示的原型'],['a','  第 3 週  找 10 位目標客戶做訪談'],['a','  第 4 週  上線、收款、記錄數據。'],['a','完成。需要我把第 1 週拆成每日任務嗎？']];
+(function(){let li=0,ci=0,line;
+  function nextLine(){if(li>=script.length){setTimeout(()=>{tl.innerHTML='';li=0;ci=0;nextLine()},2600);return}
+    line=document.createElement('div');line.className=script[li][0];line.innerHTML='<span></span><i class="c"></i>';tl.appendChild(line);ci=0;type()}
+  function type(){const [k,s]=script[li],sp=line.firstChild;
+    if(ci<s.length){sp.textContent=s.slice(0,++ci);setTimeout(type,k==='u'?55:16)}
+    else{line.querySelector('.c').remove();li++;setTimeout(nextLine,k==='u'?700:350)}}
+  if(reduce){script.forEach(([k,s])=>{const d=document.createElement('div');d.className=k;d.textContent=s;tl.appendChild(d)})}else nextLine();
+})();
+
+/* ---------- 7. 點陣場 ---------- */
+const dgc=$('#dg'),dctx=dgc.getContext('2d'),dsec=$('#dots');watch(dsec);
+let ripples=[];dsec.addEventListener('click',e=>{const r=dsec.getBoundingClientRect();ripples.push({x:e.clientX-r.left,y:e.clientY-r.top,r:0})});
+function drawDots(t){
+  const d=Math.min(devicePixelRatio||1,2),W=dsec.clientWidth,H=dsec.clientHeight;
+  if(dgc.width!==W*d|0||dgc.height!==H*d|0){dgc.width=W*d;dgc.height=H*d}
+  dctx.setTransform(d,0,0,d,0,0);dctx.clearRect(0,0,W,H);
+  const r=dsec.getBoundingClientRect(),px=mx-r.left,py=my-r.top,S=30;
+  ripples.forEach(o=>o.r+=7);ripples=ripples.filter(o=>o.r<Math.hypot(W,H));
+  for(let y=S/2;y<H;y+=S)for(let x=S/2;x<W;x+=S){
+    let dx=x-px,dy=y-py,dd=Math.hypot(dx,dy),f=Math.exp(-dd*dd/(2*130*130)),ox=0,oy=0,rw=0;
+    if(dd>0.1){ox=dx/dd*f*34;oy=dy/dd*f*34}
+    ripples.forEach(o=>{const q=Math.hypot(x-o.x,y-o.y),k=Math.exp(-((q-o.r)**2)/900);rw+=k;if(q>.1){ox+=(x-o.x)/q*k*14;oy+=(y-o.y)/q*k*14}});
+    const wv=(Math.sin(x*.012+t*.0012)+Math.sin(y*.014-t*.001))*.5;
+    const s=.9+f*3.4+rw*2.4+wv*.5;
+    const hue=f*1+rw*1;
+    dctx.fillStyle=`rgb(${110+hue*104|0},${110+hue*145|0},${150-hue*90|0})`;dctx.globalAlpha=.35+Math.min(.65,f+rw*.8);
+    dctx.beginPath();dctx.arc(x+ox,y+oy,Math.max(.4,s),0,6.3);dctx.fill()}
+  dctx.globalAlpha=1;
+}
+
+/* ---------- 9. 手電筒 ---------- */
+const fl=$('#flash');let fx=0,fy=0,tfx=0,tfy=0;
+fl.addEventListener('pointermove',e=>{const r=fl.getBoundingClientRect();tfx=e.clientX-r.left;tfy=e.clientY-r.top});
+fl.addEventListener('pointerenter',()=>cur.classList.add('big'));fl.addEventListener('pointerleave',()=>cur.classList.remove('big'));
+fx=tfx=innerWidth/2;fy=tfy=200;
+
+/* ---------- 10. 數字滾動 ---------- */
+const cio=new IntersectionObserver(es=>es.forEach(e=>{if(!e.isIntersecting)return;cio.unobserve(e.target);
+  const el=e.target,end=+el.dataset.n,dp=+(el.dataset.d||0),t0=performance.now(),dur=1800;
+  (function f(now){const t=clamp((now-t0)/dur),v=end*(1-Math.pow(1-t,4));el.textContent=dp?v.toFixed(dp):Math.round(v).toLocaleString();if(t<1)requestAnimationFrame(f)})(t0)}),{threshold:.6});
+$$('[data-n]').forEach(el=>cio.observe(el));
+
+/* ---------- 顯現 ---------- */
+const rio=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');rio.unobserve(e.target)}}),{threshold:.12});
+$$('.rv').forEach(el=>{if(el.getBoundingClientRect().top>innerHeight)rio.observe(el);else el.classList.remove('pre')});
+
+/* ---------- 主迴圈 ---------- */
+let lastScroll=scrollY;
+function frame(now){
+  const t=now/1000;
+  mv=lerp(mv,Math.hypot(mx-pmx,my-pmy)/40,.1);pmx=mx;pmy=my;
+  cx=lerp(cx,mx,.2);cy=lerp(cy,my,.2);cur.style.transform=`translate(${cx}px,${cy}px)`;
+  if(g1&&vis($('#hero'))){
+    hx=lerp(hx,mx/innerWidth,.06);hy=lerp(hy,1-(my-$('#hero').getBoundingClientRect().top)/$('#hero').clientHeight,.06);hv=lerp(hv,Math.min(mv,1.2),.1);
+    const gl=g1.gl;g1.size();gl.uniform1f(g1.u('uT'),t);gl.uniform2f(g1.u('uM'),hx,hy);gl.uniform1f(g1.u('uV'),hv);gl.drawArrays(gl.TRIANGLES,0,3)}
+  if(g2&&vis(dw)){
+    dxs=lerp(dxs,dx,.12);dys=lerp(dys,dy,.12);const tgt=ds*Math.min(1.6,.5+mv*1.4);dsm=lerp(dsm||0,tgt,.1);
+    const gl=g2.gl;g2.size();gl.uniform1f(g2.u('uT'),t);gl.uniform2f(g2.u('uM'),dxs,dys);gl.uniform1f(g2.u('uS'),dsm);gl.drawArrays(gl.TRIANGLES,0,3)}
+  if(vis(nc))drawNet(now);
+  if(vis(dsec))drawDots(now);
+  doWords();doHS();
+  fx=lerp(fx,tfx,.15);fy=lerp(fy,tfy,.15);fl.style.setProperty('--x',fx+'px');fl.style.setProperty('--y',fy+'px');
+  lastScroll=scrollY;requestAnimationFrame(frame)}
+let dsm=0;
+requestAnimationFrame(frame);onScroll();
+</script>
+</body>
+</html>

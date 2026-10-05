@@ -1,0 +1,529 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0a0c11">
+<title>Rook Vault 遊戲倉庫</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;800&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+TC:wght@300;400;500;700;900&display=swap">
+<style>
+/* 版面：App 式手機商店。頂部搜尋與篩選條、雙欄商品卡、底部分頁列、可拖曳的商品詳情抽屜。稀有度顏色是唯一的功能色系統 */
+:root{
+  --bg:#0a0c11; --panel:#12151d; --panel2:#181c27; --line:rgba(255,255,255,.09); --fg:#e9edf5; --mute:#8a93a8;
+  --ember:#ff6a2b; --ice:#6ee7ff; --ok:#46e58b; --warn:#ffb938;
+  --common:#8b93a7; --rare:#4aa8ff; --epic:#b46bff; --legend:#ffb938;
+  --display:'Unbounded','Noto Sans TC',sans-serif; --body:'Noto Sans TC',system-ui,sans-serif; --mono:'JetBrains Mono',ui-monospace,monospace;
+  --gut:16px; --tab:68px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{color-scheme:dark;scroll-behavior:smooth}
+body{background:var(--bg);color:var(--fg);font:400 14.5px/1.7 var(--body);overflow-x:hidden;-webkit-text-size-adjust:100%;padding-bottom:calc(var(--tab) + env(safe-area-inset-bottom,0px) + 10px)}
+a{color:inherit;text-decoration:none}button{font:inherit;color:inherit;border:0;background:none;cursor:pointer;touch-action:manipulation}
+section{padding:56px var(--gut)}
+.wrap{max-width:1180px;margin-inline:auto}
+.eyebrow{font:500 11px var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--mute);display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.eyebrow::before{content:"";width:18px;height:2px;background:var(--ember)}
+h2{font:800 clamp(1.7rem,6.6vw,3rem)/1.18 var(--body);letter-spacing:-.02em;text-wrap:balance}
+h2 em{font-style:normal;color:var(--ember)}
+.sub{color:var(--mute);margin-top:10px;max-width:46ch}
+.note{font:400 11.5px/1.7 var(--body);color:var(--mute);margin-top:14px}
+
+/* 頂欄 */
+.top{position:fixed;z-index:120;left:0;right:0;top:0;padding:calc(env(safe-area-inset-top,0px) + 10px) var(--gut) 10px;display:flex;justify-content:space-between;align-items:center;transition:background .3s,transform .4s}
+.top.solid{background:rgba(10,12,17,.8);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid var(--line)}
+.logo{font:800 15px var(--display);letter-spacing:-.02em;display:flex;align-items:center;gap:9px}
+.logo i{width:22px;height:22px;background:var(--ember);clip-path:polygon(50% 0,100% 30%,100% 100%,0 100%,0 30%);display:block}
+.logo span{font:500 10px var(--mono);color:var(--mute);letter-spacing:.14em;margin-left:2px}
+.live{display:flex;align-items:center;gap:7px;font:500 11px var(--mono);color:var(--ok)}
+.live::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--ok);animation:pl 1.8s infinite}
+@keyframes pl{0%{box-shadow:0 0 0 0 rgba(70,229,139,.6)}100%{box-shadow:0 0 0 10px rgba(70,229,139,0)}}
+
+/* 按鈕 */
+.btn{position:relative;display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:50px;padding:0 24px;border-radius:14px;background:var(--ember);color:#160a04;font:700 15px var(--body);overflow:hidden;transition:transform .2s,filter .2s}
+.btn:active{transform:scale(.96)}.btn:hover{filter:brightness(1.1)}
+.btn.ghost{background:var(--panel2);color:var(--fg);border:1px solid var(--line)}
+.btn.ok{background:var(--ok)}
+.btn.block{width:100%}
+.ink{position:absolute;border-radius:50%;background:rgba(255,255,255,.4);transform:scale(0);animation:ink .6s ease-out forwards;pointer-events:none}
+@keyframes ink{to{transform:scale(1);opacity:0}}
+
+/* ===== Hero ===== */
+.hero{position:relative;padding:calc(env(safe-area-inset-top,0px) + 84px) var(--gut) 40px;overflow:hidden;min-height:min(100svh,820px);display:flex;flex-direction:column;justify-content:center}
+.hero canvas.em{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.hero::before{content:"";position:absolute;inset:0;background:radial-gradient(70% 45% at 50% 55%,rgba(255,106,43,.22),transparent 70%),radial-gradient(60% 40% at 90% 0%,rgba(180,107,255,.18),transparent 70%)}
+.hero-in{position:relative;display:grid;gap:26px;max-width:1180px;margin-inline:auto;width:100%;grid-template-columns:1.1fr .9fr;align-items:center}
+@media(max-width:820px){.hero-in{grid-template-columns:1fr}}
+.hero h1{font:900 clamp(2.5rem,11.5vw,5.6rem)/1.02 var(--body);letter-spacing:-.04em}
+.hero h1 .w{display:inline-block;opacity:0;transform:translateY(.4em);filter:blur(10px);animation:wi .9s cubic-bezier(.2,.8,.1,1) forwards;animation-delay:calc(var(--i)*60ms + 150ms)}
+.hero h1 .hl{background:linear-gradient(100deg,var(--ember),var(--warn));-webkit-background-clip:text;background-clip:text;color:transparent}
+@keyframes wi{to{opacity:1;transform:none;filter:none}}
+.hero p.sub{font-size:15.5px;opacity:0;animation:fi 1s .8s forwards}
+@keyframes fi{to{opacity:1}}
+.hero .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px;opacity:0;animation:fi 1s 1s forwards}
+.pills{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px;opacity:0;animation:fi 1s 1.1s forwards}
+.pills span{font:500 12px var(--body);padding:6px 12px;border-radius:99px;border:1px solid var(--line);background:rgba(255,255,255,.04);color:#cfd6e6}
+.pills span::before{content:"✓";color:var(--ok);margin-right:6px}
+/* 展示卡 */
+.fc-wrap{perspective:900px;display:grid;place-items:center;padding:6px}
+.fc{--rx:0deg;--ry:0deg;--px:50;--py:50;position:relative;width:min(70vw,300px);aspect-ratio:3/4;border-radius:24px;overflow:hidden;transform:rotateX(var(--rx)) rotateY(var(--ry));will-change:transform;
+  box-shadow:0 30px 70px -20px rgba(255,185,56,.45),0 0 0 1px rgba(255,185,56,.5);background:#14110c;touch-action:pan-y}
+.fc canvas{position:absolute;inset:0;width:100%;height:100%}
+.fc .sheen{position:absolute;inset:0;background:linear-gradient(115deg,transparent 30%,rgba(255,255,255,.35) 46%,rgba(255,200,120,.35) 50%,transparent 64%);background-size:300% 100%;background-position:calc(var(--px)*2% - 40%) 0;mix-blend-mode:overlay}
+.fc .gl{position:absolute;inset:0;background:radial-gradient(circle at calc(var(--px)*1%) calc(var(--py)*1%),rgba(255,255,255,.35),transparent 50%);mix-blend-mode:soft-light}
+.fc .cap{position:absolute;left:0;right:0;bottom:0;padding:18px;background:linear-gradient(transparent,rgba(0,0,0,.88))}
+.fc .cap small{font:500 10px var(--mono);letter-spacing:.14em;color:var(--legend)}
+.fc .cap b{display:block;font:800 17px/1.3 var(--body)}
+.fc .cap span{font:800 20px var(--display);color:var(--warn);letter-spacing:-.04em}
+
+/* 跑馬燈 */
+.ticker{border-block:1px solid var(--line);background:var(--panel);overflow:hidden;padding:12px 0}
+.tk-row{display:flex;width:max-content;will-change:transform}
+.tk-row span{display:flex;align-items:center;gap:10px;padding-right:34px;font:500 12px var(--mono);white-space:nowrap;color:var(--mute)}
+.tk-row b{color:var(--fg);font-weight:500}.tk-row i{font-style:normal;color:var(--ok)}
+
+/* ===== 商店 ===== */
+.filters{position:sticky;top:calc(env(safe-area-inset-top,0px) + 54px);z-index:90;margin:22px calc(var(--gut)*-1) 0;padding:12px var(--gut);background:rgba(10,12,17,.86);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-block:1px solid var(--line)}
+.search{display:flex;align-items:center;gap:10px;height:46px;padding:0 14px;border-radius:14px;background:var(--panel);border:1px solid var(--line);margin-bottom:10px}
+.search:focus-within{border-color:var(--ember)}
+.search input{flex:1;min-width:0;background:none;border:0;outline:0;color:var(--fg);font:400 16px var(--body)}
+.search svg{flex:none;opacity:.6}
+.scrollx{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin:0 calc(var(--gut)*-1);padding:2px var(--gut);scroll-snap-type:x proximity}
+.scrollx::-webkit-scrollbar{display:none}
+.scrollx+.scrollx{margin-top:8px}
+.chip{flex:none;min-height:38px;padding:0 15px;border-radius:99px;border:1px solid var(--line);background:var(--panel);font:500 13px var(--body);color:#c6cee0;display:flex;align-items:center;gap:7px;scroll-snap-align:start;transition:background .25s,color .25s,border-color .25s}
+.chip[aria-pressed=true]{background:var(--fg);color:#0a0c11;border-color:var(--fg)}
+.chip .dot{width:8px;height:8px;border-radius:50%;background:var(--c,var(--mute))}
+.chip.fav[aria-pressed=true]{background:var(--ember);border-color:var(--ember);color:#160a04}
+.meta{display:flex;justify-content:space-between;align-items:center;margin:16px 0 12px;font:500 12px var(--mono);color:var(--mute)}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+@media(min-width:640px){.grid{grid-template-columns:repeat(3,1fr);gap:16px}}
+@media(min-width:980px){.grid{grid-template-columns:repeat(4,1fr)}}
+.item{--rc:var(--common);--rg:rgba(139,147,167,.35);position:relative;text-align:left;border-radius:18px;background:var(--panel);overflow:hidden;display:flex;flex-direction:column;border:1px solid var(--line);transition:transform .35s cubic-bezier(.2,.8,.1,1),box-shadow .35s;animation:in .5s cubic-bezier(.2,.8,.1,1) backwards;animation-delay:calc(var(--n)*35ms)}
+@keyframes in{from{opacity:0;transform:translateY(18px) scale(.97)}}
+.item[hidden]{display:none}
+.item:active{transform:scale(.97)}
+@media(hover:hover){.item:hover{transform:translateY(-4px);box-shadow:0 18px 40px -18px var(--rg)}}
+.item.r-rare{--rc:var(--rare);--rg:rgba(74,168,255,.45)}.item.r-epic{--rc:var(--epic);--rg:rgba(180,107,255,.5)}.item.r-legendary{--rc:var(--legend);--rg:rgba(255,185,56,.55)}
+.item.r-epic,.item.r-legendary{border-color:color-mix(in srgb,var(--rc) 55%,transparent)}
+.item .pic{position:relative;aspect-ratio:4/4.4;overflow:hidden}
+.item .pic canvas{width:100%;height:100%;display:block}
+.item.r-legendary .pic::after{content:"";position:absolute;inset:0;background:linear-gradient(115deg,transparent 35%,rgba(255,255,255,.28) 50%,transparent 65%);background-size:300% 100%;animation:sh 4.5s ease-in-out infinite}
+@keyframes sh{0%{background-position:120% 0}60%,100%{background-position:-60% 0}}
+.badges{position:absolute;left:8px;top:8px;display:flex;gap:5px;flex-wrap:wrap;z-index:2}
+.bdg{font:700 10px var(--mono);letter-spacing:.08em;padding:3px 8px;border-radius:7px;background:rgba(10,12,17,.78);backdrop-filter:blur(6px);color:var(--fg)}
+.bdg.new{background:var(--ember);color:#160a04}.bdg.one{color:var(--warn)}
+.heart{position:absolute;right:6px;top:6px;z-index:3;width:40px;height:40px;display:grid;place-items:center;border-radius:50%;background:rgba(10,12,17,.6);backdrop-filter:blur(6px)}
+.heart svg{width:19px;height:19px;fill:none;stroke:#fff;stroke-width:2;transition:transform .3s cubic-bezier(.3,1.8,.5,1),fill .2s,stroke .2s}
+.heart[aria-pressed=true] svg{fill:var(--ember);stroke:var(--ember);transform:scale(1.15)}
+.item .tx{padding:11px 12px 13px;display:flex;flex-direction:column;gap:4px;flex:1}
+.item .gm{font:500 10px var(--mono);letter-spacing:.1em;color:var(--mute);display:flex;justify-content:space-between;gap:6px}
+.item .gm b{color:var(--rc);font-weight:500}
+.item h3{font:700 14px/1.4 var(--body);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:2.8em}
+.item .pr{font:800 17px var(--display);letter-spacing:-.04em;margin-top:2px}
+.item .pr small{font:500 10px var(--mono);color:var(--mute);letter-spacing:0;margin-right:3px}
+.empty{grid-column:1/-1;text-align:center;padding:60px 0;color:var(--mute)}
+.empty .btn{margin-top:16px}
+
+/* ===== 收購 ===== */
+.sell{background:linear-gradient(180deg,var(--bg),#10131b)}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:22px;padding:20px;margin-top:22px;display:grid;gap:22px}
+@media(min-width:820px){.panel{grid-template-columns:1.1fr 1fr;padding:30px;gap:40px}}
+.fld>label,.fld>span.l{display:flex;justify-content:space-between;font:500 11px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--mute);margin-bottom:10px}
+.fld>label b,.fld span.l b{color:var(--fg);font:500 13px var(--mono);letter-spacing:0;text-transform:none}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:36px;background:transparent;touch-action:pan-y}
+input[type=range]::-webkit-slider-runnable-track{height:6px;border-radius:9px;background:linear-gradient(90deg,var(--ember) var(--v,0%),#252a38 var(--v,0%))}
+input[type=range]::-moz-range-track{height:6px;border-radius:9px;background:#252a38}input[type=range]::-moz-range-progress{height:6px;border-radius:9px;background:var(--ember)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;height:28px;border-radius:50%;background:#fff;margin-top:-11px;box-shadow:0 2px 10px rgba(0,0,0,.5),0 0 0 6px rgba(255,106,43,.25)}
+input[type=range]::-moz-range-thumb{width:28px;height:28px;border:0;border-radius:50%;background:#fff;box-shadow:0 2px 10px rgba(0,0,0,.5),0 0 0 6px rgba(255,106,43,.25)}
+.quote{background:#0c0e14;border:1px dashed rgba(255,255,255,.16);border-radius:18px;padding:20px;display:flex;flex-direction:column;justify-content:space-between;gap:16px}
+.quote .big{font:800 clamp(1.9rem,9vw,2.8rem)/1.05 var(--display);letter-spacing:-.05em;font-variant-numeric:tabular-nums}
+.quote small{font:500 11px var(--mono);letter-spacing:.14em;color:var(--mute);text-transform:uppercase;display:block;margin-bottom:6px}
+textarea{width:100%;min-height:128px;background:#0c0e14;border:1px solid var(--line);border-radius:14px;padding:12px;color:var(--fg);font:400 13.5px/1.7 var(--body);resize:vertical;outline:0}
+
+/* ===== 安全 ===== */
+.flow{position:relative;margin-top:30px;padding-left:34px;--p:0}
+.flow::before,.flow::after{content:"";position:absolute;left:11px;top:6px;bottom:6px;width:2px;background:var(--line)}
+.flow::after{background:linear-gradient(var(--ok),var(--ice));transform-origin:top;transform:scaleY(var(--p))}
+.fs{position:relative;padding-bottom:26px}
+.fs::before{content:"";position:absolute;left:-31px;top:4px;width:16px;height:16px;border-radius:50%;background:var(--bg);border:2px solid var(--line);transition:.4s}
+.fs.on::before{border-color:var(--ok);background:var(--ok);box-shadow:0 0 0 6px rgba(70,229,139,.15)}
+.fs h3{font:700 16px var(--body)}.fs p{color:var(--mute);font-size:13.5px}
+.check{margin-top:30px;background:var(--panel);border:1px solid var(--line);border-radius:22px;padding:20px}
+.check h3{font:800 18px var(--body);display:flex;justify-content:space-between;align-items:center;gap:10px}
+.check h3 span{font:500 12px var(--mono);color:var(--ok)}
+.bar{height:6px;border-radius:9px;background:#252a38;margin:14px 0 6px;overflow:hidden}.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--ok),var(--ice));transition:width .5s cubic-bezier(.2,.8,.1,1);border-radius:9px}
+.ck{display:flex;gap:14px;align-items:flex-start;width:100%;text-align:left;padding:14px 0;border-bottom:1px solid var(--line);min-height:56px}
+.ck:last-of-type{border-bottom:0}
+.ck .bx{flex:none;width:26px;height:26px;border-radius:8px;border:2px solid #3a4153;display:grid;place-items:center;margin-top:1px;transition:.3s}
+.ck .bx svg{width:16px;height:16px;stroke:#0a0c11;stroke-width:3.4;fill:none;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:20;stroke-dashoffset:20;transition:stroke-dashoffset .4s .05s}
+.ck[aria-pressed=true] .bx{background:var(--ok);border-color:var(--ok)}.ck[aria-pressed=true] .bx svg{stroke-dashoffset:0}
+.ck[aria-pressed=true] span.t{color:var(--mute);text-decoration:line-through;text-decoration-color:rgba(255,255,255,.2)}
+.ck span.t b{display:block;font-weight:500;color:inherit}.ck span.t small{color:var(--mute);font-size:12.5px;text-decoration:none;display:block}
+.done{margin-top:14px;padding:14px;border-radius:14px;background:rgba(70,229,139,.1);border:1px solid rgba(70,229,139,.35);color:var(--ok);font-weight:500;display:none}
+.done.on{display:block;animation:in .5s}
+
+/* 評價 */
+.revs{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;margin:22px calc(var(--gut)*-1) 0;padding:0 var(--gut) 8px;scrollbar-width:none}
+.revs::-webkit-scrollbar{display:none}
+.rv{flex:none;width:min(80vw,320px);scroll-snap-align:center;background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:12px}
+.rv .st{color:var(--warn);letter-spacing:2px;font-size:14px}
+.rv p{font-size:14px}.rv small{font:500 11px var(--mono);color:var(--mute);letter-spacing:.06em}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:22px}
+.stats div{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:14px 10px;text-align:center}
+.stats b{display:block;font:800 clamp(1.1rem,5vw,1.7rem) var(--display);letter-spacing:-.05em;font-variant-numeric:tabular-nums}.stats small{font-size:11.5px;color:var(--mute)}
+
+/* 聯絡 */
+.contact{text-align:center;background:radial-gradient(60% 50% at 50% 0%,rgba(255,106,43,.2),transparent 70%)}
+.contact h2{margin-inline:auto}.contact .sub{margin-inline:auto}
+.ct{display:grid;gap:10px;margin:24px auto 0;max-width:420px;text-align:left}
+.ct div{display:flex;justify-content:space-between;gap:12px;padding:15px 16px;background:var(--panel);border:1px solid var(--line);border-radius:14px;font-size:14px}
+.ct b{font:500 11px var(--mono);letter-spacing:.14em;color:var(--mute);text-transform:uppercase;flex:none}.ct span{text-align:right;word-break:break-all}
+.warn{max-width:560px;margin:26px auto 0;padding:14px 16px;border-radius:14px;border:1px solid rgba(255,185,56,.35);background:rgba(255,185,56,.07);color:#f0d9a8;font-size:12.5px;line-height:1.75;text-align:left}
+footer{padding:26px var(--gut) 10px;color:var(--mute);font:400 11px/1.7 var(--mono);text-align:center}
+
+/* 底部分頁 */
+.tabs{position:fixed;z-index:130;left:10px;right:10px;bottom:calc(env(safe-area-inset-bottom,0px) + 10px);max-width:520px;margin-inline:auto;height:var(--tab);display:grid;grid-template-columns:repeat(4,1fr);padding:6px;border-radius:24px;background:rgba(20,24,33,.82);backdrop-filter:blur(20px) saturate(1.5);-webkit-backdrop-filter:blur(20px) saturate(1.5);border:1px solid var(--line);box-shadow:0 20px 50px -10px rgba(0,0,0,.7);transition:transform .5s cubic-bezier(.2,.8,.1,1)}
+.tabs.hide{transform:translateY(160%)}
+.tabs a{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border-radius:18px;font:500 11px var(--body);color:var(--mute);position:relative;transition:color .3s,background .3s}
+.tabs a svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.tabs a.on{color:var(--fg);background:rgba(255,255,255,.08)}
+.tabs a.on svg{stroke:var(--ember)}
+.tabs a .cnt{position:absolute;top:5px;right:calc(50% - 22px);min-width:17px;height:17px;border-radius:9px;background:var(--ember);color:#160a04;font:800 10px/17px var(--mono);text-align:center;padding:0 4px;display:none}
+.tabs a .cnt.on{display:block}
+
+/* 詳情抽屜 */
+.sbg{position:fixed;inset:0;z-index:300;background:#000;opacity:0;pointer-events:none;transition:opacity .35s}
+.sbg.on{opacity:.65;pointer-events:auto}
+.sheet{position:fixed;z-index:310;left:0;right:0;bottom:0;margin-inline:auto;width:min(100%,560px);max-height:92svh;display:flex;flex-direction:column;background:#10131b;border:1px solid var(--line);border-bottom:0;border-radius:26px 26px 0 0;transform:translateY(105%);will-change:transform}
+.sheet.anim{transition:transform .5s cubic-bezier(.2,.9,.1,1)}
+.grab{flex:none;height:30px;display:grid;place-items:center;touch-action:none;cursor:grab}
+.grab i{width:44px;height:5px;border-radius:9px;background:rgba(255,255,255,.28)}
+.sb{overflow-y:auto;overscroll-behavior:contain;padding:0 18px calc(env(safe-area-inset-bottom,0px) + 22px);display:flex;flex-direction:column;gap:16px}
+.gal{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;margin:0 -18px;padding:0 18px;scrollbar-width:none}
+.gal::-webkit-scrollbar{display:none}
+.gal canvas{flex:none;width:78%;aspect-ratio:4/4.4;border-radius:20px;scroll-snap-align:center;background:#000}
+.gd{display:flex;gap:6px;justify-content:center;margin-top:-6px}.gd i{width:6px;height:6px;border-radius:9px;background:rgba(255,255,255,.25);transition:.3s}.gd i.on{width:20px;background:var(--fg)}
+.dh{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.dh h3{font:800 19px/1.35 var(--body)}
+.rar{flex:none;font:700 11px var(--mono);letter-spacing:.1em;padding:5px 10px;border-radius:8px;color:var(--rc);border:1px solid var(--rc);background:rgba(255,255,255,.03)}
+.dprice{font:800 2rem/1 var(--display);letter-spacing:-.05em}.dprice small{font:500 12px var(--mono);color:var(--mute);letter-spacing:0;margin-right:5px}
+.specs{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);border-radius:14px;overflow:hidden;border:1px solid var(--line)}
+.specs div{background:var(--panel);padding:11px 13px}.specs small{display:block;font:500 10px var(--mono);letter-spacing:.14em;color:var(--mute);text-transform:uppercase}.specs b{font-weight:500;font-size:13.5px}
+.tr{display:grid;gap:8px;font-size:13.5px}.tr div{display:flex;gap:10px;align-items:flex-start}.tr div::before{content:"";flex:none;width:18px;height:18px;margin-top:2px;border-radius:50%;background:var(--ok) center/11px no-repeat url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M5 10.5l3.2 3.2L15 6.8' fill='none' stroke='%230a0c11' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")}
+.act{display:grid;grid-template-columns:auto 1fr;gap:10px}
+.act .sq{width:50px;padding:0}
+
+.toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + var(--tab) + 28px);transform:translate(-50%,30px);background:var(--fg);color:#0a0c11;padding:12px 20px;border-radius:99px;font:500 13px var(--body);opacity:0;pointer-events:none;transition:.45s cubic-bezier(.2,.8,.1,1);z-index:400;white-space:nowrap}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+.rvl{opacity:1;transform:none}.js .rvl.pre{opacity:0;transform:translateY(28px);transition:opacity .8s,transform .8s cubic-bezier(.2,.8,.1,1)}.js .rvl.pre.in{opacity:1;transform:none}
+:focus-visible{outline:2px solid var(--ice);outline-offset:3px}
+@media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}.hero h1 .w,.hero p.sub,.hero .row,.pills{opacity:1;transform:none;filter:none}}
+</style>
+</head>
+<body>
+<header class="top" id="top"><div class="logo"><i></i>ROOK VAULT<span>遊戲倉庫</span></div><div class="live">營業中</div></header>
+
+<!-- Hero -->
+<section class="hero" id="home">
+  <canvas class="em" id="em" aria-hidden="true"></canvas>
+  <div class="hero-in">
+    <div>
+      <div class="eyebrow">個人遊戲商人 · 帳號 / 道具 / 代儲</div>
+      <h1 id="h1"></h1>
+      <p class="sub">每筆交易都有驗證與售後流程。手機上滑一滑就能找到、問價、成交。</p>
+      <div class="pills"><span>先驗證再付款</span><span>可面交</span><span>7 日售後（示意）</span></div>
+      <div class="row"><a class="btn" href="#shop" data-ink>逛商店</a><a class="btn ghost" href="#sell" data-ink>我要賣帳號</a></div>
+    </div>
+    <div class="fc-wrap"><div class="fc" id="fc"><canvas id="fcv"></canvas><div class="sheen"></div><div class="gl"></div>
+      <div class="cap"><small>LEGENDARY · 本週主打</small><b>滿級戰士帳號 Lv.100</b><span>NT$18,800</span></div></div></div>
+  </div>
+</section>
+
+<div class="ticker" aria-hidden="true"><div class="tk-row" id="tk"></div></div>
+
+<!-- 商店 -->
+<section id="shop">
+  <div class="wrap">
+    <div class="eyebrow">Shop · 商品</div>
+    <h2>找到你要的，<br>直接 <em>問價</em></h2>
+    <p class="sub">點商品看詳細規格，滑開底部抽屜就能複製詢價訊息。商品均為虛構示意。</p>
+    <div class="filters" id="filters">
+      <label class="search"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input id="q" type="search" placeholder="搜尋遊戲、商品或關鍵字" enterkeyhint="search" autocomplete="off"></label>
+      <div class="scrollx" id="fGame"></div>
+      <div class="scrollx" id="fType"></div>
+      <div class="scrollx" id="fRar"></div>
+    </div>
+    <div class="meta"><span id="count"></span><div class="scrollx" id="fSort" style="margin:0;padding:0"></div></div>
+    <div class="grid" id="grid"></div>
+  </div>
+</section>
+
+<!-- 收購 -->
+<section class="sell" id="sell">
+  <div class="wrap">
+    <div class="eyebrow">Sell to me · 收購</div>
+    <h2>帳號想賣？<br>先 <em>估個價</em></h2>
+    <p class="sub">拉動滑桿看大概的收購範圍，再把訊息複製給我確認。估價僅供參考，實際以驗證後為準。</p>
+    <div class="panel rvl pre">
+      <div style="display:grid;gap:22px;align-content:start">
+        <div class="fld"><span class="l">遊戲</span><div class="scrollx" id="sGame" style="margin:0;padding:0"></div></div>
+        <div class="fld"><label for="lv">帳號等級 <b id="lvV"></b></label><input id="lv" type="range" min="1" max="100" value="60"></div>
+        <div class="fld"><label for="rare">稀有道具數量 <b id="rareV"></b></label><input id="rare" type="range" min="0" max="50" value="8"></div>
+        <div class="fld"><label for="age">帳號年資 <b id="ageV"></b></label><input id="age" type="range" min="0" max="10" value="2"></div>
+      </div>
+      <div class="quote">
+        <div><small>預估收購價（示意）</small><div class="big" id="qv">NT$0</div><p class="note" style="margin-top:8px">範圍約 ±15%，請先確認帳號可合法轉讓。</p></div>
+        <textarea id="smsg" readonly aria-label="收購訊息"></textarea>
+        <button class="btn block" id="scopy" data-ink>複製收購訊息</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 安全 -->
+<section id="safe">
+  <div class="wrap">
+    <div class="eyebrow">Trust · 安全交易</div>
+    <h2>買賣前，<br>先把這幾件事 <em>做完</em></h2>
+    <div class="flow" id="flow">
+      <div class="fs"><h3>聯絡與確認</h3><p>用 LINE 或 Discord 詢問，確認商品還在、規格與價格。</p></div>
+      <div class="fs"><h3>驗證商品</h3><p>視訊或錄影展示登入畫面、庫存與綁定資料，買方自行確認。</p></div>
+      <div class="fs"><h3>安全付款與交付</h3><p>使用雙方都同意的方式，建議面交或第三方託管，並完成換綁。</p></div>
+      <div class="fs"><h3>完成與售後</h3><p>交付後保留紀錄；售後期內有問題可以回報處理（示意）。</p></div>
+    </div>
+    <div class="check rvl pre">
+      <h3>買家安全檢查表 <span id="ckn">0 / 5</span></h3>
+      <div class="bar"><i id="ckb"></i></div>
+      <button class="ck" aria-pressed="false"><span class="bx"><svg viewBox="0 0 20 20"><path d="M4 10.5l4 4 8-9"/></svg></span><span class="t"><b>確認賣家身分與評價</b><small>看有沒有可查證的成交紀錄，不要只看截圖。</small></span></button>
+      <button class="ck" aria-pressed="false"><span class="bx"><svg viewBox="0 0 20 20"><path d="M4 10.5l4 4 8-9"/></svg></span><span class="t"><b>要求即時視訊驗證</b><small>不接受只給舊截圖，請對方當場登入展示。</small></span></button>
+      <button class="ck" aria-pressed="false"><span class="bx"><svg viewBox="0 0 20 20"><path d="M4 10.5l4 4 8-9"/></svg></span><span class="t"><b>弄清楚換綁流程</b><small>信箱、手機與安全問題都要能完整轉移。</small></span></button>
+      <button class="ck" aria-pressed="false"><span class="bx"><svg viewBox="0 0 20 20"><path d="M4 10.5l4 4 8-9"/></svg></span><span class="t"><b>不要先匯款再談</b><small>先確認付款與交付的順序，避免單方面風險。</small></span></button>
+      <button class="ck" aria-pressed="false"><span class="bx"><svg viewBox="0 0 20 20"><path d="M4 10.5l4 4 8-9"/></svg></span><span class="t"><b>了解遊戲條款風險</b><small>許多遊戲禁止轉讓帳號，帳號可能被停權，需自行承擔。</small></span></button>
+      <div class="done" id="ckd">五項都完成了。可以放心進入下一步，保留好對話與付款紀錄。</div>
+    </div>
+    <div class="stats rvl pre"><div><b data-n="1280">0</b><small>累積成交（示意）</small></div><div><b data-n="15">0</b><small>平均回覆分鐘（示意）</small></div><div><b data-n="7">0</b><small>售後天數（示意）</small></div></div>
+    <div class="revs rvl pre">
+      <div class="rv"><div class="st">★★★★★</div><p>會要求視訊驗證，流程很清楚，交易完才放心。</p><small>買家 A · Eldrath · 示意</small></div>
+      <div class="rv"><div class="st">★★★★★</div><p>回覆很快，價格也有講清楚，沒有亂加價。</p><small>買家 B · Neon Strike · 示意</small></div>
+      <div class="rv"><div class="st">★★★★☆</div><p>代儲速度快，十幾分鐘就到帳。</p><small>買家 C · Starfall · 示意</small></div>
+    </div>
+  </div>
+</section>
+
+<!-- 聯絡 -->
+<section class="contact" id="contact">
+  <div class="wrap">
+    <div class="eyebrow" style="justify-content:center">Contact · 聯絡</div>
+    <h2>有想買、想賣，<br>直接 <em>傳訊息</em></h2>
+    <p class="sub">請附上商品編號或收購訊息，回覆會更快。</p>
+    <div class="ct"><div><b>LINE</b><span>@your-line-id（請填入）</span></div><div><b>Discord</b><span>yourname#0000（請填入）</span></div><div><b>回覆時間</b><span>每日 12:00 – 24:00（示意）</span></div></div>
+    <div class="warn"><b>交易提醒</b>　本頁為概念範例，商品與評價皆為虛構。實際營運時請注意：許多遊戲的服務條款禁止買賣帳號或虛擬物品，可能導致帳號被停權；請自行評估風險，並遵守所在地相關法規與稅務規定。</div>
+  </div>
+  <footer>© Rook Vault · 範例網站</footer>
+</section>
+
+<nav class="tabs" id="tabs" aria-label="主要導覽">
+  <a href="#shop" data-t="shop"><svg viewBox="0 0 24 24"><path d="M5 8h14l-1 12H6L5 8zM9 8V6a3 3 0 016 0v2"/></svg>商店<span class="cnt" id="favCnt">0</span></a>
+  <a href="#sell" data-t="sell"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v10M9.5 9.5c0-1 1-1.6 2.5-1.6s2.5.6 2.5 1.6-1 1.4-2.5 1.8-2.5.8-2.5 1.8 1 1.6 2.5 1.6 2.5-.6 2.5-1.6"/></svg>收購</a>
+  <a href="#safe" data-t="safe"><svg viewBox="0 0 24 24"><path d="M12 3l7 3v5c0 5-3 8.5-7 10-4-1.500-7-5-7-10V6l7-3z"/><path d="M9 12l2.200 2.200L15 10"/></svg>安全</a>
+  <a href="#contact" data-t="contact"><svg viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4V5z"/></svg>聯絡</a>
+</nav>
+
+<div class="sbg" id="sbg"></div>
+<aside class="sheet" id="sheet" aria-label="商品詳情" aria-hidden="true"><div class="grab" id="grab"><i></i></div><div class="sb" id="sb"></div></aside>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+document.documentElement.classList.add('js');
+const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
+const lerp=(a,b,t)=>a+(b-a)*t,clamp=(v,a=0,b=1)=>Math.max(a,Math.min(b,v));
+const reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
+const buzz=(n=8)=>{try{navigator.vibrate&&navigator.vibrate(n)}catch(e){}};
+const money=n=>'NT$'+Math.round(n).toLocaleString();
+let tt;function toast(t){const e=$('#toast');e.textContent=t;e.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>e.classList.remove('on'),2000)}
+async function copy(text,ta){try{await navigator.clipboard.writeText(text);toast('已複製，貼到 LINE 或 Discord');return}catch(e){}
+  if(ta){ta.removeAttribute('readonly');ta.select();let ok=false;try{ok=document.execCommand('copy')}catch(x){}ta.setAttribute('readonly','');toast(ok?'已複製，貼到 LINE 或 Discord':'請長按文字手動複製')}else toast('請長按文字手動複製')}
+document.addEventListener('pointerdown',e=>{const b=e.target.closest('[data-ink]');if(!b)return;buzz(8);const r=b.getBoundingClientRect(),s=Math.max(r.width,r.height)*2.2,i=document.createElement('span');i.className='ink';
+  i.style.cssText=`width:${s}px;height:${s}px;left:${e.clientX-r.left-s/2}px;top:${e.clientY-r.top-s/2}px`;b.appendChild(i);setTimeout(()=>i.remove(),650)});
+function rng(a){return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+
+/* ---------- 資料（全部為虛構） ---------- */
+const GAMES={eld:{n:'Eldrath Online',h:24,m:'blade'},neo:{n:'Neon Strike',h:190,m:'ring'},star:{n:'Starfall',h:275,m:'star'}};
+const RAR={common:['普通','#8b93a7'],rare:['稀有','#4aa8ff'],epic:['史詩','#b46bff'],legendary:['傳說','#ffb938']};
+const TYPES={acc:'帳號',item:'道具',topup:'代儲',card:'點數卡'};
+const L=[
+ {id:101,g:'eld',t:'acc',r:'legendary',n:'滿級戰士帳號 Lv.100・傳說裝備 6 件',p:18800,s:1,sp:[['等級','100'],['職業','戰士'],['傳說裝備','6 件'],['角色數','3'],['綁定','信箱可轉'],['年資','4 年']],d:'視訊驗證後換綁'},
+ {id:102,g:'eld',t:'item',r:'epic',n:'龍鱗胸甲（可交易）',p:2400,s:3,sp:[['類型','防具'],['需求等級','80'],['可交易','是'],['耐久','滿'],['屬性','火抗'],['來源','副本掉落']],d:'遊戲內面交'},
+ {id:103,g:'eld',t:'topup',r:'common',n:'月卡代儲（30 日）',p:280,s:99,sp:[['類型','月卡'],['時效','30 日'],['方式','官方管道'],['所需資料','角色名'],['速度','約 15 分鐘'],['限制','需同伺服器']],d:'代操作儲值'},
+ {id:104,g:'neo',t:'acc',r:'epic',n:'大師段位帳號・賽季皮膚 12 款',p:6500,s:1,sp:[['段位','大師'],['皮膚','12 款'],['勝率','61%'],['綁定','信箱可轉'],['年資','3 年'],['實名','未綁']],d:'視訊驗證後換綁'},
+ {id:105,g:'neo',t:'item',r:'legendary',n:'限定槍皮「Aurora」',p:3200,s:2,sp:[['類型','武器皮膚'],['限定','賽季限定'],['可交易','贈送'],['特效','擊殺光效'],['適用','全武器'],['稀有度','傳說']],d:'好友贈送'},
+ {id:106,g:'neo',t:'card',r:'common',n:'點數卡 1,000 點',p:880,s:40,sp:[['面額','1,000 點'],['地區','台灣'],['形式','序號'],['時效','無'],['發票','可開'],['交付','即時']],d:'序號傳送'},
+ {id:107,g:'star',t:'acc',r:'legendary',n:'初始號・五星角色 3 位',p:4900,s:1,sp:[['五星角色','3 位'],['等級','55'],['抽數','48 抽'],['綁定','信箱可轉'],['年資','1 年'],['伺服器','亞洲']],d:'視訊驗證後換綁'},
+ {id:108,g:'star',t:'item',r:'rare',n:'角色碎片包（十組）',p:650,s:12,sp:[['類型','碎片'],['數量','10 組'],['可交易','是'],['來源','活動'],['適用','全角色'],['期限','無']],d:'遊戲內贈送'},
+ {id:109,g:'star',t:'topup',r:'common',n:'首儲雙倍代儲',p:320,s:99,sp:[['類型','代儲'],['面額','60 元'],['雙倍','首儲限定'],['方式','官方管道'],['速度','約 10 分鐘'],['所需','UID']],d:'代操作儲值'},
+ {id:110,g:'neo',t:'acc',r:'rare',n:'白金段位帳號・乾淨首購',p:1800,s:1,sp:[['段位','白金'],['皮膚','3 款'],['年資','1 年'],['綁定','信箱可轉'],['停權紀錄','無'],['實名','未綁']],d:'視訊驗證後換綁'}];
+const byId=Object.fromEntries(L.map(x=>[x.id,x]));
+
+/* ---------- 程序化插圖 ---------- */
+function star(g,cx,cy,R,n,inner){g.beginPath();for(let i=0;i<n*2;i++){const r=i%2?R*inner:R,a=i*Math.PI/n-Math.PI/2;g[i?'lineTo':'moveTo'](cx+Math.cos(a)*r,cy+Math.sin(a)*r)}g.closePath()}
+function art(cv,x,v=0,anim){
+  const W=320,H=352,d=2;cv.width=W*d;cv.height=H*d;const g=cv.getContext('2d');g.scale(d,d);
+  const G=GAMES[x.g],r=rng(x.id*97+v*13),rc=RAR[x.r][1];
+  let b=g.createLinearGradient(0,0,W,H);b.addColorStop(0,`hsl(${G.h} 55% 16%)`);b.addColorStop(1,`hsl(${G.h+30} 60% 5%)`);g.fillStyle=b;g.fillRect(0,0,W,H);
+  b=g.createRadialGradient(W/2,H*.44,10,W/2,H*.44,W*.7);b.addColorStop(0,rc+'66');b.addColorStop(1,'transparent');g.fillStyle=b;g.fillRect(0,0,W,H);
+  g.save();g.globalAlpha=.35;
+  if(G.m==='blade'){for(let i=0;i<7;i++){g.save();g.translate(W*(.1+i*.14),H);g.rotate(-.5);const gr=g.createLinearGradient(0,0,0,-H);gr.addColorStop(0,'transparent');gr.addColorStop(1,`hsla(${G.h},90%,60%,.5)`);g.fillStyle=gr;g.fillRect(-4,-H*1.1,8+r()*8,H*1.1);g.restore()}}
+  else if(G.m==='ring'){g.strokeStyle=`hsl(${G.h} 90% 60%)`;g.lineWidth=1;for(let i=1;i<7;i++){g.beginPath();g.arc(W/2,H*.44,i*34,0,6.3);g.stroke()}g.beginPath();g.moveTo(0,H*.44);g.lineTo(W,H*.44);g.moveTo(W/2,0);g.lineTo(W/2,H);g.stroke()}
+  else{for(let i=0;i<46;i++){g.fillStyle='#fff';g.globalAlpha=.2+r()*.6;g.beginPath();g.arc(r()*W,r()*H,r()*1.6+.3,0,6.3);g.fill()}g.globalAlpha=.3;g.strokeStyle=`hsl(${G.h} 80% 70%)`;for(let i=0;i<3;i++){g.beginPath();g.ellipse(W/2,H*.44,60+i*34,24+i*12,-.5+i*.4,0,6.3);g.stroke()}}
+  g.restore();
+  const n={common:6,rare:6,epic:8,legendary:10}[x.r];
+  if(v===0||v===2){const cy=v===2?H*.3:H*.44,R=v===2?58:92;g.save();g.shadowColor=rc;g.shadowBlur=36;
+    b=g.createLinearGradient(0,cy-R,0,cy+R);b.addColorStop(0,'#fff');b.addColorStop(.35,rc);b.addColorStop(1,'#000');g.fillStyle=b;star(g,W/2,cy,R,n,.58);g.fill();g.restore();
+    g.strokeStyle='rgba(255,255,255,.7)';g.lineWidth=1.2;star(g,W/2,cy,R,n,.58);g.stroke();
+    g.beginPath();g.arc(W/2,cy,R*.3,0,6.3);g.fillStyle='rgba(0,0,0,.55)';g.fill();g.strokeStyle='#fff';g.stroke()}
+  if(v===1){for(let i=0;i<6;i++){const cx=W*(.2+(i%3)*.3),cy=H*(.28+Math.floor(i/3)*.3);g.save();g.shadowColor=rc;g.shadowBlur=14;g.fillStyle=rc;g.globalAlpha=.4+r()*.6;star(g,cx,cy,36,6,.7);g.fill();g.restore()}}
+  if(v===2){const lab=['攻擊','防禦','敏捷','幸運'];lab.forEach((t,i)=>{const y=H*.52+i*34,w=(W-80)*(.4+r()*.55);g.fillStyle='rgba(255,255,255,.08)';g.fillRect(40,y,W-80,10);g.fillStyle=rc;g.fillRect(40,y,w,10);g.fillStyle='#cfd6e6';g.font='500 11px "Noto Sans TC",sans-serif';g.fillText(t,40,y-5)})}
+  b=g.createLinearGradient(0,H*.6,0,H);b.addColorStop(0,'transparent');b.addColorStop(1,'rgba(0,0,0,.6)');g.fillStyle=b;g.fillRect(0,0,W,H)}
+
+/* ---------- Hero ---------- */
+(function(){const h=$('#h1');let i=0;const add=(t,c)=>{const s=document.createElement('span');s.className='w'+(c?' '+c:'');s.style.setProperty('--i',i++);s.textContent=t;h.appendChild(s)};
+  [...'穩穩成交，'].forEach(c=>add(c));h.appendChild(document.createElement('br'));[...'裝備到手'].forEach(c=>add(c,'hl'))})();
+art($('#fcv'),byId[101],0);
+const fc=$('#fc');let fr={rx:0,ry:0,px:50,py:50},ft={rx:0,ry:0,px:50,py:50},lastIn=-9999;
+function aim(cx,cy){const r=fc.getBoundingClientRect(),x=clamp((cx-r.left)/r.width),y=clamp((cy-r.top)/r.height);ft={ry:(x-.5)*30,rx:(.5-y)*24,px:x*100,py:y*100};lastIn=performance.now()}
+fc.addEventListener('pointermove',e=>{if(e.pointerType==='mouse')aim(e.clientX,e.clientY)});
+fc.addEventListener('touchstart',e=>aim(e.touches[0].clientX,e.touches[0].clientY),{passive:true});fc.addEventListener('touchmove',e=>aim(e.touches[0].clientX,e.touches[0].clientY),{passive:true});
+/* 火星粒子 */
+const em=$('#em'),eg=em.getContext('2d'),heroEl=$('#home');let EP=[],emVis=true;
+new IntersectionObserver(es=>emVis=es[0].isIntersecting).observe(heroEl);
+function emInit(){const d=Math.min(devicePixelRatio||1,2),w=em.clientWidth,h=em.clientHeight;em.width=w*d;em.height=h*d;eg.setTransform(d,0,0,d,0,0);
+  EP=Array.from({length:Math.min(70,w/7|0)},()=>({x:Math.random()*w,y:Math.random()*h,v:.3+Math.random()*.9,s:.6+Math.random()*1.8,ph:Math.random()*6.3,c:Math.random()<.7?'255,106,43':'255,185,56'}))}
+emInit();addEventListener('resize',emInit);
+function drawEm(t){const w=em.clientWidth,h=em.clientHeight;eg.clearRect(0,0,w,h);for(const p of EP){p.y-=p.v;p.x+=Math.sin(t*1.2+p.ph)*.4;if(p.y<-10){p.y=h+10;p.x=Math.random()*w}
+  eg.fillStyle=`rgba(${p.c},${.25+.55*Math.abs(Math.sin(t*2+p.ph))})`;eg.beginPath();eg.arc(p.x,p.y,p.s,0,6.3);eg.fill()}}
+
+/* 跑馬燈 */
+(function(){const ev=[['Eldrath','龍鱗胸甲'],['Neon Strike','Aurora 槍皮'],['Starfall','首儲代儲'],['Eldrath','月卡代儲'],['Neon Strike','白金帳號'],['Starfall','碎片包']];
+  const h=ev.map(([g,n],i)=>`<span><i>●</i><b>${g}</b>${n}<em style="font-style:normal;opacity:.6">已成交 · ${[3,7,12,18,26,41][i]} 分鐘前（示意）</em></span>`).join('');$('#tk').innerHTML=h+h})();
+
+/* ---------- 商店 ---------- */
+const F={game:'all',type:'all',rar:'all',q:'',fav:false,sort:'rec'};
+let favs=new Set();try{favs=new Set(JSON.parse(localStorage.getItem('rv-fav')||'[]'))}catch(e){}
+const saveFav=()=>{try{localStorage.setItem('rv-fav',JSON.stringify([...favs]))}catch(e){}};
+function chipRow(host,items,key,withDot){host.innerHTML='';items.forEach(([k,label,c])=>{const b=document.createElement('button');b.className='chip';b.type='button';b.dataset.k=k;
+  b.innerHTML=(withDot&&c?`<span class="dot" style="--c:${c}"></span>`:'')+label;b.onclick=()=>{F[key]=k;buzz(5);apply()};host.appendChild(b)})}
+chipRow($('#fGame'),[['all','全部遊戲'],...Object.entries(GAMES).map(([k,v])=>[k,v.n])],'game');
+chipRow($('#fType'),[['all','全部類型'],...Object.entries(TYPES)],'type');
+chipRow($('#fRar'),[['all','全部稀有度'],...Object.entries(RAR).map(([k,v])=>[k,v[0],v[1]])],'rar',true);
+(function(){const h=$('#fSort');[['rec','推薦'],['asc','價格 ↑'],['desc','價格 ↓']].forEach(([k,l])=>{const b=document.createElement('button');b.className='chip';b.dataset.k=k;b.textContent=l;b.style.minHeight='34px';b.onclick=()=>{F.sort=k;apply()};h.appendChild(b)});
+  const f=document.createElement('button');f.className='chip fav';f.id='favBtn';f.style.minHeight='34px';f.onclick=()=>{F.fav=!F.fav;apply()};h.appendChild(f)})();
+const grid=$('#grid'),cards={};
+L.forEach((x,i)=>{const el=document.createElement('div');el.className='item r-'+x.r;el.setAttribute('role','button');el.tabIndex=0;el.style.setProperty('--n',i);
+  el.innerHTML=`<div class="pic"><canvas></canvas><div class="badges">${i<3?'<span class="bdg new">新上架</span>':''}${x.s===1?'<span class="bdg one">僅此 1 件</span>':''}</div>
+  <button class="heart" aria-label="收藏" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M12 20s-7-4.4-9-9.2C1.800 7.200 4 4.500 6.800 4.500c2 0 3.400 1.100 5.200 3 1.800-1.900 3.200-3 5.200-3 2.800 0 5 2.700 3.800 6.300C19 15.600 12 20 12 20z"/></svg></button></div>
+  <div class="tx"><div class="gm"><span>${GAMES[x.g].n}</span><b>${RAR[x.r][0]}</b></div><h3>${x.n}</h3><div class="pr"><small>NT$</small>${x.p.toLocaleString()}</div></div>`;
+  art($('canvas',el),x,0);const hb=$('.heart',el);
+  hb.onclick=e=>{e.stopPropagation();toggleFav(x.id)};
+  el.onclick=()=>openSheet(x.id);el.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openSheet(x.id)}};
+  grid.appendChild(el);cards[x.id]=el});
+function toggleFav(id){favs.has(id)?favs.delete(id):favs.add(id);buzz(10);saveFav();apply();const f=favs.has(id);toast(f?'已收藏':'已取消收藏');const d=$('#fvb');if(d)d.setAttribute('aria-pressed',f)}
+function apply(){
+  const q=F.q.trim().toLowerCase();let n=0;
+  const list=L.filter(x=>(F.game==='all'||x.g===F.game)&&(F.type==='all'||x.t===F.type)&&(F.rar==='all'||x.r===F.rar)&&(!F.fav||favs.has(x.id))&&(!q||(x.n+GAMES[x.g].n+TYPES[x.t]+RAR[x.r][0]).toLowerCase().includes(q)));
+  if(F.sort==='asc')list.sort((a,b)=>a.p-b.p);else if(F.sort==='desc')list.sort((a,b)=>b.p-a.p);else list.sort((a,b)=>L.indexOf(a)-L.indexOf(b));
+  const ids=new Set(list.map(x=>x.id));
+  L.forEach(x=>{const el=cards[x.id];el.hidden=!ids.has(x.id);$('.heart',el).setAttribute('aria-pressed',favs.has(x.id))});
+  list.forEach((x,i)=>{cards[x.id].style.order=i;cards[x.id].style.setProperty('--n',i)});
+  $$('#fGame .chip').forEach(b=>b.setAttribute('aria-pressed',b.dataset.k===F.game));$$('#fType .chip').forEach(b=>b.setAttribute('aria-pressed',b.dataset.k===F.type));
+  $$('#fRar .chip').forEach(b=>b.setAttribute('aria-pressed',b.dataset.k===F.rar));$$('#fSort .chip:not(.fav)').forEach(b=>b.setAttribute('aria-pressed',b.dataset.k===F.sort));
+  $('#favBtn').textContent=`♡ 收藏 ${favs.size}`;$('#favBtn').setAttribute('aria-pressed',F.fav);
+  $('#count').textContent=`共 ${list.length} 件商品`;
+  const c=$('#favCnt');c.textContent=favs.size;c.classList.toggle('on',favs.size>0);
+  let em=$('.empty');if(!list.length){if(!em){em=document.createElement('div');em.className='empty';em.innerHTML='<p>沒有符合的商品，試試放寬條件。</p><button class="btn ghost" id="rst">清除篩選</button>';grid.appendChild(em);$('#rst').onclick=()=>{Object.assign(F,{game:'all',type:'all',rar:'all',q:'',fav:false});$('#q').value='';apply()}}}else if(em)em.remove()}
+$('#q').addEventListener('input',e=>{F.q=e.target.value;apply()});apply();
+
+/* ---------- 詳情抽屜 ---------- */
+const sheet=$('#sheet'),sbg=$('#sbg'),sb=$('#sb');let SH=0,sy=0,opened=false,cur=null;
+function setY(y,anim){sy=y;sheet.classList.toggle('anim',!!anim);sheet.style.transform=`translateY(${y}px)`;sbg.style.opacity=clamp(1-y/Math.max(1,SH))*.65}
+function openSheet(id){
+  const x=byId[id];cur=x;const rc=RAR[x.r][1];
+  sb.innerHTML=`<div class="gal" id="gal"><canvas></canvas><canvas></canvas><canvas></canvas></div><div class="gd" id="gd"><i class="on"></i><i></i><i></i></div>
+  <div class="dh" style="--rc:${rc}"><div><div style="font:500 11px var(--mono);letter-spacing:.12em;color:var(--mute);margin-bottom:4px">${GAMES[x.g].n} · ${TYPES[x.t]} · #${x.id}</div><h3>${x.n}</h3></div><span class="rar">${RAR[x.r][0]}</span></div>
+  <div class="dprice"><small>NT$</small>${x.p.toLocaleString()}</div>
+  <div class="specs">${x.sp.map(s=>`<div><small>${s[0]}</small><b>${s[1]}</b></div>`).join('')}</div>
+  <div class="specs"><div><small>交付方式</small><b>${x.d}</b></div><div><small>庫存</small><b>${x.s>=99?'充足':x.s+' 件'}</b></div></div>
+  <div class="tr"><div>可視訊驗證後再付款</div><div>保留對話與交付紀錄</div><div>7 日售後（示意）</div></div>
+  <textarea id="dmsg" readonly aria-label="詢價訊息"></textarea>
+  <div class="act"><button class="btn ghost sq" id="fvb" aria-pressed="${favs.has(id)}" aria-label="收藏">♡</button><button class="btn block" id="dcopy" data-ink>複製詢價訊息</button></div>
+  <p class="note" style="margin:0">商品為虛構示意。實際交易請留意遊戲條款對轉讓的限制。</p>`;
+  $$('#gal canvas').forEach((c,i)=>art(c,x,i));
+  $('#dmsg').value=`你好，我想詢問商品：\n【${x.n}】\n遊戲：${GAMES[x.g].n}\n編號：#${x.id}\n價格：${money(x.p)}\n請問還有嗎？可以先視訊驗證嗎？`;
+  $('#dcopy').onclick=()=>copy($('#dmsg').value,$('#dmsg'));$('#fvb').onclick=()=>toggleFav(id);
+  const gal=$('#gal');gal.addEventListener('scroll',()=>{const i=Math.round(gal.scrollLeft/(gal.scrollWidth/3));$$('#gd i').forEach((d,k)=>d.classList.toggle('on',k===i))},{passive:true});
+  sheet.setAttribute('aria-hidden','false');sheet.style.setProperty('--rc',rc);
+  document.body.style.overflow='hidden';$('#tabs').classList.add('hide');
+  sbg.classList.add('on');requestAnimationFrame(()=>{SH=sheet.offsetHeight;opened=true;setY(0,true)});buzz(8)}
+function closeSheet(){if(!opened)return;opened=false;SH=sheet.offsetHeight;setY(SH+20,true);sbg.classList.remove('on');sheet.setAttribute('aria-hidden','true');document.body.style.overflow='';$('#tabs').classList.remove('hide')}
+sbg.onclick=closeSheet;addEventListener('keydown',e=>{if(e.key==='Escape')closeSheet()});
+let gd=null;const grab=$('#grab');
+grab.addEventListener('pointerdown',e=>{gd={y:e.clientY,y0:sy,t:performance.now()};grab.setPointerCapture(e.pointerId);sheet.classList.remove('anim')});
+grab.addEventListener('pointermove',e=>{if(gd)setY(Math.max(0,gd.y0+e.clientY-gd.y),false)});
+const gend=e=>{if(!gd)return;const v=(e.clientY-gd.y)/Math.max(1,performance.now()-gd.t),far=sy>SH*.3||v>.5;gd=null;if(far)closeSheet();else{setY(0,true);buzz(5)}};
+grab.addEventListener('pointerup',gend);grab.addEventListener('pointercancel',gend);
+/* 內容區下拉關閉：僅在捲到頂時 */
+let ty=0,tcl=false;sb.addEventListener('touchstart',e=>{ty=e.touches[0].clientY;tcl=sb.scrollTop<=0},{passive:true});
+sb.addEventListener('touchmove',e=>{if(!tcl||gd)return;const dy=e.touches[0].clientY-ty;if(dy>0&&sb.scrollTop<=0)setY(dy*.9,false);else if(dy<=0)tcl=false},{passive:true});
+sb.addEventListener('touchend',()=>{if(tcl&&sy>0){sy>SH*.25?closeSheet():setY(0,true)}tcl=false});
+setY(2000,false);
+
+/* ---------- 收購估價 ---------- */
+const SG={eld:{n:'Eldrath Online',base:600,lv:150,rare:420,age:260},neo:{n:'Neon Strike',base:400,lv:90,rare:300,age:200},star:{n:'Starfall',base:500,lv:110,rare:520,age:150}};
+let sgk='eld';
+Object.entries(SG).forEach(([k,v])=>{const b=document.createElement('button');b.className='chip';b.type='button';b.dataset.k=k;b.textContent=v.n;b.onclick=()=>{sgk=k;calc()};$('#sGame').appendChild(b)});
+let qShow=0,qTgt=0;
+function calc(){
+  const G=SG[sgk],lv=+$('#lv').value,rare=+$('#rare').value,age=+$('#age').value;
+  $('#lvV').textContent='Lv.'+lv;$('#rareV').textContent=rare+' 件';$('#ageV').textContent=age?age+' 年':'未滿 1 年';
+  $$('#sell input[type=range]').forEach(r=>r.style.setProperty('--v',((r.value-r.min)/(r.max-r.min)*100)+'%'));
+  $$('#sGame .chip').forEach(b=>b.setAttribute('aria-pressed',b.dataset.k===sgk));
+  qTgt=G.base+Math.pow(lv/100,1.6)*lv*G.lv/2+rare*G.rare/2+age*G.age;
+  const lo=Math.round(qTgt*.85/50)*50,hi=Math.round(qTgt*1.15/50)*50;
+  $('#smsg').value=`你好，我想賣帳號。\n遊戲：${G.n}\n等級：Lv.${lv}\n稀有道具：${rare} 件\n帳號年資：${age?age+' 年':'未滿 1 年'}\n我的預期：${money(lo)} – ${money(hi)}\n請問可以怎麼進行驗證？`;
+  $('#qv').dataset.range=`${money(lo)} – ${money(hi)}`}
+$$('#sell input[type=range]').forEach(r=>r.addEventListener('input',calc));calc();qShow=qTgt;
+$('#scopy').onclick=()=>copy($('#smsg').value,$('#smsg'));
+
+/* ---------- 安全 ---------- */
+const cks=$$('.ck');cks.forEach(b=>b.onclick=()=>{b.setAttribute('aria-pressed',b.getAttribute('aria-pressed')!=='true');buzz(8);ckUp()});
+function ckUp(){const n=cks.filter(b=>b.getAttribute('aria-pressed')==='true').length;$('#ckn').textContent=`${n} / ${cks.length}`;$('#ckb').style.width=n/cks.length*100+'%';$('#ckd').classList.toggle('on',n===cks.length);if(n===cks.length)buzz([12,40,12])}
+const flow=$('#flow'),fss=$$('.fs');
+function doFlow(){const r=flow.getBoundingClientRect(),p=clamp((innerHeight*.7-r.top)/r.height);flow.style.setProperty('--p',p.toFixed(3));
+  fss.forEach((s,i)=>s.classList.toggle('on',p>(i+.4)/fss.length))}
+/* 數字 */
+const cio=new IntersectionObserver(es=>es.forEach(e=>{if(!e.isIntersecting)return;cio.unobserve(e.target);const el=e.target,end=+el.dataset.n,t0=performance.now();
+  (function f(n){const t=clamp((n-t0)/1600);el.textContent=Math.round(end*(1-Math.pow(1-t,4))).toLocaleString();if(t<1)requestAnimationFrame(f)})(t0)}),{threshold:.6});
+$$('[data-n]').forEach(e=>cio.observe(e));
+
+/* ---------- 導覽、揭露 ---------- */
+const top=$('#top');addEventListener('scroll',()=>top.classList.toggle('solid',scrollY>30),{passive:true});
+const tabs=$$('#tabs a'),secs=['shop','sell','safe','contact'].map(id=>document.getElementById(id));
+const sio=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){const id=e.target.id;tabs.forEach(a=>a.classList.toggle('on',a.dataset.t===id))}}),{rootMargin:'-45% 0px -50% 0px'});secs.forEach(s=>sio.observe(s));
+const rio=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');rio.unobserve(e.target)}}),{threshold:.08});
+$$('.rvl').forEach(el=>{if(el.getBoundingClientRect().top>innerHeight)rio.observe(el);else el.classList.remove('pre')});
+$$('a[href^="#"]').forEach(a=>a.addEventListener('click',e=>{const id=a.getAttribute('href').slice(1);const t=id&&document.getElementById(id);if(t){e.preventDefault();t.scrollIntoView({behavior:reduce?'auto':'smooth',block:'start'})}}));
+
+/* ---------- 主迴圈 ---------- */
+const tk=$('#tk');
+function frame(now){
+  const t=now/1000;
+  if(emVis)drawEm(t);
+  if(now-lastIn>2200||reduce){ft={ry:Math.sin(t*.9)*13,rx:Math.cos(t*.7)*8,px:50+Math.sin(t*.9)*36,py:50+Math.cos(t*.7)*28}}
+  for(const k in fr)fr[k]=lerp(fr[k],ft[k],.12);
+  fc.style.setProperty('--rx',fr.rx.toFixed(2)+'deg');fc.style.setProperty('--ry',fr.ry.toFixed(2)+'deg');fc.style.setProperty('--px',fr.px.toFixed(1));fc.style.setProperty('--py',fr.py.toFixed(1));
+  qShow=lerp(qShow,qTgt,.12);$('#qv').textContent=money(qShow/50)==''?'':`${money(Math.round(qShow*.85/50)*50).replace('NT$','')} – ${money(Math.round(qShow*1.15/50)*50).replace('NT$','')}`.replace(/^/,'NT$');
+  const w=tk.scrollWidth/2;tk.style.transform=`translate3d(${-((t*40)%w)}px,0,0)`;
+  doFlow();requestAnimationFrame(frame)}
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>

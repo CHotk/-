@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0d0e12">
+<title>網站開發合輯</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+TC:wght@300;400;500;700&display=swap">
+<style>
+/* 版面：總入口目錄。上方標題，下方兩組卡片網格（特效圖鑑 / 行業範例）。點卡片開啟預覽視窗，可切換手機與桌機寬度 */
+:root{
+  --bg:#0d0e12; --panel:#15171d; --line:rgba(255,255,255,.1); --fg:#eceef3; --mute:#8b90a0; --acc:#ff7a45;
+  --display:'Bricolage Grotesque','Noto Sans TC',sans-serif; --body:'Noto Sans TC',system-ui,sans-serif; --mono:'JetBrains Mono',ui-monospace,monospace;
+  --gut:clamp(18px,5vw,64px);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font:300 15px/1.75 var(--body);padding-bottom:env(safe-area-inset-bottom,0px);overflow-x:hidden}
+a{color:inherit;text-decoration:none}button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+header{padding:calc(env(safe-area-inset-top,0px) + 64px) var(--gut) 40px;max-width:1280px;margin-inline:auto}
+.eyebrow{font:500 11px var(--mono);letter-spacing:.2em;text-transform:uppercase;color:var(--mute);display:flex;align-items:center;gap:12px;margin-bottom:20px}
+.eyebrow::before{content:"";width:28px;height:2px;background:var(--acc)}
+h1{font:800 clamp(2.6rem,10vw,6.4rem)/1 var(--display);letter-spacing:-.045em}
+h1 em{font-style:normal;color:var(--acc)}
+header p{color:var(--mute);max-width:46ch;margin-top:20px}
+.stats{display:flex;gap:28px;flex-wrap:wrap;margin-top:28px;font:500 12px var(--mono);color:var(--mute);letter-spacing:.06em}
+.stats b{color:var(--fg);font-weight:500;font-size:15px;margin-right:6px}
+main{padding:0 var(--gut) 90px;max-width:1280px;margin-inline:auto}
+.grp{margin-top:44px}
+.grp h2{font:700 12px var(--mono);letter-spacing:.2em;text-transform:uppercase;color:var(--mute);display:flex;align-items:center;gap:14px;margin-bottom:18px}
+.grp h2::after{content:"";flex:1;height:1px;background:var(--line)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,340px),1fr));gap:16px}
+.card{position:relative;display:flex;flex-direction:column;text-align:left;border-radius:22px;background:var(--panel);border:1px solid var(--line);overflow:hidden;transition:transform .45s cubic-bezier(.2,.8,.1,1),border-color .3s,box-shadow .4s}
+.card:hover{transform:translateY(-6px);border-color:rgba(255,255,255,.25);box-shadow:0 24px 50px -24px var(--g1)}
+.card:active{transform:scale(.98)}
+.thumb{position:relative;aspect-ratio:16/10;overflow:hidden;background:var(--bgt)}
+.thumb::after{content:"";position:absolute;inset:0;background:linear-gradient(transparent 55%,rgba(0,0,0,.45))}
+.thumb .art{position:absolute;inset:0;transition:transform .8s cubic-bezier(.2,.8,.1,1)}
+.card:hover .thumb .art{transform:scale(1.07)}
+.thumb .no{position:absolute;left:16px;top:14px;z-index:2;font:500 11px var(--mono);letter-spacing:.14em;color:rgba(255,255,255,.85);background:rgba(0,0,0,.35);padding:4px 10px;border-radius:99px;backdrop-filter:blur(6px)}
+.thumb .dev{position:absolute;right:14px;top:14px;z-index:2;display:flex;gap:6px}
+.dev i{font:500 10px var(--mono);font-style:normal;letter-spacing:.08em;padding:4px 9px;border-radius:99px;background:rgba(0,0,0,.35);backdrop-filter:blur(6px);color:#fff}
+.body{padding:18px 20px 22px;display:flex;flex-direction:column;gap:10px;flex:1}
+.body h3{font:700 1.25rem/1.3 var(--display);letter-spacing:-.02em}
+.body p{color:var(--mute);font-size:14px}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:auto;padding-top:6px}
+.tags span{font:500 11px var(--mono);letter-spacing:.04em;padding:4px 10px;border-radius:99px;border:1px solid var(--line);color:#b7bccb}
+.go{position:absolute;right:16px;bottom:18px;width:42px;height:42px;border-radius:50%;background:var(--fg);color:var(--bg);display:grid;place-items:center;font-size:18px;transform:translateY(8px);opacity:0;transition:.4s cubic-bezier(.2,.8,.1,1)}
+.card:hover .go,.card:focus-visible .go{opacity:1;transform:none}
+@media(hover:none){.go{opacity:1;transform:none}}
+/* 縮圖圖樣（純 CSS，不載入任何頁面） */
+.a1{background:radial-gradient(60% 80% at 30% 40%,#d6ff3f,transparent 60%),radial-gradient(60% 80% at 75% 60%,#ff5a36,transparent 60%),#0c0c0e}
+.a2{background:conic-gradient(from 210deg at 60% 55%,#6d28ff,#19e3ff,#d6ff3f,#ff3d81,#6d28ff);filter:saturate(1.1)}
+.a3{background:radial-gradient(70% 70% at 70% 30%,#ff7ad9,transparent 60%),radial-gradient(60% 70% at 20% 70%,#5cf2c8,transparent 60%),#17102e}
+.a4{background:radial-gradient(40% 70% at 22% 60%,#c1123a,transparent 70%),radial-gradient(40% 70% at 50% 60%,#e8c9c8,transparent 70%),radial-gradient(40% 70% at 78% 60%,#bfc3d1,transparent 70%),#f1ebea}
+.a5{background:radial-gradient(30% 40% at 30% 40%,#f4b4c4,transparent 70%),radial-gradient(30% 40% at 62% 30%,#ff7d5c,transparent 70%),radial-gradient(30% 40% at 72% 65%,#f6e27a,transparent 70%),#12261b}
+.a6{background:repeating-linear-gradient(115deg,rgba(255,106,43,.35) 0 2px,transparent 2px 22px),radial-gradient(60% 80% at 50% 50%,#ffb938,transparent 65%),#161008}
+
+.hint{margin-top:44px;padding:16px 18px;border:1px dashed var(--line);border-radius:16px;color:var(--mute);font-size:13px;line-height:1.8}
+.hint b{color:var(--fg);font-weight:500}
+
+/* 預覽視窗 */
+.ov{position:fixed;inset:0;z-index:100;display:flex;flex-direction:column;background:rgba(5,6,8,.92);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);opacity:0;pointer-events:none;transition:opacity .35s}
+.ov.on{opacity:1;pointer-events:auto}
+.bar{flex:none;display:flex;align-items:center;gap:10px;padding:calc(env(safe-area-inset-top,0px) + 10px) 14px 10px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.bar .t{font:700 15px var(--display);letter-spacing:-.01em;margin-right:auto;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.seg{display:flex;padding:3px;border-radius:99px;background:var(--panel);border:1px solid var(--line)}
+.seg button{padding:7px 16px;border-radius:99px;font:500 12px var(--mono);color:var(--mute);min-height:34px;transition:.25s}
+.seg button[aria-pressed=true]{background:var(--fg);color:var(--bg)}
+.pill{display:inline-flex;align-items:center;justify-content:center;min-height:40px;padding:0 16px;border-radius:99px;border:1px solid var(--line);background:var(--panel);font:500 12px var(--mono);letter-spacing:.04em}
+.pill:hover{border-color:rgba(255,255,255,.3)}.pill.x{width:40px;padding:0;font-size:16px}
+.stage{flex:1;min-height:0;display:flex;justify-content:center;align-items:stretch;padding:14px;overflow:auto}
+.frame{width:100%;max-width:100%;background:#000;border-radius:18px;overflow:hidden;border:1px solid var(--line);transition:width .5s cubic-bezier(.2,.8,.1,1);position:relative}
+.frame.phone{width:390px;border-radius:34px;border:8px solid #22252e}
+.frame iframe{width:100%;height:100%;border:0;display:block;background:#fff}
+.load{position:absolute;inset:0;display:grid;place-items:center;font:500 12px var(--mono);color:var(--mute);letter-spacing:.14em;pointer-events:none;transition:opacity .4s}
+.load.off{opacity:0}
+:focus-visible{outline:2px solid var(--acc);outline-offset:3px}
+@media(prefers-reduced-motion:reduce){*{transition-duration:.01ms!important}}
+</style>
+</head>
+<body>
+<header>
+  <div class="eyebrow">Web Dev Collection</div>
+  <h1>網站開發<em>合輯</em></h1>
+  <p>這裡收錄所有做過的特效展示與行業範例網站。點任何一張卡片，就能在視窗裡預覽，並切換手機與桌機寬度。</p>
+  <div class="stats"><span><b>6</b>個頁面</span><span><b>3</b>組特效圖鑑</span><span><b>3</b>個行業範例</span></div>
+</header>
+
+<main>
+  <section class="grp">
+    <h2>特效圖鑑 · Effects</h2>
+    <div class="grid" id="g1"></div>
+  </section>
+  <section class="grp">
+    <h2>行業範例 · Industry Demos</h2>
+    <div class="grid" id="g2"></div>
+  </section>
+  <div class="hint"><b>使用說明：</b>所有範例的店名、價格、評價、商品與聯絡資料都是虛構示意，上線前請換成真實內容。頁面會從網路載入字型，需要連線才會顯示正確字體。若直接用滑鼠雙擊 index.html 打開，預覽視窗仍可運作；若某些瀏覽器擋住內嵌預覽，請改按「新分頁開啟」。</div>
+</main>
+
+<div class="ov" id="ov" role="dialog" aria-modal="true" aria-label="頁面預覽" aria-hidden="true">
+  <div class="bar">
+    <span class="t" id="ot"></span>
+    <div class="seg" role="group" aria-label="預覽寬度"><button id="bp" aria-pressed="true">手機</button><button id="bd" aria-pressed="false">桌機</button></div>
+    <a class="pill" id="oa" target="_blank" rel="noopener">新分頁開啟 ↗</a>
+    <button class="pill x" id="oc" aria-label="關閉">✕</button>
+  </div>
+  <div class="stage"><div class="frame phone" id="fr"><iframe id="if" title="預覽"></iframe><div class="load" id="ld">LOADING…</div></div></div>
+</div>
+
+<script>
+const $=s=>document.querySelector(s);
+const PAGES=[
+ {grp:1,no:'01',art:'a1',file:'awwwards-effects.html',t:'特效圖鑑 I',d:'八款得獎網站常見互動：自訂游標、磁性按鈕、文字亂碼、跑馬燈、3D 傾斜、浮動預覽、粒子與捲動展開。',tags:['游標','Canvas','捲動'],dev:['桌機']},
+ {grp:1,no:'02',art:'a2',file:'awwwards-effects-2.html',t:'特效圖鑑 II',d:'進階版：WebGL 液態流體、圖片漣漪色散、3D 神經網路球體、橫向釘住捲動與 AI 對話串流。',tags:['WebGL','Shader','3D'],dev:['桌機']},
+ {grp:1,no:'03',art:'a3',file:'awwwards-effects-3-mobile.html',t:'特效圖鑑 III · 手機版',d:'手機優先：觸控漣漪、疊卡捲動、滑動卡堆、重力感應全像卡、吸附輪播與底部報名抽屜。',tags:['觸控','手機','抽屜'],dev:['手機','桌機']},
+ {grp:2,no:'04',art:'a4',file:'nail-artist-site.html',t:'美甲師形象網站',d:'奶霜精品風。CSS 繪製的貓眼與鏡面指甲、款式實驗室、前後對照與預約訊息產生器。',tags:['美業','CSS 繪圖','預約'],dev:['手機','桌機']},
+ {grp:2,no:'05',art:'a5',file:'florist-studio-site.html',t:'花藝工作室網站',d:'Canvas 即時繪製並綻放的花朵、捲動綻放敘事，以及可即時預覽的花束訂製器。',tags:['Canvas','訂製器','課程'],dev:['手機','桌機']},
+ {grp:2,no:'06',art:'a6',file:'game-trader-site.html',t:'遊戲商人商店',d:'App 式手機商店：稀有度篩選、商品詳情抽屜、收購估價、安全檢查表與底部分頁列。',tags:['手機優先','電商','收藏'],dev:['手機','桌機']}
+];
+const G={a1:'#d6ff3f',a2:'#6d28ff',a3:'#ff7ad9',a4:'#c1123a',a5:'#f4b4c4',a6:'#ffb938'};
+const BG={a1:'#0c0c0e',a2:'#0d0e12',a3:'#17102e',a4:'#f1ebea',a5:'#12261b',a6:'#161008'};
+PAGES.forEach(p=>{
+  const b=document.createElement('button');b.className='card';b.type='button';b.style.setProperty('--g1',G[p.art]+'66');
+  b.innerHTML=`<div class="thumb" style="--bgt:${BG[p.art]}"><div class="art ${p.art}"></div><span class="no">${p.no}</span><span class="dev">${p.dev.map(d=>`<i>${d}</i>`).join('')}</span></div>
+  <div class="body"><h3>${p.t}</h3><p>${p.d}</p><div class="tags">${p.tags.map(t=>`<span>${t}</span>`).join('')}</div></div><span class="go">↗</span>`;
+  b.onclick=()=>openP(p);$('#g'+p.grp).appendChild(b)});
+
+const ov=$('#ov'),fr=$('#fr'),ifr=$('#if'),ld=$('#ld');let cur=null;
+function setDev(phone){fr.classList.toggle('phone',phone);$('#bp').setAttribute('aria-pressed',phone);$('#bd').setAttribute('aria-pressed',!phone)}
+function openP(p){cur=p;const url='pages/'+p.file;$('#ot').textContent=p.t;$('#oa').href=url;
+  setDev(p.dev[0]==='手機');ld.classList.remove('off');ifr.onload=()=>ld.classList.add('off');ifr.src=url;
+  ov.classList.add('on');ov.setAttribute('aria-hidden','false');document.body.style.overflow='hidden';try{history.replaceState(null,'','#'+p.no)}catch(e){}}
+function closeP(){ov.classList.remove('on');ov.setAttribute('aria-hidden','true');document.body.style.overflow='';setTimeout(()=>{if(!ov.classList.contains('on'))ifr.src='about:blank'},350);try{history.replaceState(null,'',location.pathname)}catch(e){}}
+$('#oc').onclick=closeP;$('#bp').onclick=()=>setDev(true);$('#bd').onclick=()=>setDev(false);
+addEventListener('keydown',e=>{if(e.key==='Escape'&&ov.classList.contains('on'))closeP()});
+const h=location.hash.slice(1);if(h){const p=PAGES.find(x=>x.no===h);if(p)openP(p)}
+</script>
+</body>
+</html>

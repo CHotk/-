@@ -1,0 +1,413 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0e1f16">
+<title>Folia 花藝工作室</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gloock&family=Figtree:wght@300;400;500;600&family=Noto+Serif+TC:wght@400;600&display=swap">
+<style>
+/* 版面：深苔綠底，花朵全由 Canvas 程式繪製並綻放。滿版英雄區、捲動綻放、花束訂製器、橫向作品卡 */
+:root{
+  --moss:#0e1f16; --leaf:#183326; --fern:#2f6b46; --mist:#e7eee3; --ink:#12201a; --petal:#f4b4c4; --coral:#ff7d5c; --butter:#f6e27a; --lilac:#c9b6f4;
+  --mute:rgba(231,238,227,.62); --line:rgba(231,238,227,.16);
+  --display:'Gloock','Noto Serif TC',serif; --sans:'Figtree','Noto Serif TC',system-ui,sans-serif; --zh:'Noto Serif TC','Gloock',serif;
+  --gut:clamp(20px,5vw,72px);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{color-scheme:dark;scroll-behavior:smooth}
+body{background:var(--moss);color:var(--mist);font:300 15px/1.8 var(--sans);overflow-x:hidden;-webkit-text-size-adjust:100%}
+a{color:inherit;text-decoration:none}button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+section{position:relative;padding:clamp(80px,14vh,160px) var(--gut)}
+.in{max-width:1240px;margin-inline:auto}
+.eyebrow{font:500 11px var(--sans);letter-spacing:.28em;text-transform:uppercase;color:var(--mute);display:flex;align-items:center;gap:14px;margin-bottom:1.5rem}
+.eyebrow::before{content:"";width:34px;height:1px;background:currentColor}
+h2{font:400 clamp(2.3rem,6.4vw,5rem)/1.08 var(--display);letter-spacing:-.01em;text-wrap:balance}
+h2 em{font-style:normal;color:var(--petal)}
+.lead{max-width:44ch;color:var(--mute);margin-top:1.2rem}
+.note{font:400 11.5px/1.7 var(--sans);color:var(--mute);margin-top:1.6rem;letter-spacing:.03em}
+.light{background:var(--mist);color:var(--ink)}
+.light .eyebrow,.light .lead,.light .note{color:rgba(18,32,26,.62)}
+.light h2 em{color:#c2255c}
+
+.nav{position:fixed;z-index:200;left:0;right:0;top:0;padding:calc(env(safe-area-inset-top,0px) + 16px) var(--gut) 14px;display:flex;justify-content:space-between;align-items:center;transition:transform .5s cubic-bezier(.2,.8,.1,1),background .4s}
+.nav.solid{background:rgba(14,31,22,.72);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid var(--line)}
+.nav.hide{transform:translateY(-110%)}
+.logo{font:400 24px var(--display);letter-spacing:-.01em}.logo small{font:500 10px var(--sans);letter-spacing:.26em;text-transform:uppercase;margin-left:10px;opacity:.6}
+.nav ul{display:flex;gap:34px;list-style:none;font:500 12px var(--sans);letter-spacing:.18em;text-transform:uppercase}
+@media(max-width:760px){.nav ul{display:none}}
+.btn{position:relative;display:inline-flex;align-items:center;justify-content:center;gap:.6rem;min-height:52px;padding:0 30px;border-radius:99px;background:var(--petal);color:var(--moss);font:600 13px var(--sans);letter-spacing:.14em;text-transform:uppercase;overflow:hidden;isolation:isolate;transition:transform .35s cubic-bezier(.2,.8,.1,1)}
+.btn::before{content:"";position:absolute;inset:0;background:var(--butter);transform:translateY(101%);transition:transform .5s cubic-bezier(.2,.8,.1,1);z-index:-1;border-radius:inherit}
+.btn:hover::before{transform:none}.btn:active{transform:scale(.97)}
+.btn.line{background:transparent;color:inherit;border:1px solid currentColor}.btn.line::before{background:var(--mist)}.btn.line:hover{color:var(--moss)}
+
+/* ===== Hero ===== */
+.hero{min-height:100svh;padding:0;overflow:hidden;display:flex;align-items:center}
+.hero canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.hero::before{content:"";position:absolute;inset:0;background:radial-gradient(60% 60% at 70% 55%,rgba(47,107,70,.55),transparent 70%),radial-gradient(40% 40% at 10% 10%,rgba(244,180,196,.14),transparent 70%);pointer-events:none}
+.hero-txt{position:relative;z-index:2;padding:calc(env(safe-area-inset-top,0px) + 100px) var(--gut) 8vh;max-width:760px;align-self:flex-start;margin-top:4vh}
+.hero h1{font:400 clamp(3.4rem,13vw,10.5rem)/.92 var(--display);letter-spacing:-.03em;margin:1rem 0 1.4rem}
+.hero h1 span{display:block;overflow:hidden;padding-bottom:.08em}
+.hero h1 span b{display:block;font-weight:400;transform:translateY(110%);animation:up 1.3s cubic-bezier(.2,.8,.1,1) forwards}
+.hero h1 span:nth-child(2) b{animation-delay:.12s;color:var(--petal);font-style:italic}
+@keyframes up{to{transform:none}}
+.hero p{font:400 clamp(1.05rem,2.4vw,1.35rem)/1.7 var(--zh);max-width:20ch;opacity:0;animation:fi 1.2s .9s forwards}
+@keyframes fi{to{opacity:1}}
+.hero .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:1.8rem;opacity:0;animation:fi 1.2s 1.1s forwards}
+.hero .meta{position:absolute;z-index:2;left:var(--gut);right:var(--gut);bottom:calc(env(safe-area-inset-bottom,0px) + 22px);display:flex;justify-content:space-between;gap:1rem;font:500 11px var(--sans);letter-spacing:.2em;text-transform:uppercase;color:var(--mute)}
+@media(max-width:760px){.hero{align-items:flex-start}.hero-txt{margin-top:0}.hero .meta span:last-child{display:none}}
+
+/* 跑馬燈 */
+.mq{overflow:hidden;border-block:1px solid var(--line);padding-block:22px}
+.mq-row{display:flex;width:max-content;will-change:transform}
+.mq-row span{font:400 clamp(1.6rem,4.4vw,3rem)/1 var(--display);padding-right:1.2em;white-space:nowrap;display:flex;align-items:center;gap:1.2em;font-style:italic}
+.mq-row span::after{content:"❀";font-style:normal;font-size:.6em;color:var(--petal)}
+
+/* ===== 捲動綻放 ===== */
+.bloom{height:320vh;padding:0}
+.bloom-stick{position:sticky;top:0;height:100svh;overflow:hidden;display:grid;place-items:center}
+.bloom canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.bloom-txt{position:absolute;z-index:2;left:var(--gut);right:var(--gut);bottom:calc(env(safe-area-inset-bottom,0px) + 7vh);display:grid;grid-template-columns:1fr auto;gap:2rem;align-items:end}
+.bloom-head{position:absolute;z-index:2;left:var(--gut);top:calc(env(safe-area-inset-top,0px) + 100px);max-width:16ch}
+.steps{list-style:none;display:grid;gap:6px;max-width:34ch}
+.steps li{display:grid;grid-template-columns:auto 1fr;gap:14px;padding:10px 0;border-top:1px solid var(--line);opacity:.35;transition:opacity .5s}
+.steps li.on{opacity:1}
+.steps li b{font:400 .9rem var(--display);color:var(--petal);min-width:2ch}
+.steps li span{font:400 1rem/1.5 var(--zh)}
+.pct{font:400 clamp(3.4rem,12vw,9rem)/.9 var(--display);letter-spacing:-.04em;font-variant-numeric:tabular-nums;color:var(--petal)}
+.pct small{font:500 11px var(--sans);letter-spacing:.24em;text-transform:uppercase;color:var(--mute);display:block;letter-spacing:.24em}
+@media(max-width:700px){.bloom-txt{grid-template-columns:1fr}.pct{display:none}}
+
+/* ===== 作品 ===== */
+.col-head{display:flex;justify-content:space-between;align-items:end;gap:2rem;flex-wrap:wrap;margin-bottom:3rem}
+.snap{display:flex;gap:clamp(12px,2vw,24px);overflow-x:auto;scroll-snap-type:x mandatory;padding:0 var(--gut) 24px;margin-inline:calc(var(--gut)*-1);scroll-padding:0 var(--gut);scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.snap::-webkit-scrollbar{display:none}
+.card{flex:none;width:min(74vw,360px);scroll-snap-align:start;text-align:left;display:flex;flex-direction:column;gap:14px;transition:transform .6s cubic-bezier(.2,.8,.1,1)}
+.card:hover{transform:translateY(-8px)}
+.card .pic{position:relative;aspect-ratio:4/5;border-radius:26px;overflow:hidden}
+.card canvas{width:100%;height:100%;display:block}
+.card .go{position:absolute;right:14px;top:14px;font:600 10px var(--sans);letter-spacing:.2em;text-transform:uppercase;padding:8px 13px;border-radius:99px;background:rgba(255,255,255,.8);color:var(--ink);opacity:0;transform:translateY(-6px);transition:.4s}
+.card:hover .go{opacity:1;transform:none}
+@media(hover:none){.card .go{opacity:1;transform:none}}
+.card h3{font:400 1.5rem/1.2 var(--display)}
+.card p{display:flex;justify-content:space-between;font:500 12px var(--sans);letter-spacing:.14em;text-transform:uppercase;color:rgba(18,32,26,.6)}
+
+/* ===== 訂製器 ===== */
+.builder{display:grid;grid-template-columns:1.1fr 1fr;gap:clamp(2rem,5vw,5rem);margin-top:3.5rem;align-items:start}
+.preview{position:sticky;top:90px;aspect-ratio:4/5;border-radius:30px;overflow:hidden;background:radial-gradient(70% 60% at 50% 40%,#254c36,#12261b);border:1px solid var(--line)}
+.preview canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.tagcard{position:absolute;right:18px;bottom:18px;width:min(46%,190px);padding:14px 16px;background:#f7f2e8;color:#2a2018;border-radius:6px;transform:rotate(4deg);box-shadow:0 14px 30px rgba(0,0,0,.35);font:400 .95rem/1.5 var(--zh);word-break:break-all}
+.tagcard::before{content:"";position:absolute;left:50%;top:-8px;width:12px;height:12px;margin-left:-6px;border-radius:50%;background:#0e1f16;box-shadow:inset 0 0 0 2px #c9a24a}
+.tagcard small{display:block;font:500 9px var(--sans);letter-spacing:.2em;text-transform:uppercase;opacity:.55;margin-bottom:4px}
+.shuffle{position:absolute;left:16px;top:16px;z-index:2;min-height:42px;padding:0 16px;border-radius:99px;background:rgba(14,31,22,.6);backdrop-filter:blur(8px);border:1px solid var(--line);font:500 12px var(--sans);letter-spacing:.1em}
+.shuffle:hover{background:rgba(14,31,22,.85)}
+.ctl{display:grid;gap:1.7rem}
+.ctl h4{font:500 11px var(--sans);letter-spacing:.24em;text-transform:uppercase;color:var(--mute);margin-bottom:.8rem;display:flex;justify-content:space-between}
+.ctl h4 b{font-family:var(--zh);color:var(--mist);letter-spacing:.04em;text-transform:none;font-weight:400}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{min-height:44px;padding:0 18px;border-radius:99px;border:1px solid var(--line);font:400 13.5px var(--sans);transition:background .3s,color .3s,border-color .3s}
+.chip:hover{border-color:rgba(231,238,227,.5)}
+.chip[aria-pressed=true]{background:var(--mist);color:var(--moss);border-color:var(--mist)}
+.pal{display:flex;gap:12px;flex-wrap:wrap}
+.pal button{display:flex;align-items:center;gap:10px;min-height:48px;padding:0 16px 0 8px;border-radius:99px;border:1px solid var(--line);font:400 13.5px var(--sans);transition:border-color .3s,background .3s}
+.pal button i{display:flex}.pal button i b{width:18px;height:18px;border-radius:50%;margin-right:-6px;border:2px solid var(--moss)}
+.pal button[aria-pressed=true]{border-color:var(--mist);background:rgba(231,238,227,.08)}
+.field label{display:block;font:500 11px var(--sans);letter-spacing:.24em;text-transform:uppercase;color:var(--mute);margin-bottom:.6rem}
+.field input,.field textarea{width:100%;background:transparent;border:0;border-bottom:1px solid var(--line);color:var(--mist);font:300 16px var(--sans);padding:10px 0;border-radius:0;outline:0}
+.field input:focus{border-color:var(--petal)}
+.field textarea{border:1px solid var(--line);border-radius:14px;padding:14px;min-height:150px;font-size:14px;line-height:1.8;resize:vertical}
+.total{display:flex;justify-content:space-between;align-items:end;gap:1rem;flex-wrap:wrap;padding-top:1.4rem;border-top:1px solid var(--line)}
+.total small{display:block;font:500 11px var(--sans);letter-spacing:.2em;text-transform:uppercase;color:var(--mute)}
+.total b{font:400 2.4rem/1 var(--display);letter-spacing:-.02em}
+@media(max-width:900px){.builder{grid-template-columns:1fr}.preview{position:relative;top:0}}
+
+/* ===== 課程 ===== */
+.cls{margin-top:3rem;border-top:1px solid rgba(18,32,26,.2)}
+.cl{display:grid;grid-template-columns:auto 1fr auto;gap:clamp(14px,3vw,40px);align-items:center;padding:clamp(20px,3vw,34px) 0;border-bottom:1px solid rgba(18,32,26,.2);transition:padding .5s cubic-bezier(.2,.8,.1,1),background .4s}
+.cl:hover{padding-left:16px;background:linear-gradient(90deg,rgba(194,37,92,.1),transparent)}
+.cl time{font:400 1rem var(--display);color:#c2255c;min-width:5.5ch}
+.cl h3{font:400 clamp(1.4rem,3vw,2.3rem)/1.2 var(--display)}.cl h3 small{display:block;font:300 13.5px var(--sans);opacity:.65;margin-top:4px}
+.cl b{font:400 1.2rem var(--display)}
+@media(max-width:620px){.cl{grid-template-columns:1fr auto}.cl time{grid-column:1/-1}}
+
+.toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 26px);transform:translate(-50%,40px);background:var(--mist);color:var(--moss);padding:14px 24px;border-radius:99px;font:500 13px var(--sans);opacity:0;pointer-events:none;transition:.5s cubic-bezier(.2,.8,.1,1);z-index:600}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+footer{padding:clamp(60px,10vh,110px) var(--gut) calc(env(safe-area-inset-bottom,0px) + 36px);display:grid;grid-template-columns:1.2fr 1fr;gap:2rem;border-top:1px solid var(--line)}
+footer .big{font:400 clamp(2.4rem,7vw,5.5rem)/1 var(--display);letter-spacing:-.02em}
+footer .big em{font-style:normal;color:var(--petal)}
+footer .lines{display:grid;gap:0;align-content:start}
+footer .lines div{display:flex;justify-content:space-between;gap:1rem;padding:14px 0;border-bottom:1px solid var(--line);font-size:14.5px}
+footer .lines b{font:500 11px var(--sans);letter-spacing:.2em;text-transform:uppercase;color:var(--mute);flex:none}
+footer .lines span{text-align:right}
+footer small{grid-column:1/-1;color:var(--mute);font:400 11.5px var(--sans);margin-top:1rem}
+@media(max-width:800px){footer{grid-template-columns:1fr}}
+.rv{opacity:1;transform:none}
+.js .rv.pre{opacity:0;transform:translateY(46px);transition:opacity 1.1s,transform 1.1s cubic-bezier(.2,.8,.1,1)}
+.js .rv.pre.in{opacity:1;transform:none}
+:focus-visible{outline:2px solid var(--petal);outline-offset:3px}
+.light :focus-visible{outline-color:#c2255c}
+@media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}.hero h1 span b,.hero p,.hero .row{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+<div class="toast" id="toast" role="status"></div>
+<header class="nav" id="nav">
+  <a class="logo" href="#top">Folia<small>花藝工作室</small></a>
+  <ul><li><a href="#bloom">日常</a></li><li><a href="#collection">作品</a></li><li><a href="#order">訂花</a></li><li><a href="#class">課程</a></li></ul>
+  <a class="btn" href="#order" style="min-height:42px;padding:0 22px">訂花</a>
+</header>
+
+<!-- Hero -->
+<section class="hero" id="top">
+  <canvas id="hc" aria-hidden="true"></canvas>
+  <div class="hero-txt">
+    <div class="eyebrow">Flower Studio · 當日預訂</div>
+    <h1><span><b>Folia</b></span><span><b>in bloom</b></span></h1>
+    <p>每一束，都是當天才開的花。</p>
+    <div class="row"><a class="btn" href="#order">訂一束花</a><a class="btn line" href="#collection">看作品</a></div>
+  </div>
+  <div class="meta"><span>移動游標，花朵會跟著傾斜</span><span>Taipei · 預約取貨與外送</span></div>
+</section>
+
+<div class="mq" aria-hidden="true"><div class="mq-row" id="mq"></div></div>
+
+<!-- 捲動綻放 -->
+<section class="bloom" id="bloom">
+  <div class="bloom-stick">
+    <canvas id="bc" aria-label="隨捲動綻放的大理花"></canvas>
+    <div class="bloom-head"><div class="eyebrow">From bud to bouquet</div><h2>從花苞到<br><em>送到你手上</em></h2></div>
+    <div class="bloom-txt">
+      <ol class="steps" id="steps">
+        <li><b>01</b><span>清晨挑選產地直送的新鮮花材。</span></li>
+        <li><b>02</b><span>斜切花莖，泡水養護至完全吸水。</span></li>
+        <li><b>03</b><span>依花色與高度手工配置、包裝。</span></li>
+        <li><b>04</b><span>當日取貨，或準時外送到你指定的地方。</span></li>
+      </ol>
+      <div class="pct"><small>開花程度</small><span id="pct">0</span>%</div>
+    </div>
+  </div>
+</section>
+
+<!-- 作品 -->
+<section class="light" id="collection">
+  <div class="in">
+    <div class="col-head"><div><div class="eyebrow rv pre">Collection · 作品</div><h2 class="rv pre">這一季，<em>五束</em>主打</h2></div>
+      <p class="lead rv pre" style="margin:0">左右滑動，點一束可以直接帶入訂花表單。圖為程式繪製的示意，上線時請換成實拍照片。</p></div>
+    <div class="snap rv pre" id="snap"></div>
+  </div>
+</section>
+
+<!-- 訂製器 -->
+<section id="order">
+  <div class="in">
+    <div class="eyebrow rv pre">Bouquet Builder · 訂製花束</div>
+    <h2 class="rv pre">自己搭一束，<br>看它 <em>即時綻放</em></h2>
+    <div class="builder">
+      <div class="preview" id="pv"><button class="shuffle" id="shuf" type="button">↻ 重新排列</button><canvas id="oc" aria-label="花束預覽"></canvas>
+        <div class="tagcard" id="tag"><small>Card</small><span id="tagTxt">寫下想說的話</span></div></div>
+      <div class="ctl">
+        <div><h4>花材 <b id="vType"></b></h4><div class="chips" id="cType"></div></div>
+        <div><h4>色系 <b id="vPal"></b></h4><div class="pal" id="cPal"></div></div>
+        <div><h4>尺寸 <b id="vSize"></b></h4><div class="chips" id="cSize"></div></div>
+        <div><h4>包裝 <b id="vWrap"></b></h4><div class="chips" id="cWrap"></div></div>
+        <div class="field"><label for="card">卡片文字</label><input id="card" maxlength="24" placeholder="例如：生日快樂" autocomplete="off"></div>
+        <div><h4>取貨日期</h4><div class="chips" id="cDate"></div></div>
+        <div class="total"><div><small>預估金額（示意）</small><b id="price"></b></div><button class="btn" id="copy" type="button">複製訂單訊息</button></div>
+        <div class="field"><label for="msg">訂單訊息</label><textarea id="msg" readonly></textarea></div>
+        <p class="note" style="margin:0">複製後貼到 LINE 或 Instagram 私訊，我們會再確認花材與時間。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 課程 -->
+<section class="light" id="class">
+  <div class="in">
+    <div class="eyebrow rv pre">Workshops · 課程</div>
+    <h2 class="rv pre">週末，<em>慢下來</em>插一束</h2>
+    <div class="cls rv pre">
+      <div class="cl"><time>每週六</time><h3>花藝體驗課<small>約 2 小時 · 材料費含 · 適合第一次</small></h3><b>NT$1,380</b></div>
+      <div class="cl"><time>每月一次</time><h3>手綁花束班<small>學會螺旋手法，帶走自己綁的花束</small></h3><b>NT$2,200</b></div>
+      <div class="cl"><time>季節限定</time><h3>乾燥花相框<small>把喜歡的花存進相框，放得很久</small></h3><b>NT$1,680</b></div>
+    </div>
+    <p class="note">課程與價格為示意，請換成實際內容。</p>
+  </div>
+</section>
+
+<footer>
+  <div class="big">讓花，<br><em>剛好</em>送到。</div>
+  <div class="lines">
+    <div><b>LINE</b><span>@your-line-id（請填入）</span></div>
+    <div><b>Instagram</b><span>@your.handle（請填入）</span></div>
+    <div><b>營業時間</b><span>每日 10:00 – 19:00</span></div>
+    <div><b>地址</b><span>台北市 ○○區 ○○路 ○ 號（請填入）</span></div>
+  </div>
+  <small>© Folia · 範例網站，名稱、價格、課程與聯絡資料皆為示意。</small>
+</footer>
+
+<script>
+document.documentElement.classList.add('js');
+const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
+const lerp=(a,b,t)=>a+(b-a)*t,clamp=(v,a=0,b=1)=>Math.max(a,Math.min(b,v)),ease=t=>1-Math.pow(1-t,3);
+const reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
+
+/* ---------- 繪圖基礎 ---------- */
+function rng(a){return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+const hex=h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16));
+const mix=(a,b,t)=>{const A=hex(a),B=hex(b);return`rgb(${A.map((v,i)=>Math.round(v+(B[i]-v)*t)).join(',')})`};
+function petal(g,len,wid,fill){g.beginPath();g.moveTo(0,0);g.bezierCurveTo(len*.25,-wid,len*.85,-wid*.9,len,0);g.bezierCurveTo(len*.85,wid*.9,len*.25,wid,0,0);g.fillStyle=fill;g.fill();g.strokeStyle='rgba(0,0,0,.14)';g.lineWidth=1;g.stroke()}
+function dahlia(g,x,y,r,cols,b,rot){
+  const R=5;
+  g.save();g.translate(x,y);
+  for(let k=0;k<R;k++){
+    const p=ease(clamp(b*1.4-k*.13)),n=15-k*2,len=r*(1-k*.17)*p,wid=len*.5,off=k*.37+rot;
+    if(len<.5)continue;const col=mix(cols[1],cols[0],k/(R-1));
+    for(let i=0;i<n;i++){g.save();g.rotate(off+i*Math.PI*2/n);petal(g,len,wid,col);g.restore()}}
+  const c=clamp(1-b*1.2);g.beginPath();g.arc(0,0,r*(.07+c*.22),0,6.3);g.fillStyle=cols[3];g.fill();g.restore()}
+function daisy(g,x,y,r,cols,b,rot){
+  const p=ease(clamp(b*1.3));g.save();g.translate(x,y);const n=16;
+  for(let i=0;i<n;i++){g.save();g.rotate(rot+i*Math.PI*2/n);petal(g,r*p,r*.17*p,i%2?'#fffdf4':'#f3efe0');g.restore()}
+  g.beginPath();g.arc(0,0,r*.2*(.4+p*.6),0,6.3);g.fillStyle='#f2c230';g.fill();g.restore()}
+function tulip(g,x,y,r,cols,b,rot){
+  const p=ease(clamp(b*1.3)),sp=.1+p*.42;g.save();g.translate(x,y);
+  [[-sp,cols[1]],[sp,cols[1]],[0,cols[0]]].forEach(([a,c],i)=>{g.save();g.rotate(-Math.PI/2+a);petal(g,r*1.55*(.5+p*.5),r*.62*(.55+p*.45),c);g.restore()});g.restore()}
+const DRAW={dahlia,daisy,tulip};
+function leaf(g,x,y,len,ang,col){g.save();g.translate(x,y);g.rotate(ang);petal(g,len,len*.32,col);g.restore()}
+
+const PALS={peach:['蜜桃',['#ff8a68','#ffb89c','#ffdfcc','#f6e27a']],berry:['莓果',['#c2255c','#e4608e','#f6a5c0','#c9b6f4']],haze:['霧紫',['#8a77ee','#c9b6f4','#e7defb','#ffffff']],snow:['純白',['#ffffff','#f0eee3','#d9d6c6','#b9d79c']]};
+const GREEN=['#2f6b46','#3f8a5a','#5fae72'];
+
+function makeBouquet(seed,n,mode,pal){
+  const r=rng(seed),items=[];const P=PALS[pal][1];
+  for(let i=0;i<n;i++){
+    const t=n===1?.5:i/(n-1),ang=(-.7+1.4*t)+(r()-.5)*.28,L=.5+.42*r()*(1-Math.abs(ang)*.45);
+    const type=mode==='mix'?(r()<.5?'dahlia':r()<.55?'tulip':'daisy'):mode;
+    const a=Math.floor(r()*3),b=(a+1+Math.floor(r()*2))%3;
+    items.push({x:.5+Math.sin(ang)*L*.62,y:.78-Math.cos(ang)*L*.62,type,r:(type==='daisy'?.052:type==='tulip'?.058:.085)*(.85+r()*.35)*(n>14?.82:1),cols:[P[a],P[b],P[2],P[3]],ph:r()*6.28,rot:r()*6.28,ang});
+  }
+  items.sort((a,b)=>a.y-b.y);items.forEach((it,i)=>it.delay=i*.12);
+  const leaves=Array.from({length:7},(_,i)=>({a:-1.1+i*.37+(r()-.5)*.2,l:.16+r()*.1,c:GREEN[i%3]}));
+  return{items,leaves,n}}
+
+function drawWrap(g,S,ox,oy,kind){
+  if(kind==='box'){
+    g.save();const w=S*.54,h=S*.26,x=ox+S*.5-w/2,y=oy+S*.74;
+    g.fillStyle='#1d3a2b';g.beginPath();g.roundRect(x,y,w,h,S*.02);g.fill();
+    g.fillStyle='#16301f';g.fillRect(x,y,w,S*.035);
+    g.strokeStyle='#c9a24a';g.lineWidth=Math.max(1,S*.004);g.beginPath();g.moveTo(x+w*.06,y+S*.07);g.lineTo(x+w*.94,y+S*.07);g.stroke();
+    g.restore();return}
+  g.save();const cx=ox+S*.5;
+  g.beginPath();g.moveTo(cx-S*.27,oy+S*.64);g.quadraticCurveTo(cx-S*.2,oy+S*.84,cx-S*.045,oy+S*.99);g.lineTo(cx+S*.045,oy+S*.99);g.quadraticCurveTo(cx+S*.2,oy+S*.84,cx+S*.27,oy+S*.64);g.quadraticCurveTo(cx,oy+S*.7,cx-S*.27,oy+S*.64);
+  const gr=g.createLinearGradient(cx-S*.27,0,cx+S*.27,0);gr.addColorStop(0,'#f3e0d8');gr.addColorStop(.5,'#fff3ee');gr.addColorStop(1,'#e8cfc6');g.fillStyle=gr;g.fill();
+  g.strokeStyle='rgba(120,80,70,.18)';g.lineWidth=1;for(let i=-2;i<=2;i++){g.beginPath();g.moveTo(cx+i*S*.08,oy+S*.67);g.lineTo(cx+i*S*.02,oy+S*.97);g.stroke()}
+  g.fillStyle='#2f6b46';g.fillRect(cx-S*.2,oy+S*.82,S*.4,S*.025);g.restore()}
+
+/* box:{x,y,s} 繪製區；pt:指標 -1..1 */
+function drawBouquet(g,B,box,t,bt,wrap,lean){
+  const S=box.s,ox=box.x,oy=box.y,bx=ox+S*.5,by=oy+S*.8;
+  const sway=(ph,k)=>Math.sin(t*.8+ph)*S*.008*k+lean*S*.03*k;
+  g.lineCap='round';
+  B.leaves.forEach(l=>{leaf(g,bx,by-S*.02,S*l.l*(bt>0?ease(clamp(bt/1.2)):0),-Math.PI/2+l.a*1.1,l.c)});
+  B.items.forEach(it=>{const k=(1-it.y)*1.4,fx=ox+it.x*S+sway(it.ph,k),fy=oy+it.y*S;
+    g.beginPath();g.moveTo(bx,by);g.quadraticCurveTo(bx+(fx-bx)*.2,by-(by-fy)*.6,fx,fy);g.strokeStyle='#2f6b46';g.lineWidth=Math.max(1.2,S*.007);g.stroke()});
+  drawWrap(g,S,ox,oy,wrap);
+  B.items.forEach(it=>{const k=(1-it.y)*1.4,fx=ox+it.x*S+sway(it.ph,k),fy=oy+it.y*S+Math.sin(t*.9+it.ph)*S*.003,b=clamp((bt-it.delay)/1.7),r=it.r*S;
+    if(b<=0.02){g.beginPath();g.arc(fx,fy,r*.18,0,6.3);g.fillStyle=it.cols[0];g.fill();return}
+    if(b<.18){g.beginPath();g.arc(fx,fy,r*(.18+b*1.2),0,6.3);g.fillStyle=it.cols[0];g.fill()}
+    DRAW[it.type](g,fx,fy,r,it.cols,b,it.rot+(it.type==='dahlia'?Math.sin(t*.3+it.ph)*.05:0))})}
+
+/* canvas 輔助 */
+function setup(cv){const d=Math.min(devicePixelRatio||1,2),w=cv.clientWidth,h=cv.clientHeight;if(!w||!h)return null;
+  if(cv.width!==(w*d|0)||cv.height!==(h*d|0)){cv.width=w*d;cv.height=h*d}const g=cv.getContext('2d');g.setTransform(d,0,0,d,0,0);g.clearRect(0,0,w,h);return{g,w,h}}
+const vis=new Map();const vio=new IntersectionObserver(es=>es.forEach(e=>vis.set(e.target,e.isIntersecting)));
+const watch=el=>{vis.set(el,true);vio.observe(el)};const on=el=>vis.get(el)!==false;
+
+/* ---------- Hero ---------- */
+const hc=$('#hc');watch(hc);const heroB=makeBouquet(7,13,'mix','berry');let heroStart=performance.now();
+let ptx=0,lean=0;
+addEventListener('pointermove',e=>{if(e.pointerType!=='touch')ptx=(e.clientX/innerWidth-.5)*2});
+/* 跑馬燈 */
+(function(){const w=['Dahlia','Tulip','Daisy','Peony','Ranunculus','Eucalyptus'];const h=w.map(t=>`<span>${t}</span>`).join('');$('#mq').innerHTML=h+h})();
+
+/* ---------- 捲動綻放 ---------- */
+const bc=$('#bc'),bsec=$('#bloom');watch(bc);
+const steps=$$('#steps li'),pctEl=$('#pct');
+const bigCols=['#ff8a68','#ffb89c','#ffdfcc','#f6e27a'];
+function drawBig(now){
+  const s=setup(bc);if(!s)return;const{g,w,h}=s,t=now/1000;
+  const r=bsec.getBoundingClientRect(),p=clamp(-r.top/(bsec.offsetHeight-innerHeight)),b=clamp(p/.82);
+  const R=Math.min(w*(w<700?.46:.3),h*.34),cx=w<700?w*.5:w*.68,cy=h*(w<700?.46:.5);
+  g.save();g.translate(cx,cy);
+  const stemY=h-cy+20;g.beginPath();g.moveTo(0,stemY);g.quadraticCurveTo(R*.1,stemY*.5,0,R*.2);g.strokeStyle='#2f6b46';g.lineWidth=Math.max(5,R*.07);g.lineCap='round';g.stroke();
+  for(let i=0;i<4;i++){const sd=i%2?1:-1,ly=stemY*(.35+i*.14),ln=R*(.9-i*.08);g.save();g.translate(0,ly);g.rotate(sd>0?-.25:Math.PI+.25);petal(g,ln,ln*.28,GREEN[i%3]);g.restore()}
+  g.restore();
+  g.save();g.translate(cx,cy);g.rotate(p*.8+Math.sin(t*.4)*.02);
+  dahlia(g,0,0,R*(.4+b*.6)+R*.1,bigCols,b,0);g.restore();
+  const k=Math.min(3,Math.floor(p*4.2));steps.forEach((li,i)=>li.classList.toggle('on',i===k));pctEl.textContent=Math.round(b*100)}
+
+/* ---------- 作品 ---------- */
+const SETS=[
+ {n:'Berry Garden',z:'莓果花園',p:1680,pal:'berry',mode:'dahlia',cnt:11,seed:3,bg:'#f3d4de'},
+ {n:'Peach Morning',z:'蜜桃晨光',p:1480,pal:'peach',mode:'mix',cnt:13,seed:11,bg:'#fde2d4'},
+ {n:'Haze Tulips',z:'霧紫鬱金香',p:1280,pal:'haze',mode:'tulip',cnt:9,seed:5,bg:'#e4dcf6'},
+ {n:'Snow Daisy',z:'純白雛菊',p:980,pal:'snow',mode:'daisy',cnt:17,seed:9,bg:'#e8f1d8'},
+ {n:'Folia Signature',z:'招牌混搭',p:2280,pal:'berry',mode:'mix',cnt:19,seed:21,bg:'#d9e8d4'}];
+const snap=$('#snap');const cardCv=[];
+SETS.forEach(s=>{const b=document.createElement('button');b.className='card';b.type='button';
+  b.innerHTML=`<div class="pic" style="background:${s.bg}"><canvas></canvas><span class="go">訂同款</span></div><h3>${s.z}</h3><p><span>${s.n}</span><span>NT$${s.p.toLocaleString()}</span></p>`;
+  const cv=$('canvas',b);cardCv.push([cv,s]);b.onclick=()=>{styleName=`${s.z}（${s.n}）`;buildMsg();location.hash='#order';toast('已帶入作品：'+s.z)};snap.appendChild(b)});
+function drawCards(){cardCv.forEach(([cv,s])=>{const o=setup(cv);if(!o)return;const B=makeBouquet(s.seed,s.cnt,s.mode,s.pal),S=Math.min(o.w,o.h*.95);drawBouquet(o.g,B,{x:(o.w-S)/2,y:o.h-S,s:S},0,99,'paper',0)})}
+addEventListener('resize',()=>{drawCards()});
+
+/* ---------- 訂製器 ---------- */
+const O={type:'dahlia',pal:'berry',size:'m',wrap:'paper',seed:5};
+const TYPES={dahlia:['大理花',0],daisy:['雛菊',-200],tulip:['鬱金香',100],mix:['混搭',200]};
+const SIZES={s:['小束 7 朵',7,890],m:['中束 15 朵',15,1480],l:['大束 25 朵',25,2280]};
+const WRAPS={paper:['紙花束',0],box:['花盒',380]};
+let styleName=null,D=null;
+function chips(host,map,key,fn){Object.entries(map).forEach(([k,v])=>{const b=document.createElement('button');b.className='chip';b.type='button';b.dataset.k=k;b.textContent=v[0];b.onclick=()=>{O[key]=k;styleName=null;refresh(true)};host.appendChild(b)})}
+chips($('#cType'),TYPES,'type');chips($('#cSize'),SIZES,'size');chips($('#cWrap'),WRAPS,'wrap');
+Object.entries(PALS).forEach(([k,v])=>{const b=document.createElement('button');b.type='button';b.dataset.k=k;b.innerHTML=`<i>${v[1].slice(0,3).map(c=>`<b style="background:${c}"></b>`).join('')}</i>${v[0]}`;b.onclick=()=>{O.pal=k;styleName=null;refresh(true)};$('#cPal').appendChild(b)});
+let OB=null,obStart=0;
+function refresh(restart){
+  OB=makeBouquet(O.seed,SIZES[O.size][1],O.type,O.pal);if(restart)obStart=performance.now();
+  $('#vType').textContent=TYPES[O.type][0];$('#vPal').textContent=PALS[O.pal][0];$('#vSize').textContent=SIZES[O.size][0];$('#vWrap').textContent=WRAPS[O.wrap][0];
+  $$('#cType .chip').forEach(b=>b.setAttribute('aria-pressed',b.dataset.k===O.type));$$('#cSize .chip').forEach(b=>b.setAttribute('aria-pressed',b.dataset.k===O.size));
+  $$('#cWrap .chip').forEach(b=>b.setAttribute('aria-pressed',b.dataset.k===O.wrap));$$('#cPal button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.k===O.pal));
+  $('#price').textContent='NT$'+price().toLocaleString();buildMsg()}
+const price=()=>SIZES[O.size][2]+TYPES[O.type][1]+WRAPS[O.wrap][1];
+$('#shuf').onclick=()=>{O.seed=Math.floor(Math.random()*9999);refresh(true)};
+$('#card').addEventListener('input',()=>{$('#tagTxt').textContent=$('#card').value.trim()||'寫下想說的話';buildMsg()});
+(function(){const w='日一二三四五六',now=new Date(),host=$('#cDate');
+  for(let i=0;i<7;i++){const d=new Date(now);d.setDate(now.getDate()+i);const t=i===0?'今天':`${d.getMonth()+1}/${d.getDate()}（${w[d.getDay()]}）`;
+    const b=document.createElement('button');b.type='button';b.className='chip';b.textContent=t;b.onclick=()=>{D=D===t?null:t;$$('#cDate .chip').forEach(x=>x.setAttribute('aria-pressed',x.textContent===D));buildMsg()};host.appendChild(b)}})();
+function buildMsg(){
+  const style=styleName||`${TYPES[O.type][0]}・${PALS[O.pal][0]}・${SIZES[O.size][0]}・${WRAPS[O.wrap][0]}`;
+  $('#msg').value=`你好，我想訂花。\n款式：${style}\n取貨日：${D||'（請選擇）'}\n卡片：${$('#card').value.trim()||'（不需要）'}\n預估：NT$${price().toLocaleString()}\n謝謝！`}
+let tt;function toast(t){const e=$('#toast');e.textContent=t;e.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>e.classList.remove('on'),2200)}
+$('#copy').onclick=async()=>{const m=$('#msg');
+  try{await navigator.clipboard.writeText(m.value);toast('已複製，請貼到 LINE 或 IG')}
+  catch(e){m.removeAttribute('readonly');m.select();let ok=false;try{ok=document.execCommand('copy')}catch(x){}m.setAttribute('readonly','');toast(ok?'已複製，請貼到 LINE 或 IG':'請長按文字手動複製')}};
+const oc=$('#oc');watch(oc);refresh(true);
+
+/* ---------- 導覽與揭露 ---------- */
+const nav=$('#nav');let lastY=0;
+addEventListener('scroll',()=>{const y=scrollY;nav.classList.toggle('solid',y>40);nav.classList.toggle('hide',y>lastY&&y>240);lastY=y},{passive:true});
+const rio=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');rio.unobserve(e.target)}}),{threshold:.08});
+$$('.rv').forEach(el=>{if(el.getBoundingClientRect().top>innerHeight)rio.observe(el);else el.classList.remove('pre')});
+
+/* ---------- 主迴圈 ---------- */
+const mq=$('#mq');
+function frame(now){
+  const t=now/1000;lean=lerp(lean,ptx,.06);
+  if(on(hc)){const s=setup(hc);if(s){const{g,w,h}=s,S=Math.min(w*(w<760?1.05:.8),h*.98,900),bt=reduce?9:(now-heroStart)/1000;
+    drawBouquet(g,heroB,{x:(w<760?w/2:w*.68)-S/2,y:h-S*(w<760?1:.96)+(w<760?S*.06:S*.04),s:S},t,bt,'paper',lean)}}
+  if(on(bc))drawBig(now);
+  if(on(oc)&&OB){const s=setup(oc);if(s){const{g,w,h}=s,S=Math.min(w,h)*.98;drawBouquet(g,OB,{x:(w-S)/2,y:h-S*.98,s:S},t,reduce?9:(now-obStart)/1000,O.wrap,lean*.6)}}
+  const w=mq.scrollWidth/2;mq.style.transform=`translate3d(${-((t*36+scrollY*.3)%w)}px,0,0)`;
+  requestAnimationFrame(frame)}
+document.fonts.ready.then(drawCards);drawCards();
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>
