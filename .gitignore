@@ -1,0 +1,6 @@
+# 個人電腦專屬的 Claude Code 設定，不上傳
+.claude/settings.local.json
+
+# 系統與編輯器暫存
+.DS_Store
+Thumbs.db
