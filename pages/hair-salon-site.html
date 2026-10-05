@@ -1,0 +1,465 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f3f2ef">
+<title>Lune 月沐髮廊</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Manrope:wght@300;400;500;700&family=Noto+Serif+TC:wght@400;600&family=Noto+Sans+TC:wght@300;400;500&display=swap">
+<style>
+/* 版面：紙白底，滿版 Canvas 髮絲簾幕是唯一主角，會跟著游標與手指流動、可即時換髮色。深色的髮色實驗室讓顏色發光，其餘區塊保持克制。強調色隨選到的髮色改變 */
+:root{
+  --paper:#f3f2ef; --ink:#121214; --night:#0e0e11; --mute:#77767f; --line:rgba(18,18,20,.14); --line-d:rgba(243,242,239,.16);
+  --hair:#ff9a4d;
+  --serif:'DM Serif Display','Noto Serif TC',serif; --sans:'Manrope','Noto Sans TC',system-ui,sans-serif; --zh:'Noto Serif TC','DM Serif Display',serif;
+  --gut:clamp(18px,5vw,72px);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{color-scheme:light;scroll-behavior:smooth}
+body{background:var(--paper);color:var(--ink);font:300 15px/1.8 var(--sans);overflow-x:hidden;-webkit-text-size-adjust:100%}
+a{color:inherit;text-decoration:none}button{font:inherit;color:inherit;border:0;background:none;cursor:pointer;touch-action:manipulation}
+section{position:relative;padding:clamp(72px,13vh,150px) var(--gut)}
+.in{max-width:1220px;margin-inline:auto}
+.eyebrow{font:500 11px var(--sans);letter-spacing:.28em;text-transform:uppercase;color:var(--mute);display:flex;align-items:center;gap:14px;margin-bottom:1.4rem}
+.eyebrow::before{content:"";width:30px;height:1px;background:currentColor}
+h2{font:400 clamp(2.2rem,6.4vw,4.8rem)/1.08 var(--serif);letter-spacing:-.015em;text-wrap:balance}
+h2 em{font-style:italic;color:var(--hair);transition:color .6s}
+.lead{max-width:44ch;color:var(--mute);margin-top:1.1rem}
+.note{font:400 11.5px/1.7 var(--sans);color:var(--mute);margin-top:1.4rem}
+.dark{background:var(--night);color:var(--paper)}
+.dark .eyebrow,.dark .lead,.dark .note{color:rgba(243,242,239,.58)}
+
+.nav{position:fixed;z-index:200;left:0;right:0;top:0;padding:calc(env(safe-area-inset-top,0px) + 14px) var(--gut) 12px;display:flex;justify-content:space-between;align-items:center;transition:transform .5s cubic-bezier(.2,.8,.1,1),background .4s}
+.nav.solid{background:rgba(243,242,239,.82);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid var(--line)}
+.nav.hide{transform:translateY(-110%)}
+.logo{font:400 26px var(--serif);letter-spacing:-.01em}.logo small{font:500 10px var(--sans);letter-spacing:.26em;text-transform:uppercase;margin-left:10px;opacity:.55}
+.nav ul{display:flex;gap:32px;list-style:none;font:500 12px var(--sans);letter-spacing:.18em;text-transform:uppercase}
+@media(max-width:760px){.nav ul{display:none}}
+.btn{position:relative;display:inline-flex;align-items:center;justify-content:center;gap:.6rem;min-height:52px;padding:0 30px;border-radius:99px;background:var(--ink);color:var(--paper);font:600 12px var(--sans);letter-spacing:.18em;text-transform:uppercase;overflow:hidden;isolation:isolate;transition:transform .35s cubic-bezier(.2,.8,.1,1)}
+.btn::before{content:"";position:absolute;inset:0;background:var(--hair);transform:translateY(101%);transition:transform .5s cubic-bezier(.2,.8,.1,1),background .6s;z-index:-1;border-radius:inherit}
+.btn:hover::before{transform:none}.btn:hover{color:#111}.btn:active{transform:scale(.97)}
+.btn.line{background:transparent;color:inherit;border:1px solid currentColor}.btn.line:hover{color:#111;border-color:var(--hair)}
+.dark .btn{background:var(--paper);color:var(--night)}
+
+/* ===== Hero ===== */
+.hero{min-height:100svh;padding:0;overflow:hidden;display:flex;align-items:flex-end}
+.hero canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.hero::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,var(--paper) 0,rgba(243,242,239,.82) 28%,transparent 55%);pointer-events:none}
+.hero-txt{position:relative;z-index:2;padding:0 var(--gut) clamp(40px,10vh,110px);max-width:760px}
+.hero h1{font:400 clamp(3.4rem,12vw,9.5rem)/.94 var(--serif);letter-spacing:-.035em;margin:1rem 0 1.4rem}
+.hero h1 span{display:block;overflow:hidden;padding-bottom:.08em}
+.hero h1 span b{display:block;font-weight:400;transform:translateY(110%);animation:up 1.3s cubic-bezier(.2,.8,.1,1) forwards}
+.hero h1 span:nth-child(2) b{animation-delay:.12s;font-style:italic;color:var(--hair);transition:color .8s}
+@keyframes up{to{transform:none}}
+.hero p{font:400 clamp(1.05rem,2.4vw,1.3rem)/1.8 var(--zh);max-width:20ch;opacity:0;animation:fi 1.2s .9s forwards}
+@keyframes fi{to{opacity:1}}
+.hero .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:1.8rem;opacity:0;animation:fi 1.2s 1.1s forwards}
+.hero .cn{position:absolute;z-index:2;right:var(--gut);bottom:calc(env(safe-area-inset-bottom,0px) + 22px);font:500 11px var(--sans);letter-spacing:.2em;text-transform:uppercase;color:var(--ink);display:flex;align-items:center;gap:10px}
+.hero .cn i{width:10px;height:10px;border-radius:50%;background:var(--hair);transition:background .8s}
+@media(max-width:760px){.hero::after{background:linear-gradient(0deg,var(--paper) 0,rgba(243,242,239,.9) 34%,transparent 62%)}.hero .cn{display:none}}
+
+.mq{overflow:hidden;border-block:1px solid var(--line);padding-block:20px}
+.mq-row{display:flex;width:max-content;will-change:transform}
+.mq-row span{font:italic 400 clamp(1.6rem,4.4vw,3rem)/1 var(--serif);padding-right:1.2em;white-space:nowrap;display:flex;align-items:center;gap:1.2em}
+.mq-row span::after{content:"";width:.5em;height:.5em;border-radius:50%;background:var(--hair);transition:background .8s}
+
+/* ===== 髮色實驗室 ===== */
+.lab-grid{display:grid;grid-template-columns:1fr 1fr;gap:clamp(1.6rem,5vw,5rem);margin-top:3rem;align-items:center}
+.stage{position:relative;aspect-ratio:4/5;border-radius:28px;overflow:hidden;background:radial-gradient(70% 55% at 50% 30%,#23232b,#0b0b0e);border:1px solid var(--line-d)}
+.stage canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:pan-y}
+.stage .tip{position:absolute;left:16px;bottom:14px;font:500 11px var(--sans);letter-spacing:.14em;color:rgba(243,242,239,.55);pointer-events:none}
+.ctl{display:grid;gap:1.6rem}
+.ctl h4{font:500 11px var(--sans);letter-spacing:.24em;text-transform:uppercase;color:rgba(243,242,239,.55);margin-bottom:.8rem;display:flex;justify-content:space-between}
+.ctl h4 b{font-family:var(--zh);font-weight:400;color:var(--paper);letter-spacing:.04em;text-transform:none}
+.sw{display:flex;gap:12px;flex-wrap:wrap}
+.sw button{width:46px;height:46px;border-radius:50%;background:linear-gradient(160deg,var(--c1),var(--c2));position:relative;box-shadow:inset 0 2px 4px rgba(255,255,255,.3),inset 0 -4px 8px rgba(0,0,0,.3);transition:transform .3s}
+.sw button::after{content:"";position:absolute;inset:-6px;border-radius:50%;border:1.5px solid var(--paper);opacity:0;transform:scale(.85);transition:.35s cubic-bezier(.2,.8,.1,1)}
+.sw button[aria-pressed=true]::after{opacity:1;transform:none}.sw button:hover{transform:translateY(-3px)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{min-height:44px;padding:0 18px;border-radius:99px;border:1px solid var(--line-d);font:400 13.5px var(--sans);transition:background .3s,color .3s,border-color .3s}
+.chip:hover{border-color:rgba(243,242,239,.5)}.chip[aria-pressed=true]{background:var(--paper);color:var(--night);border-color:var(--paper)}
+.chip.light,.light .chip{border-color:var(--line)}.chip.light:hover,.light .chip:hover{border-color:rgba(18,18,20,.5)}.chip.light[aria-pressed=true],.light .chip[aria-pressed=true]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.sum{display:flex;justify-content:space-between;align-items:end;gap:1rem;flex-wrap:wrap;padding-top:1.4rem;border-top:1px solid var(--line-d)}
+.sum p{font:400 clamp(1.1rem,2.4vw,1.45rem)/1.45 var(--zh)}.sum small{display:block;font:500 11px var(--sans);letter-spacing:.18em;text-transform:uppercase;color:rgba(243,242,239,.5)}
+@media(max-width:860px){.lab-grid{grid-template-columns:1fr}.stage{aspect-ratio:1/1.05}}
+
+/* ===== 診斷 ===== */
+.quiz{margin-top:3rem;max-width:760px}
+.qa{display:none}.qa.on{display:block;animation:in .6s cubic-bezier(.2,.8,.1,1)}
+@keyframes in{from{opacity:0;transform:translateY(20px)}}
+.qh{display:flex;justify-content:space-between;font:500 11px var(--sans);letter-spacing:.24em;text-transform:uppercase;color:var(--mute);margin-bottom:1rem}
+.qbar{height:3px;background:var(--line);border-radius:9px;margin-bottom:1.6rem;overflow:hidden}.qbar i{display:block;height:100%;width:0;background:var(--hair);transition:width .6s cubic-bezier(.2,.8,.1,1),background .6s}
+.qa h3{font:400 clamp(1.6rem,4vw,2.4rem)/1.25 var(--serif);margin-bottom:1.4rem}
+.opts{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.opt{min-height:64px;padding:14px 18px;border-radius:18px;border:1px solid var(--line);text-align:left;font:400 15px var(--zh);background:rgba(255,255,255,.5);transition:transform .25s,border-color .3s,background .3s}
+.opt:hover{border-color:var(--ink);background:#fff}.opt:active{transform:scale(.97)}
+@media(max-width:520px){.opts{grid-template-columns:1fr}}
+.res{background:var(--ink);color:var(--paper);border-radius:26px;padding:clamp(22px,4vw,38px);display:grid;gap:14px}
+.res small{font:500 11px var(--sans);letter-spacing:.24em;text-transform:uppercase;color:var(--hair)}
+.res h3{font:400 clamp(1.8rem,4.6vw,2.8rem)/1.15 var(--serif)}
+.res p{color:rgba(243,242,239,.7);font-size:14.5px}
+.res ul{list-style:none;display:grid;gap:6px;font-size:14.5px}.res li{display:flex;gap:10px}.res li::before{content:"";flex:none;width:6px;height:6px;border-radius:50%;background:var(--hair);margin-top:.75em}
+.res .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-top:6px}
+.res b{font:400 1.8rem var(--serif)}
+.res .btn{background:var(--paper);color:var(--ink)}
+.redo{margin-top:12px;font:500 12px var(--sans);letter-spacing:.14em;text-decoration:underline;text-underline-offset:4px;color:var(--mute)}
+
+/* ===== 設計師 ===== */
+.des{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(10px,2vw,22px);margin-top:3rem}
+.dz{text-align:left;padding:24px;border-radius:24px;background:#fff;border:1px solid var(--line);display:flex;flex-direction:column;gap:12px;transition:transform .4s cubic-bezier(.2,.8,.1,1),border-color .3s,box-shadow .4s}
+.dz:hover{transform:translateY(-6px);box-shadow:0 24px 50px -28px rgba(18,18,20,.5)}
+.dz[aria-pressed=true]{border-color:var(--ink);box-shadow:0 0 0 1px var(--ink)}
+.dz .av{width:64px;height:64px;border-radius:50%;background:linear-gradient(150deg,var(--a),var(--b));display:grid;place-items:center;font:400 1.6rem var(--serif);color:#fff;box-shadow:inset 0 -6px 12px rgba(0,0,0,.2)}
+.dz h3{font:400 1.7rem/1.1 var(--serif)}.dz .rl{font:500 11px var(--sans);letter-spacing:.18em;text-transform:uppercase;color:var(--mute)}
+.dz p{font-size:14px;color:var(--mute)}
+.dz .tg{display:flex;gap:6px;flex-wrap:wrap}.dz .tg span{font:500 11px var(--sans);padding:3px 10px;border-radius:99px;border:1px solid var(--line)}
+@media(max-width:860px){.des{grid-template-columns:1fr}}
+
+/* ===== 前後對照 ===== */
+.cmp-sec{background:linear-gradient(180deg,var(--paper),#e7e4de)}
+.cmp{--p:50%;position:relative;margin-top:3rem;aspect-ratio:16/9;max-height:74vh;width:100%;border-radius:28px;overflow:hidden;user-select:none;-webkit-user-select:none;touch-action:pan-y;cursor:ew-resize;background:#ece9e3;box-shadow:0 40px 80px -40px rgba(18,18,20,.5)}
+@media(max-width:700px){.cmp{aspect-ratio:4/5}}
+.cmp canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.cmp .bf{clip-path:inset(0 calc(100% - var(--p)) 0 0)}
+.cmp .lbl{position:absolute;top:16px;font:500 11px var(--sans);letter-spacing:.26em;text-transform:uppercase;padding:8px 14px;border-radius:99px;background:rgba(255,255,255,.8);backdrop-filter:blur(8px)}
+.cmp .lbl.b{left:16px}.cmp .lbl.a{right:16px}
+.knob{position:absolute;top:0;bottom:0;left:var(--p);width:2px;background:#fff;transform:translateX(-1px);box-shadow:0 0 20px rgba(0,0,0,.25)}
+.knob::after{content:"⟷";position:absolute;top:50%;left:50%;width:54px;height:54px;margin:-27px 0 0 -27px;border-radius:50%;background:#fff;display:grid;place-items:center;font-size:18px;box-shadow:0 10px 30px rgba(0,0,0,.3)}
+
+/* ===== 價目 ===== */
+.pl{margin-top:3rem;border-top:1px solid var(--line-d)}
+.pr{display:grid;grid-template-columns:auto 1fr auto;align-items:baseline;gap:18px;padding:clamp(18px,2.6vw,30px) 0;border-bottom:1px solid var(--line-d);transition:padding .5s cubic-bezier(.2,.8,.1,1)}
+.pr:hover{padding-left:14px}
+.pr h3{font:400 clamp(1.3rem,3vw,2.2rem)/1.2 var(--serif)}.pr h3 small{display:block;font:300 13px var(--sans);opacity:.6;margin-top:3px}
+.pr i{align-self:end;border-bottom:1px dotted rgba(243,242,239,.3);height:1px;margin-bottom:.5em}
+.pr b{font:400 clamp(1.1rem,2.2vw,1.6rem) var(--serif)}
+
+/* ===== 預約 ===== */
+.book-grid{display:grid;grid-template-columns:1fr 1fr;gap:clamp(2rem,6vw,6rem);margin-top:3rem}
+.fld{margin-bottom:1.6rem}.fld>label,.fld>span{display:block;font:500 11px var(--sans);letter-spacing:.24em;text-transform:uppercase;color:var(--mute);margin-bottom:.7rem}
+.fld input,.fld textarea{width:100%;background:transparent;border:0;border-bottom:1px solid var(--line);color:var(--ink);font:300 16px var(--sans);padding:10px 0;border-radius:0;outline:0}
+.fld input:focus{border-color:var(--hair)}
+.fld textarea{min-height:190px;resize:vertical;line-height:1.8;font-size:14.5px;border:1px solid var(--line);padding:14px;border-radius:16px;background:#fff}
+.info div{display:flex;justify-content:space-between;gap:1rem;padding:18px 0;border-bottom:1px solid var(--line);font-size:14.5px}
+.info b{font:500 11px var(--sans);letter-spacing:.2em;text-transform:uppercase;color:var(--mute);flex:none}.info span{text-align:right}
+@media(max-width:860px){.book-grid{grid-template-columns:1fr}}
+.toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 26px);transform:translate(-50%,40px);background:var(--ink);color:var(--paper);padding:14px 24px;border-radius:99px;font:500 13px var(--sans);opacity:0;pointer-events:none;transition:.5s cubic-bezier(.2,.8,.1,1);z-index:600}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+footer{padding:36px var(--gut) calc(env(safe-area-inset-bottom,0px) + 36px);background:var(--night);color:rgba(243,242,239,.5);border-top:1px solid var(--line-d);display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;font:400 11.5px/1.7 var(--sans)}
+.rv{opacity:1;transform:none}.js .rv.pre{opacity:0;transform:translateY(44px);transition:opacity 1s,transform 1s cubic-bezier(.2,.8,.1,1)}.js .rv.pre.in{opacity:1;transform:none}
+:focus-visible{outline:2px solid var(--hair);outline-offset:3px}
+@media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}.hero h1 span b,.hero p,.hero .row{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+<div class="toast" id="toast" role="status"></div>
+<header class="nav" id="nav">
+  <a class="logo" href="#top">Lune<small>月沐髮廊</small></a>
+  <ul><li><a href="#lab">髮色</a></li><li><a href="#quiz">診斷</a></li><li><a href="#team">設計師</a></li><li><a href="#price">價目</a></li></ul>
+  <a class="btn" href="#book" style="min-height:42px;padding:0 22px">預約</a>
+</header>
+
+<!-- Hero -->
+<section class="hero" id="top">
+  <canvas id="hc" aria-hidden="true"></canvas>
+  <div class="hero-txt">
+    <div class="eyebrow">Hair Studio · 預約制 · 台北</div>
+    <h1><span><b>Hair is</b></span><span><b>your signature</b></span></h1>
+    <p>剪裁、染燙與護理，從你的髮質開始設計。</p>
+    <div class="row"><a class="btn" href="#book">預約設計師</a><a class="btn line" href="#lab">先試髮色</a></div>
+  </div>
+  <div class="cn"><i></i><span id="heroName">Copper</span></div>
+</section>
+
+<div class="mq" aria-hidden="true"><div class="mq-row" id="mq"></div></div>
+
+<!-- 髮色實驗室 -->
+<section class="dark" id="lab">
+  <div class="in">
+    <div class="eyebrow rv pre">Color Lab · 髮色實驗室</div>
+    <h2 class="rv pre">先在螢幕上，<br>試一次 <em>新髮色</em></h2>
+    <p class="lead rv pre">選顏色、技法、長度與捲度，髮絲會即時流動變化。手指或滑鼠在髮上劃過，光澤會跟著移動。整個網站的強調色也會換成你選的顏色。</p>
+    <div class="lab-grid">
+      <div class="stage"><canvas id="lc" aria-label="髮色預覽"></canvas><span class="tip">在髮上滑動</span></div>
+      <div class="ctl">
+        <div><h4>顏色 <b id="vCol"></b></h4><div class="sw" id="cCol"></div></div>
+        <div><h4>技法 <b id="vTech"></b></h4><div class="chips" id="cTech"></div></div>
+        <div><h4>長度 <b id="vLen"></b></h4><div class="chips" id="cLen"></div></div>
+        <div><h4>捲度 <b id="vCurl"></b></h4><div class="chips" id="cCurl"></div></div>
+        <div class="sum"><p id="sumTxt"></p><a class="btn" href="#book" id="useLab">帶著這組預約</a></div>
+      </div>
+    </div>
+    <p class="note">預覽為示意，實際色彩會依原本髮色與髮質有所不同。價格與時間為示意。</p>
+  </div>
+</section>
+
+<!-- 診斷 -->
+<section id="quiz">
+  <div class="in">
+    <div class="eyebrow rv pre">Hair Check · 髮質診斷</div>
+    <h2 class="rv pre">三個問題，<br>找到 <em>適合的做法</em></h2>
+    <div class="quiz rv pre" id="quizBox"></div>
+  </div>
+</section>
+
+<!-- 設計師 -->
+<section id="team" style="padding-top:0">
+  <div class="in">
+    <div class="eyebrow rv pre">Designers · 設計師</div>
+    <h2 class="rv pre">選擇 <em>跟你合拍的人</em></h2>
+    <div class="des" id="des"></div>
+    <p class="note">設計師為虛構示意。點選後會帶入預約表單。</p>
+  </div>
+</section>
+
+<!-- 前後對照 -->
+<section class="cmp-sec">
+  <div class="in">
+    <div class="eyebrow rv pre">Before / After</div>
+    <h2 class="rv pre">同一頭髮，<br>差在 <em>光澤與線條</em></h2>
+    <div class="cmp rv pre" id="cmp" role="slider" aria-label="前後對照滑桿" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50" tabindex="0">
+      <canvas id="ca"></canvas><canvas id="cb" class="bf"></canvas>
+      <span class="lbl b">Before</span><span class="lbl a">After</span><div class="knob"></div>
+    </div>
+    <p class="note">左右拖曳。這是程式繪製的示意，請換成顧客同意授權的真實照片。</p>
+  </div>
+</section>
+
+<!-- 價目 -->
+<section class="dark" id="price">
+  <div class="in">
+    <div class="eyebrow rv pre">Menu · 價目</div>
+    <h2 class="rv pre">價格清楚，<br><em>不臨時加價</em></h2>
+    <div class="pl rv pre">
+      <div class="pr"><h3>設計剪裁<small>含洗髮與造型 · 設計師依級別加價</small></h3><i></i><b>NT$1,200 起</b></div>
+      <div class="pr"><h3>染髮<small>依長度與色系，需漂髮另計</small></h3><i></i><b>NT$2,800 起</b></div>
+      <div class="pr"><h3>漂髮<small>分階段進行，保護髮質</small></h3><i></i><b>NT$1,500 起</b></div>
+      <div class="pr"><h3>燙髮 / 髮根蓬鬆<small>依髮量與捲度</small></h3><i></i><b>NT$3,200 起</b></div>
+      <div class="pr"><h3>深層護髮<small>含熱護理與頭皮按摩</small></h3><i></i><b>NT$1,200 起</b></div>
+    </div>
+    <p class="note">以上價格為示意，請換成實際價目。</p>
+  </div>
+</section>
+
+<!-- 預約 -->
+<section id="book">
+  <div class="in">
+    <div class="eyebrow rv pre">Booking · 預約</div>
+    <h2 class="rv pre">留一個 <em>下午</em><br>給你的頭髮</h2>
+    <div class="book-grid">
+      <form class="rv pre" onsubmit="return false">
+        <div class="fld"><span>設計師</span><div class="chips" id="bDes"></div></div>
+        <div class="fld"><span>日期</span><div class="chips light" id="bDate"></div></div>
+        <div class="fld"><span>時段</span><div class="chips light" id="bTime"></div></div>
+        <div class="fld"><label for="nm">稱呼</label><input id="nm" autocomplete="name" placeholder="怎麼稱呼你"></div>
+        <div class="fld"><label for="msg">預約訊息</label><textarea id="msg" readonly></textarea></div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn" id="copy" type="button">複製訊息</button><a class="btn line" href="#" id="line">前往 LINE</a></div>
+        <p class="note">複製後貼到 LINE 或 Instagram 私訊即可。LINE 連結請換成你自己的。</p>
+      </form>
+      <div class="info rv pre">
+        <div><b>LINE</b><span>@your-line-id（請填入）</span></div>
+        <div><b>Instagram</b><span>@your.handle（請填入）</span></div>
+        <div><b>營業時間</b><span>週二至週日 11:00 – 20:00</span></div>
+        <div><b>地址</b><span>台北市 ○○區 ○○路 ○ 號（請填入）</span></div>
+        <div><b>注意</b><span>染燙需 2 至 4 小時，請預留時間</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+<footer><span>© Lune Hair Studio</span><span>範例網站，名稱、價格、設計師與聯絡資料皆為示意。</span></footer>
+
+<script>
+document.documentElement.classList.add('js');
+const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
+const lerp=(a,b,t)=>a+(b-a)*t,clamp=(v,a=0,b=1)=>Math.max(a,Math.min(b,v));
+const reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
+function rng(a){return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+const hexA=h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16));
+const mixA=(a,b,t)=>a.map((v,i)=>v+(b[i]-v)*t);
+const rgb=(a,al=1)=>`rgba(${a.map(Math.round).join(',')},${al})`;
+const toHex=a=>'#'+a.map(v=>Math.round(clamp(v,0,255)).toString(16).padStart(2,'0')).join('');
+let tt;function toast(t){const e=$('#toast');e.textContent=t;e.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>e.classList.remove('on'),2200)}
+
+/* ---------- 髮絲繪製 ---------- */
+const COLS={
+  black:{n:'黑茶',en:'Espresso',root:hexA('#1a0f0a'),tip:hexA('#46301f'),bleach:0},
+  brown:{n:'霧棕',en:'Mocha',root:hexA('#3a2518'),tip:hexA('#946a48'),bleach:0},
+  honey:{n:'蜜茶',en:'Honey',root:hexA('#6b4524'),tip:hexA('#d9a96a'),bleach:1},
+  gold:{n:'亞麻金',en:'Flax',root:hexA('#8a6d3b'),tip:hexA('#f2dca8'),bleach:2},
+  rose:{n:'玫瑰粉',en:'Rosé',root:hexA('#7a3446'),tip:hexA('#f5adbf'),bleach:2},
+  lilac:{n:'霧灰紫',en:'Lilac',root:hexA('#4a4160'),tip:hexA('#bdb1d8'),bleach:2},
+  silver:{n:'冷銀灰',en:'Silver',root:hexA('#5a5f68'),tip:hexA('#e4e8ef'),bleach:2},
+  copper:{n:'銅橘',en:'Copper',root:hexA('#6e2c10'),tip:hexA('#ff9a4d'),bleach:1}};
+function makeStrands(n,seed){const r=rng(seed);return Array.from({length:n},(_,i)=>({u:(i+r())/n,len:.86+r()*.28,ph:r()*6.283,th:.7+r()*1.1,hi:r()<.22,v:(r()-.5)*2,jit:Float32Array.from({length:22},()=>r()-.5),pts:new Float32Array(44)}))}
+const N=22;
+/* c:{root,tip,tech,len,curl,gloss} o:{cx,w,top,lw,sheenX,frizz,anim} */
+function drawHair(g,W,H,c,t,ptr,S,o){
+  const bw=o.w,Lmax=(H-o.top)*(.3+c.len*.7),sig=2*(bw*.16)*(bw*.16);
+  g.lineCap='round';g.lineJoin='round';
+  for(const s of S){
+    const k=Math.abs(s.u-.5)*2,side=s.u<.5?-1:1;
+    const xr=o.cx+(s.u-.5)*bw*.5,yr=o.top+(1-Math.sin(s.u*Math.PI))*bw*.06,L=Lmax*s.len*(1-k*.08);
+    const freq=3+c.curl*7,amp=bw*.012*(.25+c.curl*2.2);
+    for(let j=0;j<N;j++){
+      const sp=j/(N-1),y=yr+sp*L;
+      let x=xr+side*Math.sin(sp*Math.PI*.8)*bw*.1*k-side*sp*sp*sp*bw*.05*(1.15-c.len)*(1+k)
+        +Math.sin(sp*freq+(o.anim?t*.8:0)+s.ph)*amp*(.3+sp)+s.jit[j]*o.frizz*bw*.014*sp;
+      if(ptr.on){const dx=x-ptr.x,dy=y-ptr.y;x+=(dx<0?-1:1)*Math.exp(-(dx*dx+dy*dy)/sig)*bw*.07}
+      s.pts[j*2]=x;s.pts[j*2+1]=y}
+    const gr=g.createLinearGradient(0,yr,0,yr+L);
+    const adj=col=>mixA(col,s.v>0?[255,255,255]:[0,0,0],Math.abs(s.v)*.14);
+    if(c.tech==='ombre'){gr.addColorStop(0,rgb(adj(c.root),.95));gr.addColorStop(.45,rgb(adj(mixA(c.root,c.tip,.22)),.92));gr.addColorStop(1,rgb(adj(c.tip),.9))}
+    else if(c.tech==='balayage'&&s.hi){gr.addColorStop(0,rgb(adj(mixA(c.root,c.tip,.25)),.95));gr.addColorStop(1,rgb(mixA(c.tip,[255,255,255],.25),.95))}
+    else{gr.addColorStop(0,rgb(adj(c.root),.95));gr.addColorStop(1,rgb(adj(mixA(c.root,c.tip,.38)),.9))}
+    g.strokeStyle=gr;g.lineWidth=o.lw*s.th*(c.tech==='balayage'&&s.hi?1.5:1);
+    g.beginPath();g.moveTo(s.pts[0],s.pts[1]);for(let j=1;j<N;j++)g.lineTo(s.pts[j*2],s.pts[j*2+1]);g.stroke()}
+  if(c.gloss>0){
+    const sc=bw*.15;g.lineWidth=o.lw*.55;
+    for(const s of S){const dx=(s.pts[22]-o.sheenX)/sc,a=c.gloss*.55*Math.exp(-dx*dx);
+      if(a<.03)continue;g.strokeStyle=`rgba(255,255,255,${a.toFixed(3)})`;g.beginPath();g.moveTo(s.pts[4],s.pts[5]);for(let j=3;j<17;j++)g.lineTo(s.pts[j*2],s.pts[j*2+1]);g.stroke()}}}
+function setup(cv){const d=Math.min(devicePixelRatio||1,2),w=cv.clientWidth,h=cv.clientHeight;if(!w||!h)return null;
+  if(cv.width!==(w*d|0)||cv.height!==(h*d|0)){cv.width=w*d;cv.height=h*d}const g=cv.getContext('2d');g.setTransform(d,0,0,d,0,0);g.clearRect(0,0,w,h);return{g,w,h}}
+const vis=new Map();const vio=new IntersectionObserver(es=>es.forEach(e=>vis.set(e.target,e.isIntersecting)));
+const watch=el=>{vis.set(el,true);vio.observe(el)};const on=el=>vis.get(el)!==false;
+const small=Math.min(innerWidth,innerHeight)<700;
+const root=document.documentElement;
+function setAccent(tipA){const a=mixA(tipA,[255,255,255],.08);root.style.setProperty('--hair',toHex(a))}
+
+/* ---------- Hero ---------- */
+const hc=$('#hc');watch(hc);const HS=makeStrands(small?170:250,3);
+const HERO=['copper','rose','gold','lilac','silver','honey'];let hi=0,hNext=performance.now()+5200;
+const hcur={root:[...COLS.copper.root],tip:[...COLS.copper.tip]};
+let px=0,py=0,pOn=0,lastIn=-9999,sheen=0;
+function heroPtr(cx,cy){const r=hc.getBoundingClientRect();px=cx-r.left;py=cy-r.top;lastIn=performance.now()}
+hc.addEventListener('pointermove',e=>{if(e.pointerType==='mouse')heroPtr(e.clientX,e.clientY)});
+hc.parentElement.addEventListener('pointermove',e=>{if(e.pointerType==='mouse')heroPtr(e.clientX,e.clientY)});
+['touchstart','touchmove'].forEach(ev=>hc.parentElement.addEventListener(ev,e=>heroPtr(e.touches[0].clientX,e.touches[0].clientY),{passive:true}));
+(function(){const m=$('#mq');const w=['Cut','Color','Perm','Treatment','Balayage','Gloss'];const h=w.map(t=>`<span>${t}</span>`).join('');m.innerHTML=h+h})();
+
+/* ---------- 髮色實驗室 ---------- */
+const S={col:'copper',tech:'ombre',len:'mid',curl:'wave'};
+const TECH={solid:['全染',0],ombre:['漸層',1200],balayage:['挑染',800]};
+const LEN={bob:['短鮑伯',.28,2200],short:['及肩',.5,2800],mid:['中長',.72,3400],long:['長髮',.98,4200]};
+const CURL={straight:['直髮',0],wave:['微捲',.5],curl:['大捲',1]};
+const LS={root:[...COLS.copper.root],tip:[...COLS.copper.tip],len:.72,curl:.5};
+const LC=makeStrands(small?170:240,11);
+function chips(host,map,key){Object.entries(map).forEach(([k,v])=>{const b=document.createElement('button');b.className='chip';b.type='button';b.dataset.k=k;b.textContent=v[0];b.onclick=()=>{S[key]=k;lab()};host.appendChild(b)})}
+chips($('#cTech'),TECH,'tech');chips($('#cLen'),LEN,'len');chips($('#cCurl'),CURL,'curl');
+Object.entries(COLS).forEach(([k,v])=>{const b=document.createElement('button');b.type='button';b.dataset.k=k;b.setAttribute('aria-label',v.n);
+  b.style.setProperty('--c1',toHex(v.root));b.style.setProperty('--c2',toHex(v.tip));b.onclick=()=>{S.col=k;lab()};$('#cCol').appendChild(b)});
+let labTxt='';
+function labPrice(){const c=COLS[S.col];let p=LEN[S.len][2]+TECH[S.tech][1]+c.bleach*1500;let h=2.5+LEN[S.len][1]*1.2+(S.tech!=='solid'?.8:0)+c.bleach*.8;return{p,h:Math.round(h*2)/2,bleach:c.bleach}}
+function lab(){
+  const c=COLS[S.col],pr=labPrice();
+  $('#vCol').textContent=c.n;$('#vTech').textContent=TECH[S.tech][0];$('#vLen').textContent=LEN[S.len][0];$('#vCurl').textContent=CURL[S.curl][0];
+  $$('#cTech .chip').forEach(b=>b.setAttribute('aria-pressed',b.dataset.k===S.tech));$$('#cLen .chip').forEach(b=>b.setAttribute('aria-pressed',b.dataset.k===S.len));
+  $$('#cCurl .chip').forEach(b=>b.setAttribute('aria-pressed',b.dataset.k===S.curl));$$('#cCol button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.k===S.col));
+  labTxt=`${c.n}・${TECH[S.tech][0]}・${LEN[S.len][0]}・${CURL[S.curl][0]}`;
+  $('#sumTxt').innerHTML=`<small>你的組合</small>${labTxt}<br><small style="margin-top:6px">NT$${pr.p.toLocaleString()} 起 · 約 ${pr.h} 小時${pr.bleach?' · 含漂髮':''}（示意）</small>`;
+  setAccent(c.tip);if(!B.custom)B.svc=labTxt;buildMsg()}
+const lc=$('#lc');watch(lc);let lp={x:0,y:0,on:0},lastLab=-9999,lsheen=0;
+function labPtr(cx,cy){const r=lc.getBoundingClientRect();lp.x=cx-r.left;lp.y=cy-r.top;lastLab=performance.now()}
+lc.addEventListener('pointermove',e=>{if(e.pointerType==='mouse')labPtr(e.clientX,e.clientY)});
+['touchstart','touchmove'].forEach(ev=>lc.addEventListener(ev,e=>labPtr(e.touches[0].clientX,e.touches[0].clientY),{passive:true}));
+
+/* ---------- 診斷 ---------- */
+const QS=[
+ {q:'你的髮質目前最像哪一種？',o:[['dry','乾燥毛躁'],['flat','細軟扁塌'],['oily','容易出油'],['dmg','染燙過多，受損']]},
+ {q:'這次最想改變什麼？',o:[['color','換新髮色'],['vol','增加蓬鬆度'],['repair','修復護理'],['cut','換髮型或長度']]},
+ {q:'你多久整理一次頭髮？',o:[['m','每個月'],['q','每 2 至 3 個月'],['r','半年以上']]}];
+const RES={
+ color:{t:'染髮加護髮組合',p:'NT$3,800 起',d:'依你的髮色基底挑選色系，染後做護髮鎖色。',s:'染髮＋護髮'},
+ vol:{t:'髮根蓬鬆燙加剪裁',p:'NT$3,200 起',d:'從髮根撐起線條，搭配輕盈層次剪裁。',s:'髮根蓬鬆燙＋剪裁'},
+ repair:{t:'深層護髮療程',p:'NT$1,800 起',d:'熱護理加頭皮按摩，讓髮質先回到好狀態。',s:'深層護髮療程'},
+ cut:{t:'設計剪裁加造型',p:'NT$1,500 起',d:'依臉型與髮流重新設計輪廓，附造型教學。',s:'設計剪裁＋造型'}};
+const EXTRA={dry:'加強保濕護髮，避免毛躁。',flat:'搭配輕盈層次，增加髮量感。',oily:'加做頭皮養護，改善出油。',dmg:'化學處理前，先修護 1 次。'};
+const FREQ={m:'每月可回來維持色澤與線條。',q:'選擇漸層或挑染，回補間隔更長。',r:'建議選擇好維持的款式，並搭配居家護髮。'};
+const qa=[];let ans=[];
+const qb=$('#quizBox');
+function qRender(i){
+  qb.innerHTML='';
+  if(i<QS.length){const d=document.createElement('div');d.className='qa on';
+    d.innerHTML=`<div class="qh"><span>問題 ${i+1} / ${QS.length}</span></div><div class="qbar"><i style="width:${i/QS.length*100}%"></i></div><h3>${QS[i].q}</h3><div class="opts"></div>`;
+    QS[i].o.forEach(([k,l])=>{const b=document.createElement('button');b.className='opt';b.type='button';b.textContent=l;b.onclick=()=>{ans[i]=k;requestAnimationFrame(()=>{$('.qbar i',d).style.width=(i+1)/QS.length*100+'%'});setTimeout(()=>qRender(i+1),240)};$('.opts',d).appendChild(b)});
+    qb.appendChild(d);requestAnimationFrame(()=>{const f=$('.qbar i',d);f&&(f.style.width=i/QS.length*100+'%')})}
+  else{const r=RES[ans[1]];const d=document.createElement('div');d.className='qa on';
+    d.innerHTML=`<div class="res"><small>推薦做法</small><h3>${r.t}</h3><p>${r.d}</p><ul><li>${EXTRA[ans[0]]}</li><li>${FREQ[ans[2]]}</li></ul><div class="row"><b>${r.p}（示意）</b><a class="btn" href="#book" id="useQ">帶入預約</a></div></div><button class="redo" id="redo" type="button">重新診斷</button>`;
+    qb.appendChild(d);$('#redo').onclick=()=>{ans=[];qRender(0)};
+    $('#useQ').onclick=()=>{B.custom=true;B.svc=`${r.s}（診斷建議：${EXTRA[ans[0]]}）`;buildMsg()}}}
+qRender(0);
+
+/* ---------- 設計師 ---------- */
+const DZ=[
+ {id:'ren',n:'Ren',r:'設計總監',a:'#ff9a4d',b:'#7a2e12',p:'+NT$600',t:['染髮','漂髮','色彩設計'],d:'擅長色彩設計與大面積漂染。'},
+ {id:'mia',n:'Mia',r:'資深設計師',a:'#f5adbf',b:'#6d2a3d',p:'+NT$300',t:['剪裁','鮑伯','層次'],d:'重視輪廓與髮流，剪出好整理的線條。'},
+ {id:'kai',n:'Kai',r:'設計師',a:'#bdb1d8',b:'#3c3358',p:'原價',t:['燙髮','護髮','頭皮'],d:'專注髮質修護與自然捲度。'}];
+const dsel={v:'any'};
+const des=$('#des');
+DZ.forEach(z=>{const b=document.createElement('button');b.className='dz rv pre';b.type='button';b.dataset.k=z.id;
+  b.innerHTML=`<div class="av" style="--a:${z.a};--b:${z.b}">${z.n[0]}</div><div><h3>${z.n}</h3><span class="rl">${z.r} · ${z.p}</span></div><p>${z.d}</p><div class="tg">${z.t.map(t=>`<span>${t}</span>`).join('')}</div>`;
+  b.onclick=()=>{dsel.v=dsel.v===z.id?'any':z.id;syncDes();toast(dsel.v==='any'?'已取消指定設計師':'已選擇 '+z.n);location.hash='#book'};des.appendChild(b)});
+const bDes=$('#bDes');
+[['any','不指定'],...DZ.map(z=>[z.id,z.n])].forEach(([k,l])=>{const b=document.createElement('button');b.type='button';b.className='chip light';b.dataset.k=k;b.textContent=l;b.onclick=()=>{dsel.v=k;syncDes()};bDes.appendChild(b)});
+function syncDes(){$$('.dz').forEach(b=>b.setAttribute('aria-pressed',b.dataset.k===dsel.v));$$('#bDes .chip').forEach(b=>b.setAttribute('aria-pressed',b.dataset.k===dsel.v));buildMsg()}
+
+/* ---------- 對照 ---------- */
+const ca=$('#ca'),cb=$('#cb'),cmp=$('#cmp');const CS=makeStrands(small?200:300,29);
+function drawCmp(){
+  const a=setup(ca),b=setup(cb);if(!a||!b)return;
+  const W=a.w,H=a.h,cx=W*.5,bw=W*(W<700?1.35:.62);
+  a.g.fillStyle='#ece9e3';a.g.fillRect(0,0,W,H);b.g.fillStyle='#d9d5cc';b.g.fillRect(0,0,W,H);
+  drawHair(a.g,W,H,{root:COLS.honey.root,tip:COLS.honey.tip,tech:'ombre',len:.8,curl:.3,gloss:1},0,{on:0},CS,{cx,w:bw,top:H*.07,lw:Math.max(1,W/900*1.5),sheenX:W*.42,frizz:0,anim:0});
+  drawHair(b.g,W,H,{root:hexA('#2c1d14'),tip:hexA('#6b5646'),tech:'solid',len:.72,curl:.85,gloss:0},0,{on:0},CS,{cx,w:bw,top:H*.07,lw:Math.max(1,W/900*1.5),sheenX:-999,frizz:1.4,anim:0})}
+addEventListener('resize',drawCmp);
+{let p=50;const set=v=>{p=clamp(v,2,98);cmp.style.setProperty('--p',p+'%');cmp.setAttribute('aria-valuenow',Math.round(p))};let drag=false,auto=false;
+  const ev=e=>{const r=cmp.getBoundingClientRect();set((e.clientX-r.left)/r.width*100)};
+  cmp.addEventListener('pointerdown',e=>{drag=true;auto=false;try{cmp.setPointerCapture(e.pointerId)}catch(x){}ev(e)});
+  cmp.addEventListener('pointermove',e=>{if(drag)ev(e)});['pointerup','pointercancel'].forEach(n=>cmp.addEventListener(n,()=>drag=false));
+  cmp.addEventListener('keydown',e=>{if(e.key==='ArrowLeft')set(p-5);if(e.key==='ArrowRight')set(p+5)});
+  new IntersectionObserver((es,o)=>{if(es[0].isIntersecting&&!reduce){o.disconnect();auto=true;const t0=performance.now();(function f(n){if(!auto)return;const t=(n-t0)/2600;if(t<1){set(50+Math.sin(t*Math.PI*2)*30*(1-t));requestAnimationFrame(f)}else set(50)})(t0)}},{threshold:.6}).observe(cmp);set(50)}
+document.fonts.ready.then(drawCmp);drawCmp();
+
+/* ---------- 預約 ---------- */
+const B={svc:null,custom:false,date:null,time:null};
+(function(){const w='日一二三四五六',now=new Date();
+  for(let i=1;i<=7;i++){const d=new Date(now);d.setDate(now.getDate()+i);const t=`${d.getMonth()+1}/${d.getDate()}（${w[d.getDay()]}）`;
+    const b=document.createElement('button');b.type='button';b.className='chip light';b.textContent=t;b.onclick=()=>{B.date=B.date===t?null:t;syncT()};$('#bDate').appendChild(b)}
+  ['11:00','13:30','16:00','18:30'].forEach(t=>{const b=document.createElement('button');b.type='button';b.className='chip light';b.textContent=t;b.onclick=()=>{B.time=B.time===t?null:t;syncT()};$('#bTime').appendChild(b)})})();
+function syncT(){$$('#bDate .chip').forEach(b=>b.setAttribute('aria-pressed',b.textContent===B.date));$$('#bTime .chip').forEach(b=>b.setAttribute('aria-pressed',b.textContent===B.time));buildMsg()}
+function buildMsg(){const z=DZ.find(x=>x.id===dsel.v);
+  $('#msg').value=`你好，我想預約髮廊。\n服務：${B.svc||labTxt||'（請選擇）'}\n設計師：${z?z.n+'（'+z.r+'）':'不指定'}\n日期：${B.date||'（請選擇）'}\n時段：${B.time||'（請選擇）'}\n稱呼：${($('#nm').value||'').trim()||'（請填寫）'}\n謝謝！`}
+$('#nm').addEventListener('input',buildMsg);
+$('#useLab').addEventListener('click',()=>{B.custom=false;B.svc=labTxt;buildMsg()});
+$('#copy').onclick=async()=>{const m=$('#msg');try{await navigator.clipboard.writeText(m.value);toast('已複製，請貼到 LINE 或 IG')}catch(e){m.removeAttribute('readonly');m.select();let ok=false;try{ok=document.execCommand('copy')}catch(x){}m.setAttribute('readonly','');toast(ok?'已複製，請貼到 LINE 或 IG':'請長按文字手動複製')}};
+$$('a[href="#"]').forEach(a=>a.addEventListener('click',e=>e.preventDefault()));
+lab();syncDes();syncT();
+
+/* ---------- 導覽與揭露 ---------- */
+const nav=$('#nav');let lastY=0;addEventListener('scroll',()=>{const y=scrollY;nav.classList.toggle('solid',y>40);nav.classList.toggle('hide',y>lastY&&y>260);lastY=y},{passive:true});
+const rio=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');rio.unobserve(e.target)}}),{threshold:.08});
+$$('.rv').forEach(el=>{if(el.getBoundingClientRect().top>innerHeight)rio.observe(el);else el.classList.remove('pre')});
+
+/* ---------- 主迴圈 ---------- */
+const mq=$('#mq');
+function frame(now){
+  const t=now/1000;
+  if(on(hc)){
+    if(now>hNext&&!reduce){hi=(hi+1)%HERO.length;hNext=now+5200;const c=COLS[HERO[hi]];hcur.tgtR=c.root;hcur.tgtT=c.tip;$('#heroName').textContent=c.en;if(scrollY<innerHeight*.8)setAccent(c.tip)}
+    if(hcur.tgtR){hcur.root=mixA(hcur.root,hcur.tgtR,.04);hcur.tip=mixA(hcur.tip,hcur.tgtT,.04)}
+    const s=setup(hc);if(s){const{g,w,h}=s,active=now-lastIn<2200;
+      const P=active?{on:1,x:px,y:py}:{on:1,x:w*(w<760?.5:.7)+Math.sin(t*.7)*w*.22,y:h*(.45+.15*Math.sin(t*.5))};
+      sheen=lerp(sheen||P.x,P.x,.08);
+      drawHair(g,w,h,{root:hcur.root,tip:hcur.tip,tech:'ombre',len:.95,curl:.45,gloss:1},reduce?0:t,P,HS,{cx:w*(w<760?.5:.7),w:w*(w<760?1.35:.8),top:h*.08,lw:Math.max(1,w/900*1.4),sheenX:sheen,frizz:0,anim:!reduce})}}
+  if(on(lc)){
+    const c=COLS[S.col];LS.root=mixA(LS.root,c.root,.1);LS.tip=mixA(LS.tip,c.tip,.1);LS.len=lerp(LS.len,LEN[S.len][1],.08);LS.curl=lerp(LS.curl,CURL[S.curl][1],.08);
+    const s=setup(lc);if(s){const{g,w,h}=s,active=now-lastLab<2200;
+      const P=active?{on:1,x:lp.x,y:lp.y}:{on:1,x:w*(.5+.3*Math.sin(t*.8)),y:h*(.4+.15*Math.sin(t*.55))};
+      lsheen=lerp(lsheen||P.x,P.x,.1);
+      drawHair(g,w,h,{root:LS.root,tip:LS.tip,tech:S.tech,len:LS.len,curl:LS.curl,gloss:1},reduce?0:t,P,LC,{cx:w*.5,w:w*1.25,top:h*.05,lw:Math.max(1,w/700*1.4),sheenX:lsheen,frizz:0,anim:!reduce})}}
+  const w2=mq.scrollWidth/2;mq.style.transform=`translate3d(${-((t*36+scrollY*.3)%w2)}px,0,0)`;
+  requestAnimationFrame(frame)}
+requestAnimationFrame(frame);
+</script>
+<script src="common.js"></script>
+</body>
+</html>

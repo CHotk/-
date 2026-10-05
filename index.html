@@ -59,6 +59,8 @@ main{padding:0 var(--gut) 90px;max-width:1280px;margin-inline:auto}
 .hint{margin-top:44px;padding:16px 18px;border:1px dashed var(--line);border-radius:16px;color:var(--mute);font-size:13px;line-height:1.8}
 .hint b{color:var(--fg);font-weight:500}
 
+.a7{background:repeating-linear-gradient(180deg,transparent 0 6px,rgba(255,255,255,.06) 6px 7px),linear-gradient(100deg,#6e2c10 0,#ff9a4d 30%,#f5adbf 62%,#bdb1d8 100%),#f3f2ef}
+
 /* 預覽視窗 */
 .ov{position:fixed;inset:0;z-index:100;display:flex;flex-direction:column;background:rgba(5,6,8,.92);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);opacity:0;pointer-events:none;transition:opacity .35s}
 .ov.on{opacity:1;pointer-events:auto}
@@ -117,7 +119,7 @@ main{padding:0 var(--gut) 90px;max-width:1280px;margin-inline:auto}
   <div class="eyebrow">Web Dev Collection</div>
   <h1>網站開發<em>合輯</em></h1>
   <p>這裡收錄所有做過的特效展示與行業範例網站。點任何一張卡片，就能在視窗裡預覽，並切換手機與桌機寬度。</p>
-  <div class="stats"><span><b>6</b>個頁面</span><span><b>3</b>組特效圖鑑</span><span><b>3</b>個行業範例</span><a id="ver" href="#history" class="ver"></a></div>
+  <div class="stats"><span><b>7</b>個頁面</span><span><b>3</b>組特效圖鑑</span><span><b>4</b>個行業範例</span><a id="ver" href="#history" class="ver"></a></div>
 </header>
 
 <main>
@@ -151,6 +153,7 @@ const $=s=>document.querySelector(s);
 /* 更新歷史：每次更新並推送前，只在「最上面」新增一筆即可。
    頁首版本標籤、預覽網址的版本參數、下方更新歷史都從這份清單產生。 */
 const CHANGELOG=[
+ {v:'1.3.0',date:'2026-10-05',items:['新增行業範例：髮廊形象網站（髮絲簾幕、髮色實驗室、髮質診斷、設計師選擇、前後對照、預約訊息）','髮廊頁面的強調色會隨選到的髮色改變']},
  {v:'1.2.0',date:'2026-10-05',items:['手機模式預覽：滑鼠可按住上下拖曳捲動頁面，放開後有慣性滑行','所有頁面左上角新增「首頁」按鈕，可回到合輯入口','入口頁新增更新歷史','入口頁針對手機調整：預覽視窗在手機上改為全螢幕']},
  {v:'1.1.0',date:'2026-10-05',items:['滑鼠可按住左右拖曳橫向捲動區塊（輪播、篩選列、評價）','入口頁顯示版本號，預覽網址帶版本參數以避開舊快取','加入在電腦上體驗手機版的說明']},
  {v:'1.0.0',date:'2026-10-05',items:['首次上線：入口頁與六個頁面（特效圖鑑 I、II、III，美甲師、花藝工作室、遊戲商人）']}
@@ -164,10 +167,11 @@ const PAGES=[
  {grp:1,no:'03',art:'a3',file:'awwwards-effects-3-mobile.html',t:'特效圖鑑 III · 手機版',d:'手機優先：觸控漣漪、疊卡捲動、滑動卡堆、重力感應全像卡、吸附輪播與底部報名抽屜。',tags:['觸控','手機','抽屜'],dev:['手機','桌機']},
  {grp:2,no:'04',art:'a4',file:'nail-artist-site.html',t:'美甲師形象網站',d:'奶霜精品風。CSS 繪製的貓眼與鏡面指甲、款式實驗室、前後對照與預約訊息產生器。',tags:['美業','CSS 繪圖','預約'],dev:['手機','桌機']},
  {grp:2,no:'05',art:'a5',file:'florist-studio-site.html',t:'花藝工作室網站',d:'Canvas 即時繪製並綻放的花朵、捲動綻放敘事，以及可即時預覽的花束訂製器。',tags:['Canvas','訂製器','課程'],dev:['手機','桌機']},
- {grp:2,no:'06',art:'a6',file:'game-trader-site.html',t:'遊戲商人商店',d:'App 式手機商店：稀有度篩選、商品詳情抽屜、收購估價、安全檢查表與底部分頁列。',tags:['手機優先','電商','收藏'],dev:['手機','桌機']}
+ {grp:2,no:'06',art:'a6',file:'game-trader-site.html',t:'遊戲商人商店',d:'App 式手機商店：稀有度篩選、商品詳情抽屜、收購估價、安全檢查表與底部分頁列。',tags:['手機優先','電商','收藏'],dev:['手機','桌機']},
+ {grp:2,no:'07',art:'a7',file:'hair-salon-site.html',t:'髮廊形象網站',d:'Canvas 髮絲簾幕會隨手指流動；髮色實驗室即時換色、三題髮質診斷、設計師選擇與前後對照。',tags:['美業','Canvas','診斷'],dev:['手機','桌機']}
 ];
-const G={a1:'#d6ff3f',a2:'#6d28ff',a3:'#ff7ad9',a4:'#c1123a',a5:'#f4b4c4',a6:'#ffb938'};
-const BG={a1:'#0c0c0e',a2:'#0d0e12',a3:'#17102e',a4:'#f1ebea',a5:'#12261b',a6:'#161008'};
+const G={a1:'#d6ff3f',a2:'#6d28ff',a3:'#ff7ad9',a4:'#c1123a',a5:'#f4b4c4',a6:'#ffb938',a7:'#ff9a4d'};
+const BG={a1:'#0c0c0e',a2:'#0d0e12',a3:'#17102e',a4:'#f1ebea',a5:'#12261b',a6:'#161008',a7:'#f3f2ef'};
 PAGES.forEach(p=>{
   const b=document.createElement('button');b.className='card';b.type='button';b.style.setProperty('--g1',G[p.art]+'66');
   b.innerHTML=`<div class="thumb" style="--bgt:${BG[p.art]}"><div class="art ${p.art}"></div><span class="no">${p.no}</span><span class="dev">${p.dev.map(d=>`<i>${d}</i>`).join('')}</span></div>
