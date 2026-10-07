@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0a0a0a">
+<title>墨針 Ink & Needle</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@500;700;900&family=Special+Elite&family=Noto+Sans+TC:wght@300;400;500;700;900&display=swap">
+<style>
+/* 版面：黑底、紙白與一種血紅。像貼滿牆的 flash 圖紙，粗框線、膠帶感標籤、半色調網點。線稿圖案會在進場與 hover 時一筆一筆畫出來；游標或手指劃過會留下紅色墨跡 */
+:root{
+  --k:#0a0a0a; --k2:#141414; --paper:#efece3; --red:#e0261b; --mute:#8d8a82; --line:rgba(239,236,227,.2);
+  --disp:'Big Shoulders Display','Noto Sans TC',sans-serif; --type:'Special Elite','Noto Sans TC',monospace; --sans:'Noto Sans TC',system-ui,sans-serif;
+  --gut:clamp(18px,5vw,72px);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{color-scheme:dark;scroll-behavior:smooth}
+body{background:var(--k);color:var(--paper);font:400 15px/1.8 var(--sans);overflow-x:hidden;-webkit-text-size-adjust:100%}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:400;opacity:.08;background:radial-gradient(circle,#fff 0 .6px,transparent .8px) 0 0/5px 5px;mix-blend-mode:overlay}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer;touch-action:manipulation}a{color:inherit;text-decoration:none}
+canvas#ink{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:300}
+section{position:relative;padding:clamp(70px,12vh,140px) var(--gut)}
+.in{max-width:1200px;margin-inline:auto}
+.tape{display:inline-block;font:400 12px var(--type);letter-spacing:.12em;background:var(--paper);color:var(--k);padding:4px 14px;transform:rotate(-1.5deg);margin-bottom:1.2rem}
+h2{font:900 clamp(2.6rem,9vw,6.4rem)/.92 var(--disp);letter-spacing:-.01em;text-transform:uppercase}
+h2 em{font-style:normal;color:var(--red)}
+.lead{max-width:44ch;color:#b9b6ac;margin-top:1rem}
+.note{font:400 12px/1.7 var(--type);color:var(--mute);margin-top:1.4rem}
+.nav{position:fixed;z-index:250;left:0;right:0;top:0;padding:calc(env(safe-area-inset-top,0px) + 14px) var(--gut) 12px;display:flex;justify-content:space-between;align-items:center;transition:transform .5s cubic-bezier(.2,.8,.1,1),background .3s}
+.nav.solid{background:rgba(10,10,10,.85);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:2px solid var(--paper)}.nav.hide{transform:translateY(-110%)}
+.logo{font:900 26px var(--disp);letter-spacing:.04em;text-transform:uppercase}.logo i{font-style:normal;color:var(--red)}
+.nav ul{display:flex;gap:30px;list-style:none;font:700 14px var(--disp);letter-spacing:.2em;text-transform:uppercase}@media(max-width:760px){.nav ul{display:none}}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:52px;padding:0 30px;border:2px solid var(--paper);font:900 17px var(--disp);letter-spacing:.14em;text-transform:uppercase;background:var(--paper);color:var(--k);transition:transform .2s,background .25s,color .25s,box-shadow .25s;box-shadow:5px 5px 0 var(--red)}
+.btn:hover{transform:translate(-2px,-2px);box-shadow:7px 7px 0 var(--red)}.btn:active{transform:translate(3px,3px);box-shadow:2px 2px 0 var(--red)}
+.btn.line{background:transparent;color:var(--paper)}
+/* Hero */
+.hero{min-height:100svh;padding:0;display:grid;align-items:end;overflow:hidden;border-bottom:2px solid var(--paper)}
+.hero-art{position:absolute;right:-6%;top:50%;width:min(96vw,640px);transform:translateY(-52%);opacity:.95}
+.hero-art svg{width:100%;overflow:visible}
+.hero-t{position:relative;z-index:2;padding:calc(env(safe-area-inset-top,0px) + 100px) var(--gut) clamp(34px,9vh,90px);max-width:900px}
+.hero h1{font:900 clamp(5rem,26vw,17rem)/.78 var(--disp);letter-spacing:-.03em;text-transform:uppercase;mix-blend-mode:difference;color:#fff}
+.hero h1 span{display:block;overflow:hidden;padding-top:.04em}.hero h1 b{display:block;font-weight:900;transform:translateY(105%);animation:up 1s cubic-bezier(.2,.8,.1,1) forwards}.hero h1 span:nth-child(2) b{animation-delay:.1s;color:var(--red);mix-blend-mode:normal}
+@keyframes up{to{transform:none}}
+.hero p{font:400 14px/1.9 var(--type);max-width:34ch;margin-top:1.4rem;color:#cfccc2;opacity:0;animation:fi 1s .7s forwards}@keyframes fi{to{opacity:1}}
+.hero .row{display:flex;gap:16px;flex-wrap:wrap;margin-top:1.6rem;opacity:0;animation:fi 1s .9s forwards}
+.mq{overflow:hidden;background:var(--red);color:var(--k);border-bottom:2px solid var(--paper);padding-block:10px}
+.mq-row{display:flex;width:max-content;will-change:transform}.mq-row span{font:900 clamp(1.4rem,4vw,2.4rem)/1 var(--disp);letter-spacing:.06em;text-transform:uppercase;padding-right:1.2em;white-space:nowrap}.mq-row span::after{content:"✦";margin-left:1.2em}
+/* 圖紙 */
+.fl-h{display:flex;justify-content:space-between;align-items:end;gap:1.4rem;flex-wrap:wrap}
+.flt{display:flex;gap:8px;flex-wrap:wrap;margin:1.6rem 0}
+.chip{min-height:44px;padding:0 18px;border:2px solid var(--paper);font:700 15px var(--disp);letter-spacing:.14em;text-transform:uppercase;transition:.2s}
+.chip[aria-pressed=true]{background:var(--paper);color:var(--k)}
+.sheet{display:grid;grid-template-columns:repeat(3,1fr);border:2px solid var(--paper)}
+@media(max-width:700px){.sheet{grid-template-columns:repeat(2,1fr)}}
+.fk{position:relative;aspect-ratio:1;border:1px solid var(--line);padding:14px;display:flex;flex-direction:column;justify-content:space-between;text-align:left;background:var(--k);transition:background .3s}
+.fk[hidden]{display:none}
+.fk:hover,.fk:focus-visible{background:#1a1a1a}
+.fk svg{width:76%;margin:auto;overflow:visible}
+.fk .nm{font:900 clamp(1rem,3vw,1.5rem)/1 var(--disp);letter-spacing:.06em;text-transform:uppercase}
+.fk .st{font:400 11px var(--type);color:var(--mute);display:flex;justify-content:space-between;gap:6px}
+.fk .no{position:absolute;right:10px;top:8px;font:400 11px var(--type);color:var(--red)}
+.fp path,.fp circle,.fp line,.fp polygon,.fp ellipse{fill:none;stroke:var(--paper);stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke}
+.fp .r{stroke:var(--red)}.fp .fr{fill:var(--red);stroke:var(--red)}
+.fp [pathLength]{stroke-dasharray:1;stroke-dashoffset:1}
+.fp.on [pathLength]{animation:draw 1.5s cubic-bezier(.5,0,.2,1) forwards;animation-delay:calc(var(--i,0)*.12s)}
+@keyframes draw{to{stroke-dashoffset:0}}
+/* 詳情 */
+.dt{position:fixed;inset:0;z-index:350;display:flex;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.78);opacity:0;pointer-events:none;transition:opacity .3s}
+.dt.on{opacity:1;pointer-events:auto}
+.dt .box{position:relative;width:min(100%,560px);max-height:92svh;overflow-y:auto;background:var(--k);border:2px solid var(--paper);border-bottom:0;padding:22px;transform:translateY(100%);transition:transform .5s cubic-bezier(.2,.9,.1,1);display:grid;gap:14px}
+@media(min-width:700px){.dt{align-items:center}.dt .box{border-bottom:2px solid var(--paper);transform:translateY(30px)}}
+.dt.on .box{transform:none}
+.dt .big svg{width:62%;margin:0 auto;display:block}
+.dt h3{font:900 2.6rem/1 var(--disp);text-transform:uppercase}.dt h3 em{font-style:normal;color:var(--red)}
+.dt dl{display:grid;grid-template-columns:auto 1fr;gap:6px 18px;font:400 13px var(--type)}.dt dt{color:var(--mute)}
+.dt .x{position:absolute;right:10px;top:10px;width:44px;height:44px;border:2px solid var(--paper);font:900 18px var(--disp)}
+/* 估價 */
+.est{display:grid;grid-template-columns:.8fr 1.2fr;gap:clamp(20px,5vw,70px);margin-top:2.4rem;align-items:start}@media(max-width:860px){.est{grid-template-columns:1fr}}
+.body{position:relative;max-width:300px;margin-inline:auto;width:100%}
+.body svg{width:100%}.zone{fill:#1b1b1b;stroke:var(--paper);stroke-width:1.5;cursor:pointer;transition:fill .2s}
+.zone:hover{fill:#3a1512}.zone.on{fill:var(--red)}
+.body small{display:block;text-align:center;font:400 12px var(--type);color:var(--mute);margin-top:6px}
+.ctl{display:grid;gap:1.6rem}.ctl h4{font:700 14px var(--disp);letter-spacing:.22em;text-transform:uppercase;color:var(--mute);margin-bottom:.7rem;display:flex;justify-content:space-between}.ctl h4 b{color:var(--paper);font-family:var(--type);letter-spacing:0;font-weight:400}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:40px;background:transparent}
+input[type=range]::-webkit-slider-runnable-track{height:4px;background:linear-gradient(90deg,var(--red) var(--v,30%),#333 var(--v,30%))}
+input[type=range]::-moz-range-track{height:4px;background:#333}input[type=range]::-moz-range-progress{height:4px;background:var(--red)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:26px;height:26px;background:var(--paper);border:3px solid var(--k);outline:2px solid var(--paper);margin-top:-11px}
+input[type=range]::-moz-range-thumb{width:20px;height:20px;background:var(--paper);border:3px solid var(--k);border-radius:0}
+.res{border:2px solid var(--paper);padding:20px;display:grid;gap:8px;box-shadow:6px 6px 0 var(--red)}
+.res .p{font:900 clamp(2.4rem,8vw,3.8rem)/1 var(--disp);letter-spacing:.01em}.res .p small{font:400 12px var(--type);color:var(--mute);margin-left:8px}
+.res .t{font:400 13px var(--type);color:#cfccc2}
+/* 流程 */
+.fl{display:grid;grid-template-columns:repeat(4,1fr);border:2px solid var(--paper);margin-top:2.4rem}@media(max-width:860px){.fl{grid-template-columns:1fr}}
+.fl div{padding:24px 20px;border-right:1px solid var(--line);border-bottom:1px solid var(--line)}.fl b{font:900 3.4rem/1 var(--disp);color:var(--red)}.fl h3{font:900 1.5rem var(--disp);text-transform:uppercase;margin:.3rem 0}.fl p{font-size:14px;color:#b9b6ac}
+.rules{margin-top:20px;border:2px dashed var(--paper);padding:20px;display:grid;gap:8px;font:400 13.5px/1.7 var(--type)}.rules b{color:var(--red)}
+/* 預約 */
+.book{background:var(--paper);color:var(--k)}
+.book h2 em{color:var(--red)}.book .tape{background:var(--k);color:var(--paper)}.book .lead{color:#4a4842}
+.bg{display:grid;grid-template-columns:1fr 1fr;gap:clamp(2rem,6vw,6rem);margin-top:2.4rem}@media(max-width:860px){.bg{grid-template-columns:1fr}}
+.fld{margin-bottom:1.5rem}.fld>label,.fld>span{display:block;font:700 14px var(--disp);letter-spacing:.2em;text-transform:uppercase;margin-bottom:.6rem}
+.fld input,.fld textarea{width:100%;background:transparent;border:2px solid var(--k);color:var(--k);font:400 16px var(--sans);padding:12px;outline:0;border-radius:0}.fld input:focus{background:#fff}
+.fld textarea{min-height:200px;font:400 14px/1.8 var(--type);resize:vertical}
+.book .chip{border-color:var(--k)}.book .chip[aria-pressed=true]{background:var(--k);color:var(--paper)}
+.book .btn{background:var(--k);color:var(--paper);border-color:var(--k)}
+.sum{border:2px solid var(--k);padding:12px 14px;font:400 14px/1.7 var(--type)}
+.info div{display:flex;justify-content:space-between;gap:1rem;padding:16px 0;border-bottom:2px solid var(--k);font-size:14.5px}.info b{font:900 15px var(--disp);letter-spacing:.14em;text-transform:uppercase;flex:none}.info span{text-align:right}
+.toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 22px);transform:translate(-50%,40px);background:var(--red);color:#fff;padding:12px 24px;font:400 13px var(--type);opacity:0;pointer-events:none;transition:.4s cubic-bezier(.2,.8,.1,1);z-index:900}.toast.on{opacity:1;transform:translate(-50%,0)}
+footer{padding:30px var(--gut) calc(env(safe-area-inset-bottom,0px) + 30px);background:var(--k);border-top:2px solid var(--paper);display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;font:400 12px/1.7 var(--type);color:var(--mute)}
+.rv{opacity:1;transform:none}.js .rv.pre{opacity:0;transform:translateY(34px) rotate(.6deg);transition:opacity .8s,transform .8s cubic-bezier(.2,.8,.1,1)}.js .rv.pre.in{opacity:1;transform:none}
+:focus-visible{outline:3px solid var(--red);outline-offset:2px}
+@media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}.hero h1 b,.hero p,.hero .row{opacity:1;transform:none}.fp [pathLength]{stroke-dashoffset:0}}
+</style>
+</head>
+<body>
+<canvas id="ink" aria-hidden="true"></canvas>
+<div class="toast" id="toast" role="status"></div>
+<header class="nav" id="nav"><a class="logo" href="#top">墨針<i>.</i>Ink</a><ul><li><a href="#flash">圖紙</a></li><li><a href="#est">估價</a></li><li><a href="#proc">流程</a></li><li><a href="#book">預約</a></li></ul><a class="btn" href="#book" style="min-height:42px;padding:0 18px;font-size:15px;box-shadow:3px 3px 0 var(--red)">預約</a></header>
+
+<section class="hero" id="top">
+  <div class="hero-art fp" id="heroArt" aria-hidden="true"></div>
+  <div class="hero-t">
+    <span class="tape">預約制・一次一位・只做自己設計的圖</span>
+    <h1><span><b>Ink &</b></span><span><b>Needle</b></span></h1>
+    <p>黑灰、線條、手繪。每一張圖都先跟你聊過、再畫給你。</p>
+    <div class="row"><a class="btn" href="#flash">看圖紙</a><a class="btn line" href="#est">先估個價</a></div>
+  </div>
+</section>
+<div class="mq" aria-hidden="true"><div class="mq-row" id="mq"></div></div>
+
+<section id="flash">
+  <div class="in">
+    <div class="fl-h"><div><span class="tape rv pre">FLASH SHEET No.01</span><h2 class="rv pre">現成圖紙，<br><em>一次一張</em></h2></div><p class="lead rv pre" style="margin:0">這些是可以直接刺的圖，每張只做一次。點開看尺寸與價格，也可以拿去改。</p></div>
+    <div class="flt" id="flt"></div>
+    <div class="sheet" id="sheet"></div>
+    <p class="note">圖案為程式繪製的示意，請換成實際的 flash 作品。價格與時間為示意。</p>
+  </div>
+</section>
+
+<section id="est" style="background:var(--k2);border-block:2px solid var(--paper)">
+  <div class="in">
+    <span class="tape rv pre">QUOTE</span><h2 class="rv pre">先估個價，<br><em>心裡有底</em></h2>
+    <div class="est">
+      <div class="body rv pre"><svg viewBox="0 0 200 400" role="group" aria-label="選擇部位" id="bodySvg">
+        <circle cx="100" cy="40" r="26" fill="#1b1b1b" stroke="#efece3" stroke-width="1.5"/>
+        <rect class="zone" data-z="neck" x="86" y="64" width="28" height="18" rx="4"/>
+        <rect class="zone" data-z="chest" x="64" y="84" width="72" height="56" rx="10"/>
+        <rect class="zone" data-z="rib" x="68" y="142" width="64" height="56" rx="10"/>
+        <rect class="zone" data-z="upper" x="30" y="86" width="30" height="64" rx="12"/><rect class="zone" data-z="upper" x="140" y="86" width="30" height="64" rx="12"/>
+        <rect class="zone" data-z="fore" x="26" y="154" width="28" height="68" rx="12"/><rect class="zone" data-z="fore" x="146" y="154" width="28" height="68" rx="12"/>
+        <rect class="zone" data-z="thigh" x="70" y="202" width="28" height="86" rx="12"/><rect class="zone" data-z="thigh" x="102" y="202" width="28" height="86" rx="12"/>
+        <rect class="zone" data-z="calf" x="72" y="292" width="24" height="84" rx="10"/><rect class="zone" data-z="calf" x="104" y="292" width="24" height="84" rx="10"/></svg>
+        <small id="zn">點身體選部位</small></div>
+      <div class="ctl rv pre">
+        <div><h4>尺寸 <b id="vS"></b></h4><input type="range" id="size" min="3" max="40" value="10" aria-label="尺寸（公分）"></div>
+        <div><h4>風格 <b id="vY"></b></h4><div class="chips" id="cY"></div></div>
+        <div><h4>色彩 <b id="vC"></b></h4><div class="chips" id="cC"></div></div>
+        <div class="res"><div class="p" id="price"></div><div class="t" id="time"></div><div class="t" id="warn"></div><a class="btn" href="#book" id="useEst" style="margin-top:6px">用這組條件預約</a></div>
+        <p class="note" style="margin:0">估價僅供參考，實際價格依圖案細節與設計討論而定。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="proc">
+  <div class="in">
+    <span class="tape rv pre">PROCESS</span><h2 class="rv pre">從聊天，<br>到 <em>留下來</em></h2>
+    <div class="fl">
+      <div class="rv pre"><b>01</b><h3>聊</h3><p>傳你的想法與參考圖，確認位置、大小與風格。</p></div>
+      <div class="rv pre"><b>02</b><h3>畫</h3><p>依你的身體部位手繪設計稿，來回修改到滿意。</p></div>
+      <div class="rv pre"><b>03</b><h3>刺</h3><p>使用一次性針具與全程消毒，過程隨時可以喊停。</p></div>
+      <div class="rv pre"><b>04</b><h3>養</h3><p>給你完整的保養說明，並安排回診檢查。</p></div>
+    </div>
+    <div class="rules rv pre"><span><b>＊</b>未滿 18 歲需法定代理人同意與陪同。</span><span><b>＊</b>孕期、皮膚疾病、服用抗凝血藥物者，請先諮詢醫師。</span><span><b>＊</b>刺青屬侵入性行為，請審慎考慮，並選擇注重衛生的店家。</span><span><b>＊</b>洗掉或修改成本很高，請確定再動手。</span></div>
+  </div>
+</section>
+
+<section class="book" id="book">
+  <div class="in">
+    <span class="tape rv pre">BOOKING</span><h2 class="rv pre">預約，<br><em>先聊聊</em></h2>
+    <p class="lead rv pre">這裡產生的是第一次諮詢的訊息，不是付款或確認時段。確認設計後才會收訂金。</p>
+    <div class="bg">
+      <form class="rv pre" onsubmit="return false">
+        <div class="fld"><span>你的條件</span><div class="sum" id="sum"></div></div>
+        <div class="fld"><span>你已滿 18 歲？</span><div class="chips" id="age"></div></div>
+        <div class="fld"><label for="nm">稱呼</label><input id="nm" autocomplete="name" placeholder="怎麼稱呼你"></div>
+        <div class="fld"><label for="idea">想刺什麼？（選填）</label><input id="idea" placeholder="例如：想要一隻蛾，手臂內側"></div>
+        <div class="fld"><label for="mg">諮詢訊息</label><textarea id="mg" readonly></textarea></div>
+        <button class="btn" id="copy" type="button">複製訊息</button>
+      </form>
+      <div class="info rv pre"><div><b>LINE</b><span>@your-line-id（請填入）</span></div><div><b>Instagram</b><span>@your.handle（請填入）</span></div><div><b>營業時間</b><span>週三至週日 13:00 – 21:00</span></div><div><b>地址</b><span>台北市 ○○區 ○○路 ○ 號（請填入）</span></div><div><b>訂金</b><span>確認設計後收取，金額依案件而定</span></div></div>
+    </div>
+  </div>
+</section>
+<footer><span>© Ink & Needle Studio</span><span>範例網站，名稱、圖案、價格與聯絡資料皆為示意。</span></footer>
+
+<div class="dt" id="dt" aria-hidden="true"><div class="box" id="dtb" role="dialog" aria-modal="true"></div></div>
+
+<script>
+document.documentElement.classList.add('js');
+const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
+const lerp=(a,b,t)=>a+(b-a)*t,clamp=(v,a=0,b=1)=>Math.max(a,Math.min(b,v));const reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
+const buzz=n=>{try{navigator.vibrate&&navigator.vibrate(n)}catch(e){}};
+let tt;function toast(t){const e=$('#toast');e.textContent=t;e.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>e.classList.remove('on'),2200)}
+
+/* ---------- 圖案（程式繪製的線稿示意） ---------- */
+const P=(d,c='',i=0)=>`<path pathLength="1" class="${c}" style="--i:${i}" d="${d}"/>`;
+const FL=[
+ {id:'dagger',n:'Dagger',z:'匕首',y:'trad',s:'8–14 cm',h:2,pr:3600,v:`${P('M50 6 L58 62 L50 70 L42 62Z','',0)}${P('M30 70 H70','r',1)}${P('M50 70 V92','',2)}<circle pathLength="1" cx="50" cy="96" r="4" class="r" style="--i:3"/>${P('M42 24 L58 24','',3)}`},
+ {id:'rose',n:'Rose',z:'玫瑰',y:'trad',s:'10–16 cm',h:3,pr:4800,v:`${P('M50 40 a5 5 0 1 1 10 0 a10 10 0 1 1 -20 0 a15 15 0 1 1 30 0 a20 20 0 1 1 -40 0','r',0)}${P('M50 62 C50 76 46 86 40 96','',2)}${P('M48 78 C36 70 28 74 26 80 C34 84 44 84 48 78','',3)}`},
+ {id:'snake',n:'Serpent',z:'蛇',y:'fine',s:'12–20 cm',h:3,pr:5200,v:`${P('M20 90 C20 60 70 70 66 44 C62 20 30 28 36 12','',0)}${P('M36 12 L44 6 L46 16Z','r',2)}${P('M40 11 L40 11','',3)}`},
+ {id:'moth',n:'Moth',z:'蛾',y:'black',s:'10–18 cm',h:3,pr:4400,v:`${P('M50 30 V78','',0)}${P('M50 38 C30 14 10 22 14 46 C16 62 38 62 50 52','r',1)}${P('M50 38 C70 14 90 22 86 46 C84 62 62 62 50 52','r',1)}${P('M50 52 C36 56 28 74 34 82 C40 86 46 74 50 66','',2)}${P('M50 52 C64 56 72 74 66 82 C60 86 54 74 50 66','',2)}${P('M46 26 C40 14 34 12 30 14','',3)}${P('M54 26 C60 14 66 12 70 14','',3)}`},
+ {id:'eye',n:'Eye',z:'眼',y:'fine',s:'6–10 cm',h:2,pr:3200,v:`${P('M8 50 C28 22 72 22 92 50 C72 78 28 78 8 50Z','',0)}<circle pathLength="1" cx="50" cy="50" r="13" class="r" style="--i:1"/><circle pathLength="1" cx="50" cy="50" r="4" style="--i:2"/>${P('M50 8 V18 M20 18 L26 26 M80 18 L74 26','',3)}`},
+ {id:'sun',n:'Sun',z:'太陽',y:'black',s:'8–14 cm',h:2,pr:3400,v:`<circle pathLength="1" cx="50" cy="50" r="16" class="r" style="--i:0"/>${Array.from({length:12},(_,i)=>{const a=i*Math.PI/6,x1=50+Math.cos(a)*24,y1=50+Math.sin(a)*24,x2=50+Math.cos(a)*(i%2?36:44),y2=50+Math.sin(a)*(i%2?36:44);return P(`M${x1.toFixed(1)} ${y1.toFixed(1)} L${x2.toFixed(1)} ${y2.toFixed(1)}`,'',1+i%3)}).join('')}`},
+ {id:'heart',n:'Sacred Heart',z:'心與劍',y:'trad',s:'10–16 cm',h:3,pr:4600,v:`${P('M50 84 C8 56 14 22 36 22 C44 22 50 30 50 36 C50 30 56 22 64 22 C86 22 92 56 50 84Z','r',0)}${P('M22 12 L78 70','',2)}${P('M16 20 L28 8','',3)}`},
+ {id:'anchor',n:'Anchor',z:'船錨',y:'trad',s:'8–12 cm',h:2,pr:3000,v:`<circle pathLength="1" cx="50" cy="16" r="7" class="r" style="--i:0"/>${P('M50 23 V82','',1)}${P('M34 38 H66','',2)}${P('M16 60 C20 84 40 92 50 80 C60 92 80 84 84 60','r',3)}`},
+ {id:'moon',n:'Crescent',z:'月牙與星',y:'fine',s:'5–9 cm',h:1,pr:2400,v:`${P('M62 14 C32 18 22 60 44 80 C60 92 82 84 88 66 C70 78 50 62 54 40 C56 28 62 20 62 14Z','r',0)}${P('M22 22 L25 30 L33 31 L27 36 L29 44 L22 40 L15 44 L17 36 L11 31 L19 30Z','',2)}${P('M78 22 L80 27 L85 28 L81 31 L82 36 L78 33 L74 36 L75 31 L71 28 L76 27Z','',3)}`}];
+const STY={trad:'傳統',fine:'細線',black:'黑灰'};
+const svgOf=(f,cls='fp')=>`<svg viewBox="0 0 100 100" class="${cls}" aria-hidden="true">${f.v}</svg>`;
+/* Hero 大圖：匕首與玫瑰 */
+$('#heroArt').innerHTML=`<svg viewBox="0 0 100 100" aria-hidden="true"><g transform="translate(0,0)">${FL[1].v}</g><g transform="translate(18,-8) scale(.9)">${FL[0].v}</g></svg>`;
+setTimeout(()=>$('#heroArt').classList.add('on'),400);
+/* 跑馬燈 */
+(function(){const w=['Traditional','Fine Line','Blackwork','Custom Flash','One at a time'];const h=w.map(t=>`<span>${t}</span>`).join('');$('#mq').innerHTML=h+h})();
+/* 圖紙格 */
+let fy='all';const sheet=$('#sheet');
+FL.forEach((f,i)=>{const b=document.createElement('button');b.className='fk';b.type='button';b.dataset.y=f.y;b.dataset.id=f.id;
+  b.innerHTML=`<span class="no">No.${String(i+1).padStart(2,'0')}</span>${svgOf(f,'fp')}<span class="nm">${f.n}</span><span class="st"><span>${f.z}・${STY[f.y]}</span><span>${f.s}</span></span>`;
+  b.onclick=()=>openDt(f,i);b.addEventListener('pointerenter',()=>{const s=$('svg',b);s.classList.remove('on');void s.getBoundingClientRect();s.classList.add('on')});sheet.appendChild(b)});
+$('#flt').innerHTML=[['all','全部'],['trad','傳統'],['fine','細線'],['black','黑灰']].map(([k,l])=>`<button class="chip" data-k="${k}" aria-pressed="${k==='all'}">${l}</button>`).join('');
+$$('#flt .chip').forEach(b=>b.onclick=()=>{fy=b.dataset.k;$$('#flt .chip').forEach(x=>x.setAttribute('aria-pressed',x===b));$$('.fk').forEach(k=>{k.hidden=!(fy==='all'||k.dataset.y===fy)});$$('.fk:not([hidden]) svg').forEach(s=>{s.classList.remove('on');void s.getBoundingClientRect();s.classList.add('on')})});
+/* 進場畫線 */
+const dio=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){$('svg',e.target).classList.add('on');dio.unobserve(e.target)}}),{threshold:.4});$$('.fk').forEach(k=>dio.observe(k));
+/* 詳情 */
+const dt=$('#dt'),box=$('#dtb');let picked=null;
+function openDt(f,i){picked=f;box.innerHTML=`<button class="x" id="dx" aria-label="關閉">✕</button><div class="big">${svgOf(f,'fp')}</div><h3>${f.n} <em>${f.z}</em></h3>
+  <dl><dt>編號</dt><dd>No.${String(i+1).padStart(2,'0')}</dd><dt>風格</dt><dd>${STY[f.y]}</dd><dt>建議尺寸</dt><dd>${f.s}</dd><dt>時間</dt><dd>約 ${f.h} 小時（示意）</dd><dt>價格</dt><dd>NT$${f.pr.toLocaleString()} 起（示意）</dd></dl>
+  <p style="font:400 13px/1.8 var(--type);color:#b9b6ac">這張 flash 只刺一次。想改尺寸或位置，預約時一起說。</p><a class="btn" href="#book" id="useF">預約這張</a>`;
+  dt.classList.add('on');dt.setAttribute('aria-hidden','false');document.body.style.overflow='hidden';requestAnimationFrame(()=>$('svg',box).classList.add('on'));buzz(10);
+  $('#dx').onclick=closeDt;$('#useF').onclick=()=>{closeDt();B.flash=`No.${String(i+1).padStart(2,'0')} ${f.n}（${f.z}）`;buildMsg()}}
+function closeDt(){dt.classList.remove('on');dt.setAttribute('aria-hidden','true');document.body.style.overflow=''}
+dt.addEventListener('click',e=>{if(e.target===dt)closeDt()});addEventListener('keydown',e=>{if(e.key==='Escape')closeDt()});
+
+/* ---------- 估價 ---------- */
+const Z={neck:['頸部',1.5],chest:['胸口',1.3],rib:['肋骨',1.5],upper:['上臂',1],fore:['前臂',1.05],thigh:['大腿',1],calf:['小腿',1.1]};
+const Y={trad:['傳統',1.1],fine:['細線',1.25],black:['黑灰',1.2]};const C={bw:['黑灰',1],color:['彩色',1.35]};
+const E={z:'fore',y:'fine',c:'bw',s:10};
+$('#cY').innerHTML=Object.entries(Y).map(([k,v])=>`<button class="chip" data-k="${k}">${v[0]}</button>`).join('');$('#cC').innerHTML=Object.entries(C).map(([k,v])=>`<button class="chip" data-k="${k}">${v[0]}</button>`).join('');
+$$('#cY .chip').forEach(b=>b.onclick=()=>{E.y=b.dataset.k;est()});$$('#cC .chip').forEach(b=>b.onclick=()=>{E.c=b.dataset.k;est()});
+$$('.zone').forEach(z=>z.onclick=()=>{E.z=z.dataset.z;buzz(8);est()});$('#size').addEventListener('input',e=>{E.s=+e.target.value;est()});
+function est(){const sz=E.s,base=1800,rate=Y[E.y][1]*C[E.c][1]*Z[E.z][1],price=Math.round((base+sz*sz*18+sz*120)*rate/100)*100,hrs=Math.max(1,Math.round((.6+sz*.28*Y[E.y][1]*Z[E.z][1])*2)/2);
+  $('#vS').textContent=sz+' cm';$('#vY').textContent=Y[E.y][0];$('#vC').textContent=C[E.c][0];$('#zn').textContent='部位：'+Z[E.z][0];
+  $$('.zone').forEach(z=>z.classList.toggle('on',z.dataset.z===E.z));$$('#cY .chip').forEach(b=>b.setAttribute('aria-pressed',b.dataset.k===E.y));$$('#cC .chip').forEach(b=>b.setAttribute('aria-pressed',b.dataset.k===E.c));
+  $('#price').innerHTML=`NT$${price.toLocaleString()}<small>起（示意）</small>`;$('#time').textContent=`預估施作時間約 ${hrs} 小時`;
+  $('#warn').textContent=Z[E.z][1]>=1.5?'這個部位較敏感也較難施作，價格與時間通常較高。':'';
+  $('#size').style.setProperty('--v',((sz-3)/37*100)+'%');B.est=`${Z[E.z][0]}・${sz} cm・${Y[E.y][0]}・${C[E.c][0]}（約 NT$${price.toLocaleString()} 起）`;buildMsg()}
+/* ---------- 預約 ---------- */
+const B={flash:null,est:'',age:null};
+$('#age').innerHTML=['已滿 18 歲','未滿 18 歲'].map(t=>`<button class="chip" type="button">${t}</button>`).join('');
+$$('#age .chip').forEach(b=>b.onclick=()=>{B.age=b.textContent;$$('#age .chip').forEach(x=>x.setAttribute('aria-pressed',x===b));buildMsg()});
+function buildMsg(){$('#sum').textContent=(B.flash?`圖紙：${B.flash}\n`:'')+`估價條件：${B.est}`;$('#sum').style.whiteSpace='pre-line';
+  $('#mg').value=`你好，我想諮詢刺青。\n${B.flash?`想刺的圖：${B.flash}\n`:''}部位與條件：${B.est}\n年齡：${B.age||'（請選擇）'}\n想法：${($('#idea').value||'').trim()||'（尚未填寫）'}\n稱呼：${($('#nm').value||'').trim()||'（請填寫）'}\n想先聊聊設計與時間，謝謝！`}
+$('#nm').addEventListener('input',buildMsg);$('#idea').addEventListener('input',buildMsg);
+$('#copy').onclick=async()=>{const m=$('#mg');try{await navigator.clipboard.writeText(m.value);toast('已複製，請貼到 LINE 或 IG')}catch(e){m.removeAttribute('readonly');m.select();let ok=false;try{ok=document.execCommand('copy')}catch(x){}m.setAttribute('readonly','');toast(ok?'已複製，請貼到 LINE 或 IG':'請長按文字手動複製')}};
+est();
+
+/* ---------- 紅色墨跡 ---------- */
+const cv=$('#ink'),g=cv.getContext('2d');let W,H,dpr,pts=[];
+function fit(){dpr=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;cv.width=W*dpr;cv.height=H*dpr;g.setTransform(dpr,0,0,dpr,0,0)}fit();addEventListener('resize',fit);
+let lx=null,ly=null;
+function drop(x,y){if(lx!=null){const d=Math.hypot(x-lx,y-ly);if(d<6)return;pts.push({x1:lx,y1:ly,x2:x,y2:y,l:1,w:2+Math.min(7,d*.12)})}lx=x;ly=y}
+addEventListener('pointermove',e=>{if(e.pointerType==='mouse')drop(e.clientX,e.clientY)});
+addEventListener('touchmove',e=>{const t=e.touches[0];drop(t.clientX,t.clientY)},{passive:true});addEventListener('touchend',()=>{lx=ly=null},{passive:true});addEventListener('pointerleave',()=>{lx=ly=null});
+const mq=$('#mq');
+function frame(now){g.clearRect(0,0,W,H);g.lineCap='round';pts=pts.filter(p=>p.l>0);for(const p of pts){p.l-=.014;g.strokeStyle=`rgba(224,38,27,${clamp(p.l)*.85})`;g.lineWidth=p.w*clamp(p.l);g.beginPath();g.moveTo(p.x1,p.y1);g.lineTo(p.x2,p.y2);g.stroke()}
+  const w=mq.scrollWidth/2;mq.style.transform=`translate3d(${-((now/1000*50+scrollY*.4)%w)}px,0,0)`;requestAnimationFrame(frame)}
+if(!reduce)requestAnimationFrame(frame);
+const nav=$('#nav');let yy=0;addEventListener('scroll',()=>{const y=scrollY;nav.classList.toggle('solid',y>40);nav.classList.toggle('hide',y>yy&&y>260);yy=y},{passive:true});
+const rio=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');rio.unobserve(e.target)}}),{threshold:.08});
+$$('.rv').forEach(el=>{if(el.getBoundingClientRect().top>innerHeight)rio.observe(el);else el.classList.remove('pre')});
+$$('a[href="#"]').forEach(a=>a.addEventListener('click',e=>e.preventDefault()));
+</script>
+<script src="common.js"></script>
+</body>
+</html>

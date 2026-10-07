@@ -1,0 +1,313 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0e0b09">
+<title>Atelier Ombre 調香工作室</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Jost:wght@300;400;500&family=Noto+Serif+TC:wght@400;600&display=swap">
+<style>
+/* 版面：近黑的暖色底、金色細線與骨白文字。一只會依選擇即時換色的玻璃香水瓶是主角，液面有波動、瓶口飄出同色的煙霧。調香台以前、中、後調三層組合，並自動命名 */
+:root{
+  --ink:#0e0b09; --coal:#171310; --coal2:#1f1915; --gold:#c9a45c; --gold2:#e6c984; --bone:#efe6d6; --mute:#9a8f80; --line:rgba(239,230,214,.14);
+  --serif:'Cormorant Garamond','Noto Serif TC',serif; --sans:'Jost','Noto Serif TC',system-ui,sans-serif; --zh:'Noto Serif TC','Cormorant Garamond',serif;
+  --gut:clamp(20px,5.5vw,84px);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{color-scheme:dark;scroll-behavior:smooth}
+body{background:var(--ink);color:var(--bone);font:300 15px/1.85 var(--sans);overflow-x:hidden;-webkit-text-size-adjust:100%}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer;touch-action:manipulation}a{color:inherit;text-decoration:none}
+section{position:relative;padding:clamp(80px,14vh,170px) var(--gut)}
+.in{max-width:1180px;margin-inline:auto}
+.eyebrow{font:400 11px var(--sans);letter-spacing:.34em;text-transform:uppercase;color:var(--gold);display:flex;align-items:center;gap:16px;margin-bottom:1.6rem}
+.eyebrow::before{content:"";width:36px;height:1px;background:currentColor}
+h2{font:300 clamp(2.3rem,6.6vw,5rem)/1.04 var(--serif);letter-spacing:-.015em;text-wrap:balance}
+h2 em{font-style:italic;color:var(--gold2)}
+.lead{max-width:44ch;color:var(--mute);margin-top:1.2rem;font-family:var(--zh);font-weight:400}
+.note{font:300 11.5px/1.7 var(--sans);color:var(--mute);margin-top:1.4rem;letter-spacing:.05em}
+.nav{position:fixed;z-index:200;left:0;right:0;top:0;padding:calc(env(safe-area-inset-top,0px) + 16px) var(--gut) 14px;display:flex;justify-content:space-between;align-items:center;transition:transform .5s cubic-bezier(.2,.8,.1,1),background .4s}
+.nav.solid{background:rgba(14,11,9,.78);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid var(--line)}.nav.hide{transform:translateY(-110%)}
+.logo{font:500 24px var(--serif);letter-spacing:.04em}.logo small{font:300 10px var(--sans);letter-spacing:.34em;text-transform:uppercase;margin-left:12px;color:var(--gold)}
+.nav ul{display:flex;gap:34px;list-style:none;font:400 11.5px var(--sans);letter-spacing:.26em;text-transform:uppercase}
+@media(max-width:760px){.nav ul{display:none}}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:52px;padding:0 34px;border:1px solid var(--gold);color:var(--gold2);font:400 12px var(--sans);letter-spacing:.28em;text-transform:uppercase;position:relative;overflow:hidden;isolation:isolate;transition:color .5s}
+.btn::before{content:"";position:absolute;inset:0;background:linear-gradient(120deg,var(--gold),var(--gold2));transform:translateY(101%);transition:transform .6s cubic-bezier(.2,.8,.1,1);z-index:-1}
+.btn:hover{color:#1a1208}.btn:hover::before{transform:none}.btn:active{transform:scale(.98)}
+.btn.solid{background:linear-gradient(120deg,var(--gold),var(--gold2));color:#1a1208;border-color:transparent}
+
+/* ===== Hero ===== */
+.hero{min-height:100svh;padding:0;display:grid;grid-template-columns:1fr 1fr;align-items:center;overflow:hidden}
+.hero::before{content:"";position:absolute;right:-10%;top:10%;width:70vw;aspect-ratio:1;background:radial-gradient(circle,rgba(201,164,92,.16),transparent 62%);pointer-events:none}
+.hero-t{position:relative;z-index:2;padding:calc(env(safe-area-inset-top,0px) + 110px) var(--gut) 8vh}
+.hero h1{font:300 clamp(3.3rem,9.5vw,8rem)/.95 var(--serif);letter-spacing:-.035em;margin:1rem 0 1.4rem}
+.hero h1 span{display:block;overflow:hidden;padding-bottom:.1em}.hero h1 b{display:block;font-weight:300;transform:translateY(110%);animation:up 1.5s cubic-bezier(.2,.8,.1,1) forwards}
+.hero h1 span:nth-child(2) b{animation-delay:.14s;font-style:italic;color:var(--gold2)}@keyframes up{to{transform:none}}
+.hero p{font:400 clamp(1rem,2.2vw,1.2rem)/1.9 var(--zh);max-width:22ch;color:#cfc5b4;opacity:0;animation:fi 1.4s 1s forwards}@keyframes fi{to{opacity:1}}
+.hero .row{display:flex;gap:12px;flex-wrap:wrap;margin-top:2rem;opacity:0;animation:fi 1.4s 1.2s forwards}
+.hero-b{position:relative;height:100svh;min-height:560px}
+.hero-b svg{position:absolute;left:50%;top:50%;width:min(78%,420px);transform:translate(-50%,-44%);filter:drop-shadow(0 40px 60px rgba(0,0,0,.6))}
+canvas.mist{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+@media(max-width:860px){.hero{grid-template-columns:1fr}.hero-b{position:absolute;inset:0;height:auto;opacity:.55}.hero-t{padding-bottom:12vh;align-self:end}.hero{min-height:100svh;align-items:end}}
+
+/* ===== 調香台 ===== */
+.lab{background:linear-gradient(180deg,var(--ink),var(--coal))}
+.lab-g{display:grid;grid-template-columns:.9fr 1.1fr;gap:clamp(24px,5vw,80px);margin-top:3rem;align-items:start}
+@media(max-width:900px){.lab-g{grid-template-columns:1fr}}
+.stage{position:sticky;top:90px;aspect-ratio:4/5;border:1px solid var(--line);background:radial-gradient(70% 55% at 50% 38%,#2a2118,#120e0b);overflow:hidden}
+@media(max-width:900px){.stage{position:relative;top:0;aspect-ratio:1/1.05}}
+.stage svg{position:absolute;left:50%;top:54%;width:min(62%,300px);transform:translate(-50%,-50%)}
+.stage .cap{position:absolute;left:0;right:0;bottom:16px;text-align:center;pointer-events:none}
+.stage .cap b{display:block;font:italic 400 clamp(1.5rem,4vw,2.1rem)/1.2 var(--serif);color:var(--gold2)}.stage .cap small{font:300 10px var(--sans);letter-spacing:.3em;color:var(--mute);text-transform:uppercase}
+.grp{margin-bottom:2.2rem}
+.grp h4{display:flex;justify-content:space-between;align-items:baseline;font:400 11px var(--sans);letter-spacing:.3em;text-transform:uppercase;color:var(--gold);margin-bottom:.9rem}
+.grp h4 b{font:italic 400 1.1rem var(--serif);color:var(--bone);letter-spacing:0;text-transform:none}
+.notes{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+@media(min-width:560px){.notes{grid-template-columns:repeat(4,1fr)}}
+.nt{position:relative;text-align:left;padding:14px 12px 12px;border:1px solid var(--line);min-height:92px;display:flex;flex-direction:column;justify-content:space-between;transition:border-color .4s,background .4s,transform .3s;overflow:hidden}
+.nt::before{content:"";position:absolute;right:-18px;top:-18px;width:60px;height:60px;border-radius:50%;background:var(--c);opacity:.28;filter:blur(8px);transition:opacity .4s}
+.nt i{width:16px;height:16px;border-radius:50%;background:var(--c);box-shadow:0 0 14px var(--c);display:block}
+.nt span{font:500 15px var(--zh);margin-top:12px}.nt small{display:block;font:300 10.5px var(--sans);color:var(--mute);letter-spacing:.06em;margin-top:2px}
+.nt:hover{transform:translateY(-3px);border-color:rgba(239,230,214,.4)}
+.nt[aria-pressed=true]{border-color:var(--gold);background:rgba(201,164,92,.08)}.nt[aria-pressed=true]::before{opacity:.7}
+.out{border-top:1px solid var(--line);padding-top:1.6rem;display:grid;gap:1.1rem}
+.out .row{display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;align-items:baseline}
+.out .nm{font:italic 400 clamp(1.7rem,4.4vw,2.6rem)/1.1 var(--serif);color:var(--gold2)}
+.tagf{font:400 11px var(--sans);letter-spacing:.22em;border:1px solid var(--gold);color:var(--gold2);padding:4px 14px}
+.desc{font:400 14px/1.9 var(--zh);color:#cfc5b4}
+.meter{display:grid;gap:6px}.meter div{height:2px;background:var(--line);position:relative}.meter i{position:absolute;left:0;top:-1px;height:4px;width:30%;background:linear-gradient(90deg,var(--gold),var(--gold2));transition:width .8s cubic-bezier(.2,.8,.1,1)}
+.meter span{display:flex;justify-content:space-between;font:300 10.5px var(--sans);letter-spacing:.24em;color:var(--mute);text-transform:uppercase}
+.sizes{display:flex;gap:8px;flex-wrap:wrap}.sz{min-height:46px;padding:0 20px;border:1px solid var(--line);font:400 13px var(--sans);letter-spacing:.1em;transition:.3s}.sz[aria-pressed=true]{border-color:var(--gold);color:var(--gold2)}
+.pc{font:400 2rem var(--serif);letter-spacing:.02em}.pc small{font:300 11px var(--sans);color:var(--mute);letter-spacing:.14em;margin-left:8px}
+
+/* 金字塔 */
+.pyr{display:grid;grid-template-columns:1fr 1fr;gap:clamp(24px,6vw,100px);align-items:center;margin-top:3rem}
+@media(max-width:860px){.pyr{grid-template-columns:1fr}}
+.tri{position:relative;aspect-ratio:1;max-width:420px;width:100%;margin-inline:auto}
+.tri svg{width:100%;height:100%}.tri .l{fill:rgba(201,164,92,.06);stroke:var(--gold);stroke-width:.5;transition:fill .6s}.tri .l.on{fill:rgba(201,164,92,.28)}
+.tri text{fill:var(--bone);font:italic 400 5px var(--serif);text-anchor:middle}
+.lay{display:grid;gap:0}.lay div{padding:20px 0;border-bottom:1px solid var(--line);display:grid;grid-template-columns:auto 1fr;gap:18px;transition:opacity .5s}
+.lay b{font:italic 400 1.5rem var(--serif);color:var(--gold2);min-width:3.2em}.lay h3{font:500 15px var(--zh)}.lay p{color:var(--mute);font-size:14px}
+
+/* 系列 */
+.ser{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(10px,2vw,24px);margin-top:3rem}
+@media(max-width:860px){.ser{grid-template-columns:1fr}}
+.sc{border:1px solid var(--line);padding:26px;display:grid;grid-template-columns:auto 1fr;gap:22px;align-items:center;transition:border-color .5s,transform .5s,background .5s;text-align:left}
+@media(min-width:861px){.sc{grid-template-columns:1fr;text-align:center;justify-items:center;padding:34px 22px}}
+.sc:hover{border-color:var(--gold);transform:translateY(-6px);background:rgba(201,164,92,.04)}
+.sc svg{width:96px;filter:drop-shadow(0 18px 24px rgba(0,0,0,.5))}
+.sc h3{font:italic 400 1.7rem/1.1 var(--serif);color:var(--gold2)}.sc p{font:300 12px var(--sans);letter-spacing:.14em;color:var(--mute);margin-top:6px}
+.sc .go{display:inline-block;margin-top:12px;font:400 10.5px var(--sans);letter-spacing:.28em;text-transform:uppercase;border-bottom:1px solid var(--gold);color:var(--gold);padding-bottom:3px}
+/* 流程 */
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-top:3rem;border-top:1px solid var(--line)}
+@media(max-width:860px){.steps{grid-template-columns:1fr}}
+.step{padding:28px 22px 28px 0;border-bottom:1px solid var(--line)}@media(min-width:861px){.step{border-bottom:0;border-right:1px solid var(--line);padding-left:22px}.step:first-child{padding-left:0}.step:last-child{border-right:0}}
+.step b{font:italic 300 3rem/1 var(--serif);color:var(--gold)}.step h3{font:500 16px var(--zh);margin:.6rem 0 .3rem}.step p{color:var(--mute);font-size:14px}
+/* 預約 */
+.book{background:var(--coal)}
+.bg{display:grid;grid-template-columns:1fr 1fr;gap:clamp(2rem,6vw,6rem);margin-top:3rem}@media(max-width:860px){.bg{grid-template-columns:1fr}}
+.fld{margin-bottom:1.5rem}.fld>label,.fld>span{display:block;font:400 11px var(--sans);letter-spacing:.28em;text-transform:uppercase;color:var(--gold);margin-bottom:.7rem}
+.chips{display:flex;gap:8px;flex-wrap:wrap}.chip{min-height:44px;padding:0 18px;border:1px solid var(--line);font:400 13px var(--sans);transition:.3s}.chip[aria-pressed=true]{border-color:var(--gold);color:var(--gold2);background:rgba(201,164,92,.08)}
+.fld input,.fld textarea{width:100%;background:transparent;border:0;border-bottom:1px solid var(--line);color:var(--bone);font:300 16px var(--sans);padding:10px 0;outline:0;border-radius:0}.fld input:focus{border-color:var(--gold)}
+.fld textarea{min-height:190px;border:1px solid var(--line);padding:14px;font-size:14.5px;line-height:1.85;resize:vertical}
+.info div{display:flex;justify-content:space-between;gap:1rem;padding:18px 0;border-bottom:1px solid var(--line);font-size:14.5px}.info b{font:400 11px var(--sans);letter-spacing:.24em;text-transform:uppercase;color:var(--gold);flex:none}.info span{text-align:right}
+.toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 26px);transform:translate(-50%,40px);background:var(--bone);color:var(--ink);padding:14px 26px;font:400 13px var(--sans);letter-spacing:.08em;opacity:0;pointer-events:none;transition:.5s cubic-bezier(.2,.8,.1,1);z-index:600}.toast.on{opacity:1;transform:translate(-50%,0)}
+footer{padding:36px var(--gut) calc(env(safe-area-inset-bottom,0px) + 36px);border-top:1px solid var(--line);color:var(--mute);display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;font:300 11.5px/1.7 var(--sans);letter-spacing:.08em}
+.rv{opacity:1;transform:none}.js .rv.pre{opacity:0;transform:translateY(40px);transition:opacity 1.2s,transform 1.2s cubic-bezier(.2,.8,.1,1)}.js .rv.pre.in{opacity:1;transform:none}
+:focus-visible{outline:1px solid var(--gold2);outline-offset:3px}
+@media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}.hero h1 b,.hero p,.hero .row{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+<div class="toast" id="toast" role="status"></div>
+<header class="nav" id="nav"><a class="logo" href="#top">Ombre<small>調香工作室</small></a>
+  <ul><li><a href="#lab">調香台</a></li><li><a href="#pyr">香調</a></li><li><a href="#ser">系列</a></li><li><a href="#book">預約</a></li></ul>
+  <a class="btn" href="#book" style="min-height:42px;padding:0 22px">預約</a></header>
+
+<section class="hero" id="top">
+  <div class="hero-t">
+    <div class="eyebrow">Perfume Atelier · 預約制</div>
+    <h1><span><b>Wear a</b></span><span><b>memory.</b></span></h1>
+    <p>把一段記憶，調成可以穿在身上的味道。</p>
+    <div class="row"><a class="btn solid" href="#lab">開始調香</a><a class="btn" href="#ser">看系列</a></div>
+  </div>
+  <div class="hero-b"><canvas class="mist" id="mist1" aria-hidden="true"></canvas><div id="heroBottle"></div></div>
+</section>
+
+<section class="lab" id="lab">
+  <div class="in">
+    <div class="eyebrow rv pre">The Blending Table · 調香台</div>
+    <h2 class="rv pre">自己搭一支，<br>看它 <em>慢慢成形</em></h2>
+    <p class="lead rv pre">香水由前調、中調、後調三層組成。選一個前調、一個中調、一個後調，瓶中的液體會跟著變色，並替你的作品取名。</p>
+    <div class="lab-g">
+      <div class="stage"><canvas class="mist" id="mist2" aria-hidden="true"></canvas><div id="labBottle"></div><div class="cap"><b id="capN"></b><small id="capS"></small></div></div>
+      <div>
+        <div class="grp"><h4>前調 Top <b id="vT"></b></h4><div class="notes" id="gT"></div></div>
+        <div class="grp"><h4>中調 Heart <b id="vH"></b></h4><div class="notes" id="gH"></div></div>
+        <div class="grp"><h4>後調 Base <b id="vB"></b></h4><div class="notes" id="gB"></div></div>
+        <div class="out">
+          <div class="row"><div class="nm" id="nm"></div><span class="tagf" id="fam"></span></div>
+          <p class="desc" id="desc"></p>
+          <div class="meter"><div><i id="mI"></i></div><span><em style="font-style:normal">輕盈</em><em style="font-style:normal" id="mL"></em><em style="font-style:normal">濃郁</em></span></div>
+          <div class="sizes" id="sizes"></div>
+          <div class="row"><div class="pc" id="pc"></div><a class="btn solid" href="#book" id="useBlend">預約這支</a></div>
+        </div>
+      </div>
+    </div>
+    <p class="note">香調描述為示意，實際氣味會因個人體質與搭配而不同。價格為示意。</p>
+  </div>
+</section>
+
+<section id="pyr">
+  <div class="in">
+    <div class="eyebrow rv pre">Notes · 香調金字塔</div>
+    <h2 class="rv pre">一支香水，<br>會 <em>隨時間說話</em></h2>
+    <div class="pyr">
+      <div class="tri rv pre"><svg viewBox="0 0 100 100"><path class="l" id="l1" d="M50 8 L64 36 L36 36Z"/><path class="l" id="l2" d="M36 36 L64 36 L78 64 L22 64Z"/><path class="l" id="l3" d="M22 64 L78 64 L92 92 L8 92Z"/>
+        <text x="50" y="28">Top</text><text x="50" y="53">Heart</text><text x="50" y="81">Base</text></svg></div>
+      <div class="lay"><div class="rv pre"><b>Top</b><span><h3>前調：第一印象</h3><p>最先出現，通常在噴上後的幾分鐘內，多半是明亮的柑橘或香草氣息。</p></span></div>
+        <div class="rv pre"><b>Heart</b><span><h3>中調：香水的個性</h3><p>前調散去後浮現，可持續數小時，是整支香水的主角，常見花香與果香。</p></span></div>
+        <div class="rv pre"><b>Base</b><span><h3>後調：留下的記憶</h3><p>最後留在肌膚上的味道，可以延續很久，常見木質、琥珀與麝香。</p></span></div></div>
+    </div>
+  </div>
+</section>
+
+<section id="ser" style="padding-top:0">
+  <div class="in">
+    <div class="eyebrow rv pre">Signature · 招牌系列</div>
+    <h2 class="rv pre">三支，<em>各自一段故事</em></h2>
+    <div class="ser" id="serBox"></div>
+    <p class="note">點選會把配方套用到上方的調香台。系列為虛構示意。</p>
+  </div>
+</section>
+
+<section style="padding-top:0">
+  <div class="in">
+    <div class="eyebrow rv pre">Experience · 調香體驗</div>
+    <h2 class="rv pre">約 <em>三小時</em>，帶走一瓶</h2>
+    <div class="steps">
+      <div class="step rv pre"><b>I</b><h3>聊聊你的故事</h3><p>從喜歡的場景、季節與記憶出發，找到你想要的方向。</p></div>
+      <div class="step rv pre"><b>II</b><h3>聞香與挑選</h3><p>逐一聞過前、中、後調的原料，挑出屬於你的組合。</p></div>
+      <div class="step rv pre"><b>III</b><h3>調配與修正</h3><p>在調香師協助下小量試做，調整比例直到滿意。</p></div>
+      <div class="step rv pre"><b>IV</b><h3>熟成與取香</h3><p>調好後需要靜置熟成，再約時間取香（天數依配方而定）。</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="book" id="book">
+  <div class="in">
+    <div class="eyebrow rv pre">Reservation · 預約</div>
+    <h2 class="rv pre">留一個下午，<br><em>給你的味道</em></h2>
+    <div class="bg">
+      <form class="rv pre" onsubmit="return false">
+        <div class="fld"><span>你的配方</span><p id="bBlend" style="font:italic 400 1.4rem var(--serif);color:var(--gold2)"></p></div>
+        <div class="fld"><span>日期</span><div class="chips" id="bDate"></div></div>
+        <div class="fld"><span>時段</span><div class="chips" id="bTime"></div></div>
+        <div class="fld"><label for="nm2">稱呼</label><input id="nm2" autocomplete="name" placeholder="怎麼稱呼你"></div>
+        <div class="fld"><label for="msg">預約訊息</label><textarea id="msg" readonly></textarea></div>
+        <div style="display:flex;gap:12px;flex-wrap:wrap"><button class="btn solid" id="copy" type="button">複製訊息</button></div>
+        <p class="note">複製後貼到 LINE 或 Instagram 私訊即可。聯絡方式請換成你自己的。</p>
+      </form>
+      <div class="info rv pre"><div><b>LINE</b><span>@your-line-id（請填入）</span></div><div><b>Instagram</b><span>@your.handle（請填入）</span></div><div><b>營業時間</b><span>週三至週日 13:00 – 20:00</span></div><div><b>地址</b><span>台北市 ○○區 ○○路 ○ 號（請填入）</span></div><div><b>注意</b><span>體驗為預約制，孕期或對香料過敏者請事先告知</span></div></div>
+    </div>
+  </div>
+</section>
+<footer><span>© Atelier Ombre</span><span>範例網站，名稱、配方、價格與聯絡資料皆為示意。</span></footer>
+
+<script>
+document.documentElement.classList.add('js');
+const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
+const lerp=(a,b,t)=>a+(b-a)*t,clamp=(v,a=0,b=1)=>Math.max(a,Math.min(b,v));const reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
+const hex=h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16));const mixA=(a,b,t)=>a.map((v,i)=>v+(b[i]-v)*t);const rgb=(a,al=1)=>`rgba(${a.map(Math.round).join(',')},${al})`;
+let tt;function toast(t){const e=$('#toast');e.textContent=t;e.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>e.classList.remove('on'),2200)}
+
+/* ---------- 香調資料（虛構示意） ---------- */
+const N={
+ T:[{k:'bergamot',n:'佛手柑',c:'#ffd35e',p:'晨光',d:'明亮的柑橘，像剛切開的果皮',w:[3,0,0,0],i:1},{k:'grape',n:'葡萄柚',c:'#ff8f6b',p:'初夏',d:'帶一點苦味的清爽果香',w:[3,0,0,0],i:1},{k:'mint',n:'薄荷',c:'#7fe8b6',p:'薄霧',d:'涼感的草本，讓人醒神',w:[3,0,1,0],i:1},{k:'pepper',n:'黑胡椒',c:'#b9b3c9',p:'微辛',d:'乾淨俐落的辛香',w:[1,0,1,2],i:2}],
+ H:[{k:'rose',n:'玫瑰',c:'#ff7a9c',p:'夜玫瑰',d:'飽滿柔軟的花香，帶一點絲絨感',w:[0,3,0,1],i:3},{k:'jasmine',n:'茉莉',c:'#f4e6b0',p:'白夜',d:'甜潤微醺的白花香',w:[0,3,0,1],i:3},{k:'iris',n:'鳶尾',c:'#a99bff',p:'粉霧',d:'粉質乾燥的優雅氣味',w:[0,2,1,0],i:2},{k:'fig',n:'無花果',c:'#8fbf6a',p:'青果',d:'帶奶香與綠葉的果實氣息',w:[1,1,1,0],i:2}],
+ B:[{k:'cedar',n:'雪松',c:'#b5895b',p:'雪松林',d:'乾燥溫暖的木質調',w:[0,0,3,0],i:3},{k:'amber',n:'琥珀',c:'#e0952e',p:'琥珀光',d:'溫潤甜暖，像燈下的皮膚',w:[0,0,0,3],i:5},{k:'musk',n:'麝香',c:'#eadfcd',p:'肌膚',d:'柔軟乾淨的肌膚感',w:[1,1,0,1],i:2},{k:'sandal',n:'檀香',c:'#d1a77a',p:'靜室',d:'奶油般的木質，安靜綿長',w:[0,0,3,1],i:4}]};
+const FAM=['清新','花香','木質','東方'];
+const SER=[{n:'初雪',t:'bergamot',h:'iris',b:'musk',s:'清新・粉霧'},{n:'夜航',t:'pepper',h:'rose',b:'amber',s:'花香・東方'},{n:'靜室',t:'mint',h:'fig',b:'sandal',s:'木質・青綠'}];
+const S={T:'bergamot',H:'rose',B:'amber',size:30};
+const find=(g,k)=>N[g].find(x=>x.k===k);
+const SIZES={30:2800,50:3800};
+
+/* ---------- 瓶身 ---------- */
+let uid=0;
+function bottle(id,live){return `<svg viewBox="0 0 200 330" aria-hidden="true"><defs>
+  <linearGradient id="lq${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" class="s0"/><stop offset=".5" class="s1"/><stop offset="1" class="s2"/></linearGradient>
+  <linearGradient id="gd${id}" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#8a6b2e"/><stop offset=".4" stop-color="#f0d890"/><stop offset=".7" stop-color="#c9a45c"/><stop offset="1" stop-color="#6e5222"/></linearGradient>
+  <linearGradient id="gl${id}" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity=".28"/><stop offset=".25" stop-color="#fff" stop-opacity=".02"/><stop offset=".8" stop-color="#fff" stop-opacity=".02"/><stop offset="1" stop-color="#fff" stop-opacity=".18"/></linearGradient>
+  <clipPath id="cp${id}"><rect x="40" y="120" width="120" height="196" rx="16"/></clipPath></defs>
+  <rect x="84" y="78" width="32" height="44" fill="url(#gl${id})" stroke="rgba(239,230,214,.35)"/>
+  <rect x="40" y="120" width="120" height="196" rx="16" fill="#120e0b" stroke="rgba(239,230,214,.4)" stroke-width="1.4"/>
+  <g clip-path="url(#cp${id})"><path class="wv" d="M40 150 H160 V320 H40Z" fill="url(#lq${id})"/></g>
+  <rect x="40" y="120" width="120" height="196" rx="16" fill="url(#gl${id})"/>
+  <rect x="50" y="130" width="8" height="150" rx="4" fill="#fff" opacity=".16"/>
+  <rect x="74" y="24" width="52" height="58" rx="6" fill="url(#gd${id})"/><rect x="74" y="24" width="52" height="8" rx="4" fill="#fff" opacity=".25"/>
+  <text x="100" y="236" text-anchor="middle" font-family="Cormorant Garamond,serif" font-style="italic" font-size="15" fill="rgba(239,230,214,.78)">Ombre</text>
+  <line x1="62" y1="246" x2="138" y2="246" stroke="rgba(239,230,214,.35)"/></svg>`}
+function setStops(svg,c){const s=$$('stop',svg);s[0].style.stopColor=rgb(c[0]);s[1].style.stopColor=rgb(c[1]);s[2].style.stopColor=rgb(c[2])}
+const mkB=(host,live)=>{const id=++uid;host.innerHTML=bottle(id,live);return $('svg',host)};
+const hero=mkB($('#heroBottle')),labB=mkB($('#labBottle'));
+const colA=k=>hex(find(k[0],k[1]).c);
+const tgtCols=()=>[mixA(colA(['T',S.T]),[255,255,255],.05),colA(['H',S.H]),mixA(colA(['B',S.B]),[0,0,0],.28)];
+let cur=tgtCols();
+/* 系列瓶 */
+SER.forEach((s,i)=>{const b=document.createElement('button');b.className='sc rv pre';b.type='button';const host=document.createElement('div');b.appendChild(host);
+  const sv=mkB(host);setStops(sv,[mixA(hex(find('T',s.t).c),[255,255,255],.05),hex(find('H',s.h).c),mixA(hex(find('B',s.b).c),[0,0,0],.28)]);
+  const wv=$('.wv',sv);wv.setAttribute('d','M40 156 H160 V320 H40Z');
+  const t=document.createElement('div');t.innerHTML=`<h3>${s.n}</h3><p>${s.s}</p><span class="go">套用到調香台</span>`;b.appendChild(t);
+  b.onclick=()=>{S.T=s.t;S.H=s.h;S.B=s.b;render();$('#lab').scrollIntoView({behavior:'smooth'});toast('已套用「'+s.n+'」')};$('#serBox').appendChild(b)});
+
+/* ---------- 調香台 UI ---------- */
+['T','H','B'].forEach(g=>{N[g].forEach(o=>{const b=document.createElement('button');b.type='button';b.className='nt';b.style.setProperty('--c',o.c);b.dataset.k=o.k;b.dataset.g=g;
+  b.innerHTML=`<i></i><span>${o.n}</span><small>${o.d}</small>`;b.onclick=()=>{S[g]=o.k;render()};$('#g'+g).appendChild(b)})});
+Object.entries(SIZES).forEach(([ml,pr])=>{const b=document.createElement('button');b.type='button';b.className='sz';b.dataset.k=ml;b.textContent=ml+' ml';b.onclick=()=>{S.size=+ml;render()};$('#sizes').appendChild(b)});
+function blendName(){return `${find('H',S.H).p}・${find('B',S.B).p}`}
+function render(){
+  const T=find('T',S.T),H=find('H',S.H),B=find('B',S.B);
+  $('#vT').textContent=T.n;$('#vH').textContent=H.n;$('#vB').textContent=B.n;
+  ['T','H','B'].forEach(g=>$$('#g'+g+' .nt').forEach(b=>b.setAttribute('aria-pressed',b.dataset.k===S[g])));
+  $$('.sz').forEach(b=>b.setAttribute('aria-pressed',+b.dataset.k===S.size));
+  const sc=[0,0,0,0];[T,H,B].forEach(o=>o.w.forEach((v,i)=>sc[i]+=v));const top=sc.indexOf(Math.max(...sc));const sec=sc.map((v,i)=>[v,i]).sort((a,b)=>b[0]-a[0])[1];
+  $('#fam').textContent=FAM[top]+(sec[0]>=3?'・'+FAM[sec[1]]:'');
+  const inten=(T.i*.5+H.i+B.i*1.5)/3;const pct=clamp((inten-1)/4);$('#mI').style.width=(pct*100)+'%';$('#mL').textContent=pct<.35?'偏輕盈':pct<.65?'適中':'偏濃郁';
+  $('#nm').textContent=blendName();$('#capN').textContent=blendName();$('#capS').textContent=`${T.n} ・ ${H.n} ・ ${B.n}`;
+  $('#desc').textContent=`開場是${T.d}；接著${H.d}；最後留下${B.d}。`;
+  $('#pc').innerHTML=`NT$${SIZES[S.size].toLocaleString()}<small>${S.size} ml（示意）</small>`;
+  $('#bBlend').textContent=`${blendName()}（${T.n}・${H.n}・${B.n}，${S.size} ml）`;
+  $('#l1').classList.add('on');buildMsg()}
+
+/* ---------- 預約 ---------- */
+const D={date:null,time:null};
+(function(){const w='日一二三四五六',now=new Date();for(let i=1;i<=7;i++){const d=new Date(now);d.setDate(now.getDate()+i);const t=`${d.getMonth()+1}/${d.getDate()}（${w[d.getDay()]}）`;const b=document.createElement('button');b.type='button';b.className='chip';b.textContent=t;b.onclick=()=>{D.date=D.date===t?null:t;sync()};$('#bDate').appendChild(b)}
+  ['13:30','16:00','18:00'].forEach(t=>{const b=document.createElement('button');b.type='button';b.className='chip';b.textContent=t;b.onclick=()=>{D.time=D.time===t?null:t;sync()};$('#bTime').appendChild(b)})})();
+function sync(){$$('#bDate .chip').forEach(b=>b.setAttribute('aria-pressed',b.textContent===D.date));$$('#bTime .chip').forEach(b=>b.setAttribute('aria-pressed',b.textContent===D.time));buildMsg()}
+function buildMsg(){const T=find('T',S.T),H=find('H',S.H),B=find('B',S.B);$('#msg').value=`你好，我想預約調香體驗。\n我的配方：${blendName()}\n香調：${T.n}（前）・${H.n}（中）・${B.n}（後）\n容量：${S.size} ml\n日期：${D.date||'（請選擇）'}\n時段：${D.time||'（請選擇）'}\n稱呼：${($('#nm2').value||'').trim()||'（請填寫）'}\n謝謝！`}
+$('#nm2').addEventListener('input',buildMsg);
+$('#copy').onclick=async()=>{const m=$('#msg');try{await navigator.clipboard.writeText(m.value);toast('已複製，請貼到 LINE 或 IG')}catch(e){m.removeAttribute('readonly');m.select();let ok=false;try{ok=document.execCommand('copy')}catch(x){}m.setAttribute('readonly','');toast(ok?'已複製，請貼到 LINE 或 IG':'請長按文字手動複製')}};
+$('#useBlend').addEventListener('click',()=>buildMsg());
+$$('a[href="#"]').forEach(a=>a.addEventListener('click',e=>e.preventDefault()));
+render();sync();
+
+/* ---------- 煙霧與動畫 ---------- */
+const vis=new Map();const vio=new IntersectionObserver(es=>es.forEach(e=>vis.set(e.target,e.isIntersecting)));
+function mist(cv,getTop){const g=cv.getContext('2d');const P=Array.from({length:46},()=>({x:Math.random(),y:Math.random(),v:.0006+Math.random()*.0012,s:6+Math.random()*16,ph:Math.random()*6.3,a:Math.random()}));vis.set(cv,true);vio.observe(cv);
+  return t=>{if(vis.get(cv)===false)return;const d=Math.min(devicePixelRatio||1,2),w=cv.clientWidth,h=cv.clientHeight;if(!w||!h)return;if(cv.width!==(w*d|0)||cv.height!==(h*d|0)){cv.width=w*d;cv.height=h*d}g.setTransform(d,0,0,d,0,0);g.clearRect(0,0,w,h);
+    const tp=getTop(w,h);for(const p of P){p.y-=p.v;if(p.y<0){p.y=1;p.x=Math.random();p.a=Math.random()}const x=tp.x+(p.x-.5)*tp.w+Math.sin(t*.7+p.ph)*14,y=tp.y-(1-p.y)*tp.h;const al=Math.sin(Math.PI*(1-p.y))*.22*p.a;
+      const c=cur[Math.floor(p.a*3)%3];const gr=g.createRadialGradient(x,y,0,x,y,p.s);gr.addColorStop(0,rgb(c,al));gr.addColorStop(1,rgb(c,0));g.fillStyle=gr;g.beginPath();g.arc(x,y,p.s,0,6.3);g.fill()}}}
+const m1=mist($('#mist1'),(w,h)=>{const r=hero.getBoundingClientRect(),c=$('#mist1').getBoundingClientRect();return{x:r.left-c.left+r.width*.5,y:r.top-c.top+r.height*.2,w:r.width*.5,h:h*.6}});
+const m2=mist($('#mist2'),(w,h)=>{const r=labB.getBoundingClientRect(),c=$('#mist2').getBoundingClientRect();return{x:r.left-c.left+r.width*.5,y:r.top-c.top+r.height*.2,w:r.width*.4,h:h*.5}});
+function wave(svg,t,amp){const p=$('.wv',svg);let d='M40 '+(150+Math.sin(t)*amp);for(let x=40;x<=160;x+=10)d+=` L${x} ${150+Math.sin(x*.07+t*1.6)*amp}`;p.setAttribute('d',d+' L160 320 L40 320Z')}
+function frame(now){const t=now/1000,tg=tgtCols();cur=cur.map((c,i)=>mixA(c,tg[i],.07));setStops(hero,cur);setStops(labB,cur);
+  if(!reduce){wave(hero,t,2.4);wave(labB,t+1,2.2)}else{wave(hero,0,0);wave(labB,0,0)}m1(t);m2(t);requestAnimationFrame(frame)}
+requestAnimationFrame(frame);
+/* 金字塔隨捲動點亮 */
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){const i=[...$$('.lay>div')].indexOf(e.target);['l1','l2','l3'].forEach((id,k)=>$('#'+id).classList.toggle('on',k<=i))}}),{threshold:.7});$$('.lay>div').forEach(d=>io.observe(d));
+const nav=$('#nav');let ly=0;addEventListener('scroll',()=>{const y=scrollY;nav.classList.toggle('solid',y>40);nav.classList.toggle('hide',y>ly&&y>260);ly=y},{passive:true});
+const rio=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');rio.unobserve(e.target)}}),{threshold:.08});
+$$('.rv').forEach(el=>{if(el.getBoundingClientRect().top>innerHeight)rio.observe(el);else el.classList.remove('pre')});
+</script>
+<script src="common.js"></script>
+</body>
+</html>
